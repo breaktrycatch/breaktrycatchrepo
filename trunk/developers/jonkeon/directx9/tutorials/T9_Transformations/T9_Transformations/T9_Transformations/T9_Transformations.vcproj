@@ -192,6 +192,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Classes\com\app\core\CWorldTransform.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Classes\com\app\core\stdafx.cpp"
 				>
 			</File>
@@ -219,6 +223,10 @@
 			</File>
 			<File
 				RelativePath=".\Classes\com\app\core\CVertexBuffer.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Classes\com\app\core\CWorldTransform.h"
 				>
 			</File>
 			<File

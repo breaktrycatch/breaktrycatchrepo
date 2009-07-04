@@ -5,6 +5,7 @@
 #include "CFramework.h"
 #include "CVertexBuffer.h"
 #include "CIndexBuffer.h"
+#include "CWorldTransform.h"
 
 
 class CGameApp : public CBaseApp {
@@ -27,9 +28,9 @@ public:
 private:
 	CFramework* m_pFramework;
 
-	CVertexBuffer m_VB4;
-	CVertexBuffer m_VB6;
+	CVertexBuffer m_VB;
 	CIndexBuffer m_IB;
+	CWorldTransform m_transform;
 
 
 };
