@@ -3,16 +3,15 @@ package com.thread.draw
 	import com.thread.draw.IDrawer;
 
 	import flash.display.Sprite;
-	import flash.geom.Point;
 
-	/**	 * @author plemarquand	 */	public class SimpleDrawer implements IDrawer 
+	/**	 * @author plemarquand	 */	public class SquareDrawer implements IDrawer 
 	{		public function draw(drawTarget : Sprite, lines : Vector.<Line>) : void
 		{
 			var len : int = lines.length;
 			for (var i : Number = 0; i < len; i++) 
 			{
-				drawTarget.graphics.moveTo(lines[i].pt1.x, lines[i].pt1.y);
-				drawTarget.graphics.lineTo(lines[i].pt2.x, lines[i].pt2.y);
+				var radius : Number = lines[i].length;	
+				drawTarget.graphics.drawRect( lines[i].pt1.x, lines[i].pt1.y, radius, radius);
 			}
 		}
 	}}

@@ -2,7 +2,7 @@ package com.thread.transform
 {
 	import com.geom.Line;
 	import com.thread.constant.ThreadConstants;
-	import com.thread.motion.IMotionable;
+	import com.thread.motion.IPositionable;
 
 	import flash.geom.Point;
 
@@ -20,7 +20,7 @@ package com.thread.transform
 			super( this );
 		}
 
-		override public function transform(d : IMotionable) : Vector.<Line>
+		override public function transform(d : IPositionable) : Vector.<Line>
 		{
 			var lines : Vector.<Line> = new Vector.<Line>( );
 			
@@ -45,7 +45,6 @@ package com.thread.transform
 			np.y = Math.sin( rot * (Math.PI / 180) ) * p.x + Math.cos( rot * (Math.PI / 180) ) * p.y;
 			np.x += origin.x;
 			np.y += origin.y;
-
 			return np; 
 		}
 	}
