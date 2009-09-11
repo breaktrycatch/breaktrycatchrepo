@@ -38,9 +38,9 @@ package com.thread.ai
 			while(deltaAngle < -Math.PI) deltaAngle += 2 * Math.PI;
 			while(deltaAngle > Math.PI) deltaAngle -= 2 * Math.PI;
 			
-			_target.angle += NumberUtils.radToDegree( deltaAngle ) / (1 + _index * .3);
+			//_target.angle += NumberUtils.radToDegree( deltaAngle ) / (1 + _index * .3);
 			//_target.angle += NumberUtils.radToDegree( deltaAngle ) / (1 + _index * .01);
-			//_target.angle += NumberUtils.radToDegree( deltaAngle ) / (1 + ( 1 - dist / ThreadConstants.MANAGER_WIDTH / 2)) * 3;
+			_target.angle += NumberUtils.radToDegree( deltaAngle ) / (1 + ( 1 - dist / ThreadConstants.MANAGER_WIDTH / 2)) * 3;
 			_ctr += .1;
 		}
 
@@ -48,7 +48,7 @@ package com.thread.ai
 		{
 			_worldAgents = args[0];
 			_index = args[1];
-			_target.speed = _target.initialSpeed * (1 - (_index / _worldAgents.length)) * 1;
+			_target.speed = _target.initialSpeed * ((1 - (_index / _worldAgents.length)) * .2 + .8);
 			_followTarget = ( _index > 0) ? (_worldAgents[_index - 1].data) : (_worldAgents[_worldAgents.length - 1].data);
 		}
 	}

@@ -46,7 +46,6 @@ package com.util
 			// kludge!!
 			if(source.hasOwnProperty( "clone" ))
 			{
-				trace("RETURNING")
 				return source;
 			}
 			

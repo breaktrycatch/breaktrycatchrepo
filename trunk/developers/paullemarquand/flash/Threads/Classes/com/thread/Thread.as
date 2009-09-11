@@ -1,16 +1,17 @@
 package com.thread 
 {
+	import com.thread.draw.IDrawer;
 	import com.thread.ai.IAgent;
 	import com.thread.color.IColorSupplier;
-	import com.thread.draw.IDrawer;
 	import com.thread.line.IDrawStyle;
 	import com.thread.motion.IComponent;
 	import com.thread.motion.bounds.IBoundsChecker;
+	import com.thread.transform.IDrawTransform;
 	import com.thread.vo.ThreadDataVO;
 	import com.util.NumberUtils;
-	
+
 	import flash.display.Sprite;
-	import flash.geom.Point;		
+	import flash.geom.Point;
 
 	/**
 	 * @author Paul
@@ -21,18 +22,20 @@ package com.thread
 		private var _boundsChecker 	: IBoundsChecker;
 		private var _lineStyle 		: IDrawStyle;
 		private var _data 			: ThreadDataVO;
+		private var _transform		: IDrawTransform;
 		private var _drawer 		: IDrawer;
 		private var _motionAI 		: IAgent;
 
 		private var _worldThreads 	: Vector.<Thread>;
 		private var _worldIndex 	: int;
 
-		public function Thread(data : ThreadDataVO, bounds : IBoundsChecker, color : IColorSupplier, drawer : IDrawer, line : IDrawStyle, agent : IAgent)
+		public function Thread(data : ThreadDataVO, bounds : IBoundsChecker, color : IColorSupplier, transform : IDrawTransform, drawer : IDrawer, line : IDrawStyle, agent : IAgent)
 		{
 			_data = data;
 			
 			_boundsChecker = bounds;
 			_colorSupplier = color;
+			_transform = transform;
 			_drawer = drawer;
 			_lineStyle = line;
 			_motionAI = agent;
@@ -65,7 +68,7 @@ package com.thread
 			graphics.clear( );
 			
 			_lineStyle.setStyle( this );
-			_drawer.draw( this, _data );
+			_drawer.draw( this, _transform.transform( _data ) );
 		}
 		
 		public function get data() : ThreadDataVO
