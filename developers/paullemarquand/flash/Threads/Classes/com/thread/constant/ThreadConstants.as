@@ -18,10 +18,10 @@ package com.thread.constant
 		public static var MANAGER_HEIGHT		:Number = MST_STAGE_HEIGHT / GRID_HEIGHT;
 		
 		public static var START_THREADS			:uint = 50;
-		public static var MAX_THREADS			:uint = 200;
+		public static var MAX_THREADS			:uint = 100;
 		
 		public static var CLEAR_INTERVAL		:int = 6;
-		public static var CLEAR_AMOUNT			:Number = .005;
+		public static var CLEAR_AMOUNT			:Number = .0;
 		
 		public static var GROSS_GLOBAL_HACK : int = 0;
 	}

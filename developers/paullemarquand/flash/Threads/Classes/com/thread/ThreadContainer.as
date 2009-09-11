@@ -57,15 +57,15 @@ package com.thread
 			_timer.start( );
 		}
 
-		private function onRemoved(event : Event) : void
-		{
-			_timer.stop( );
-		}
-
 		private function onTimer(e : TimerEvent) : void
 		{
 			update( );
 			draw( );	
+		}
+		
+		private function onRemoved(event : Event) : void
+		{
+			_timer.stop( );
 		}
 
 		private function update() : void

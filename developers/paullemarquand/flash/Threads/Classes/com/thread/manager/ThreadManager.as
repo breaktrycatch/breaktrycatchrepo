@@ -12,7 +12,6 @@ package com.thread.manager
 		public function ThreadManager(canvas : BitmapData) 
 		{
 			super(canvas, this);
-			
 		}
 	}
 }
