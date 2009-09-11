@@ -1,6 +1,5 @@
 package com.thread.manager 
 {
-	import com.thread.Thread;
 	import com.thread.constant.ThreadConstants;
 	import com.thread.manager.AbstractThreadManager;
 	import com.thread.motion.IComponent;
@@ -10,7 +9,7 @@ package com.thread.manager
 	import flash.text.AntiAliasType;
 	import flash.text.TextField;
 	import flash.text.TextFieldAutoSize;
-	import flash.text.TextFormat;	
+	import flash.text.TextFormat;
 
 	/**
 	 * @author Paul

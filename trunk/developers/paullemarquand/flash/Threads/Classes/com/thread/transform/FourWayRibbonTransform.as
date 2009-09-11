@@ -21,5 +21,6 @@ package com.thread.transform
 			{
 				lines = lines.concat( _fourWay.transform(ribbons[i]));
 			}
+			
 			return lines;		}
 	}}

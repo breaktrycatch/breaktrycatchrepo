@@ -34,7 +34,12 @@ package com.geom
 		
 		public function get length() : Number
 		{
-			throw new Error("Not implemented!" );
+			return Point.distance(pt1, pt2);
+		}
+		
+		public function interpolate(t:Number):Point
+		{
+			return Point.interpolate(pt1, pt2, t);
 		}
 		
 		public static function createFromPoints(pt1 : Point, pt2 : Point) : Line

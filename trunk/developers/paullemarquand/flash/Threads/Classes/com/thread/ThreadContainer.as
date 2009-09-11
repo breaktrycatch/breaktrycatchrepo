@@ -1,17 +1,16 @@
 package com.thread
 {
-	import com.thread.manager.ThreadManager;	
 	import com.thread.constant.ThreadConstants;
 	import com.thread.manager.AbstractThreadManager;
-	import com.thread.manager.FontDrawThreadManager;
+	import com.thread.manager.ThreadManager;
 	import com.thread.motion.IComponent;
-	
+
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
 	import flash.display.Sprite;
 	import flash.events.Event;
 	import flash.events.TimerEvent;
-	import flash.utils.Timer;		
+	import flash.utils.Timer;
 
 	/**
 	 * @author Paul

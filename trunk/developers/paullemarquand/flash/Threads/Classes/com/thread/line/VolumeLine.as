@@ -1,8 +1,6 @@
 package com.thread.line 
 {
-	import com.thread.color.IColorSupplier;
-	
-	import flash.display.Sprite;	
+	import flash.display.Sprite;
 
 	/**
 	 * @author Paul
