@@ -1,12 +1,12 @@
 package com.thread.factory 
 {
-	import com.thread.ai.RightAngleAgent;
+	import com.thread.draw.SizedPolyDrawer;
+	import com.thread.draw.ProximityPolyDrawer;
 	import com.thread.Thread;
 	import com.thread.ai.BitmapFollowAgent;
-	import com.thread.ai.CurvyAgent;
 	import com.thread.ai.FollowAgent;
 	import com.thread.ai.IAgent;
-	import com.thread.ai.SimpleAgent;
+	import com.thread.ai.RightAngleAgent;
 	import com.thread.color.IColorSupplier;
 	import com.thread.color.KulerColorSupplier;
 	import com.thread.constant.ThreadConstants;
@@ -18,7 +18,7 @@ package com.thread.factory
 	import com.thread.motion.bounds.BounceBoundsChecker;
 	import com.thread.motion.bounds.IBoundsChecker;
 	import com.thread.transform.IDrawTransform;
-	import com.thread.transform.KaleidoscopeRibbonTransform;
+	import com.thread.transform.MirrorTransform;
 	import com.thread.transform.SimpleTransform;
 	import com.thread.vo.ThreadDataVO;
 
@@ -43,9 +43,9 @@ package com.thread.factory
 			vo.initialSpeed = 3.1;
 			
 			var colorSupplier : IColorSupplier = new KulerColorSupplier( [0xff0000, 0x00ff00, 0x0000ff], 200 );
-			var transform : IDrawTransform = new KaleidoscopeRibbonTransform( 15, 3, 90 );
+			var transform : IDrawTransform = new MirrorTransform();//( 15, 3, 90 );
 			//var transform : IDrawTransform = new SimpleTransform();
-			var drawer : IDrawer = new PolyDrawer();
+			var drawer : IDrawer = new SizedPolyDrawer();
 			var motionAI : IAgent = (_threadCount < 1) ? (new RightAngleAgent( vo )) : (new FollowAgent( vo ));
 			motionAI.randomize( );
 			
