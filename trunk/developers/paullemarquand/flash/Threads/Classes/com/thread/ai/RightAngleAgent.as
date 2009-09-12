@@ -6,17 +6,25 @@ package com.thread.ai
 
 	/**	 * @author plemarquand	 */	public class RightAngleAgent extends AbstractAgent implements IAgent 
 	{
-		private var _ctr : int = 0;
+		private var _ctr : int = 0;
+		private var _switchInterval : int;
 		public function RightAngleAgent(target : IMotionable)
-		{			super( target, this );		}
+		{
+			updateSwitchInterval();			super( target, this );		}
 
 		override public function update() : void
 		{
 			_ctr++;
 			
-			if(_ctr % 100 == 0)
+			if(_ctr % _switchInterval == 0)
 			{
-				_target.angle += ((Math.random() < .5) ? (45) : (-45));			}
+				updateSwitchInterval();
+				_target.angle += ((Math.random() < .5) ? (90) : (-90));			}
+		}
+		
+		private function updateSwitchInterval():void
+		{
+			_switchInterval = 20 + Math.round(Math.random() * 100);
 		}
 
 		override public function randomize() : void

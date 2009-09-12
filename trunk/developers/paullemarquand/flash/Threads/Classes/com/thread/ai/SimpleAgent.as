@@ -1,11 +1,9 @@
 package com.thread.ai 
 {
-	import com.thread.motion.IMotionable;	
-	import com.util.Randomizer;	
 	import com.thread.ai.AbstractAgent;
 	import com.thread.ai.IAgent;
-
-	/**
+	import com.thread.motion.IMotionable;
+	/**
 	 * @author Paul
 	 */
 	public class SimpleAgent extends AbstractAgent implements IAgent 
@@ -17,6 +15,10 @@ package com.thread.ai
 		}
 
 		override public function update() : void
+		{
+		}
+
+		override public function randomize() : void
 		{
 		}
 	}

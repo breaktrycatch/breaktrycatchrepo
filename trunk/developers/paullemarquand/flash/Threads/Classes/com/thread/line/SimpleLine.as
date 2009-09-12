@@ -12,9 +12,14 @@ package com.thread.line
 			super(this);
 		}
 		
-		override public function setStyle(drawTarget : Sprite) : void
+		override public function preDraw(drawTarget : Sprite) : void
 		{
 			drawTarget.graphics.lineStyle( _target.lineSize, _colorSupplier.currentColor, _target.lineAlpha );
+		}
+
+		override public function postDraw(drawTarget : Sprite) : void
+		{
+			// do nothing
 		}
 	}
 }

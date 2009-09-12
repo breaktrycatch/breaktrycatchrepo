@@ -1,5 +1,6 @@
 package com.geom 
 {	import com.thread.motion.IPositionable;
+
 	import flash.geom.Point;
 
 	/**	 * @author plemarquand	 */	public class Line implements IPositionable
@@ -31,58 +32,63 @@ package com.geom
 		{
 			return _pt2;
 		}
-		
+
 		public function get length() : Number
 		{
-			return Point.distance(pt1, pt2);
+			return Point.distance( pt1, pt2 );
 		}
-		
-		public function interpolate(t:Number):Point
+
+		public function interpolate(t : Number) : Point
 		{
-			return Point.interpolate(pt1, pt2, t);
+			return Point.interpolate( pt1, pt2, t );
 		}
-		
+
 		public static function createFromPoints(pt1 : Point, pt2 : Point) : Line
 		{
-			return new Line(pt1.x, pt1.y, pt2.x, pt2.y );
+			return new Line( pt1.x, pt1.y, pt2.x, pt2.y );
 		}
-		
+
 		public function get x() : Number
 		{
 			return _x2;
 		}
-		
+
 		public function get y() : Number
 		{
 			return _y2;
 		}
-		
+
 		public function get prevX() : Number
 		{
 			return _x1;
 		}
-		
+
 		public function get prevY() : Number
 		{
 			return _y2;
 		}
-		
+
 		public function set x(n : Number) : void
 		{
 			_x2 = n;
 		}
-		
+
 		public function set y(n : Number) : void
 		{
 			_y2 = n;
 		}
-		
+
 		public function set prevX(n : Number) : void
 		{
 			_x1 = n;
 		}
-		
+
 		public function set prevY(n : Number) : void
 		{
 			_y1 = n;
+		}
+
+		public function toString() : String 
+		{
+			return "[Line {" + pt1 + "} {" + pt2 + "}]";
 		}	}}

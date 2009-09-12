@@ -18,7 +18,6 @@ package com.thread.color
 		
 		public function GradientColorSupplier(colors : Array, framesPerColor : int = 10) 
 		{
-			trace("COLORS: " + colors);
 			_colors = colors;
 			_framesPerColor = framesPerColor;
 			_currColor = _colors[0];

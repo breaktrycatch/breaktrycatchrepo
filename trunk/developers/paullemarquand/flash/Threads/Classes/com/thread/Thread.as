@@ -56,7 +56,6 @@ package com.thread
 			
 			var dx : Number = Math.cos( NumberUtils.degreeToRad( _data.angle ) ) * _data.speed;
 			var dy : Number = Math.sin( NumberUtils.degreeToRad( _data.angle ) ) * _data.speed;
-			
 			var pt : Point = _boundsChecker.checkBounds( _data.x + dx, _data.y + dy );
 			
 			_data.x = pt.x;
@@ -67,10 +66,11 @@ package com.thread
 		{
 			graphics.clear( );
 			
-			_lineStyle.setStyle( this );
+			_lineStyle.preDraw( this );
 			_drawer.draw( this, _transform.transform( _data ) );
+			_lineStyle.postDraw( this );
 		}
-		
+
 		public function get data() : ThreadDataVO
 		{
 			return _data;
