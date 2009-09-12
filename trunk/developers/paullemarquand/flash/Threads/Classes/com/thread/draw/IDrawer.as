@@ -5,4 +5,6 @@ package com.thread.draw
 
 	/**	 * @author plemarquand	 */	public interface IDrawer 
 	{
-		function draw(drawTarget : Sprite, lines : Vector.<Line>) : void	}}
+		function draw(drawTarget : Sprite, lines : Vector.<Line>) : void;
+
+		function setModifiers(...args) : void;	}}

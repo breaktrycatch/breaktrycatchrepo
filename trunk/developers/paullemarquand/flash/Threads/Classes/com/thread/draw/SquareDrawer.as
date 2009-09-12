@@ -4,14 +4,20 @@ package com.thread.draw
 
 	import flash.display.Sprite;
 
-	/**	 * @author plemarquand	 */	public class SquareDrawer implements IDrawer 
-	{		public function draw(drawTarget : Sprite, lines : Vector.<Line>) : void
+	/**	 * @author plemarquand	 */	public class SquareDrawer extends AbstractDrawer implements IDrawer 
+	{
+		public function SquareDrawer() 
+		{
+			super( this );
+		}
+
+		override public function draw(drawTarget : Sprite, lines : Vector.<Line>) : void
 		{
 			var len : int = lines.length;
-			for (var i : Number = 0; i < len; i++) 
+			for (var i : Number = 0; i < len ; i++) 
 			{
 				var radius : Number = lines[i].length;	
-				drawTarget.graphics.drawRect( lines[i].pt1.x, lines[i].pt1.y, radius, radius);
+				drawTarget.graphics.drawRect( lines[i].pt1.x, lines[i].pt1.y, radius, radius );
 			}
 		}
 	}}

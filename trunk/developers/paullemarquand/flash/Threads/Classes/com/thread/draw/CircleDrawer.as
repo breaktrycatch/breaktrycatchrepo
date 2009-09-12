@@ -5,9 +5,14 @@ package com.thread.draw
 	import flash.display.Sprite;
 	import flash.geom.Point;
 
-	/**	 * @author plemarquand	 */	public class CircleDrawer implements IDrawer 
+	/**	 * @author plemarquand	 */	public class CircleDrawer extends AbstractDrawer implements IDrawer 
 	{				
-		public function draw(drawTarget : Sprite, lines : Vector.<Line>) : void
+		public function CircleDrawer() 
+		{
+			super(this);
+		}
+		
+		override public function draw(drawTarget : Sprite, lines : Vector.<Line>) : void
 		{
 			var len : int = lines.length;
 			for (var i : Number = 0; i < len; i++) 

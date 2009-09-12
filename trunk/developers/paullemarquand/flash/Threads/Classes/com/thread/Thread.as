@@ -52,6 +52,7 @@ package com.thread
 			_colorSupplier.update( );
 			_lineStyle.setModifiers( _worldThreads, _worldIndex );
 			_motionAI.setModifiers( _worldThreads, _worldIndex );
+			_drawer.setModifiers( _worldThreads, _worldIndex );
 			_motionAI.update( );
 			
 			var dx : Number = Math.cos( NumberUtils.degreeToRad( _data.angle ) ) * _data.speed;
