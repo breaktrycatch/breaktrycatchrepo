@@ -10,12 +10,15 @@ package com.thread.line
 	 */
 	public interface IDrawStyle 
 	{
-		function set colorSupplier(color : IColorSupplier) : void
+		function set colorSupplier(color : IColorSupplier) : void;
 
-		function set target(d : ILineStyleable) : void
+		function set target(d : ILineStyleable) : void;
 
-		function setStyle(drawTarget : Sprite) : void;
+		function preDraw(drawTarget : Sprite) : void;
 
-		function setModifiers(...args) : void
+		function postDraw(drawTarget : Sprite) : void;
+		
+		function setModifiers(...args) : void;
+		
 	}
 }

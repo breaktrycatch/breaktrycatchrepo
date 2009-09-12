@@ -3,7 +3,6 @@ package com.thread.draw
 	import com.thread.draw.IDrawer;
 
 	import flash.display.Sprite;
-	import flash.geom.Point;
 
 	/**	 * @author plemarquand	 */	public class SimpleDrawer implements IDrawer 
 	{		public function draw(drawTarget : Sprite, lines : Vector.<Line>) : void

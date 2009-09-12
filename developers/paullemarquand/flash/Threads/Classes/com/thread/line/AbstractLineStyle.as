@@ -33,10 +33,15 @@ package com.thread.line
 		{
 			_modifiers = args;
 		}
-
-		public function setStyle(drawTarget : Sprite) : void
+		
+		public function preDraw(drawTarget : Sprite) : void
 		{
-			throw new IllegalOperationError( "checkBounds() not implemented in" + this );
+			throw new IllegalOperationError( "preDraw() not implemented in" + this );
+		}
+		
+		public function postDraw(drawTarget : Sprite) : void
+		{
+			throw new IllegalOperationError( "postDraw() not implemented in" + this );
 		}
 	}
 }

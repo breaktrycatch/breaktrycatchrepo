@@ -19,7 +19,7 @@ package com.thread.line
 			super( this );
 		}
 		
-		override public function setStyle(drawTarget : Sprite) : void
+		override public function preDraw(drawTarget : Sprite) : void
 		{
 			drawTarget.graphics.lineStyle( _target.lineSize * (_index / _worldAgents.length), _colorSupplier.currentColor, _target.lineAlpha );
 		}

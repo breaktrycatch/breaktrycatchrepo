@@ -7,22 +7,24 @@ package com.thread.ai
 	{
 		private var _curlSpeed : Number = 500;
 		private var _curlTightness : Number = 3;
-		private var _ctr : int = 0;		public function CurvyAgent(target : IMotionable)
+		private var _ctr : int = 0;
+		public function CurvyAgent(target : IMotionable)
 		{			super( target, this );		}
 
 		override public function update() : void
 		{
-			_target.angle += Math.cos( _ctr / _curlSpeed ) * _curlTightness * Math.sin( _ctr / _curlSpeed ) * _curlTightness;
-//			_target.angle += Math.cos( _ctr / _curlSpeed );
-//			_target.angle += .1;
+			//_target.angle += (Math.cos( _ctr / _curlSpeed ) * _curlTightness * Math.sin( _ctr / _curlSpeed ) * _curlTightness) * 360;
+						_target.angle += Math.cos( _ctr / _curlSpeed ) * _curlTightness * ( 1 - Math.sin( _ctr / _curlSpeed ));
+			//			_target.angle += 10;
 
+			_ctr += .01;
 		}
 
 		override public function randomize() : void
 		{
 			var randomizer : Randomizer = new Randomizer( );
-			randomizer.addRule( Number, "curlSpeed", 10, 10);
-			randomizer.addRule( Number, "curlTightness", 1, 1 );
+			randomizer.addRule( Number, "curlSpeed", 100, 100 );
+			randomizer.addRule( Number, "curlTightness", 3, 3 );
 			randomizer.randomize( this );
 		}
 
