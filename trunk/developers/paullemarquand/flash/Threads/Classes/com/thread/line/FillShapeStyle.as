@@ -10,7 +10,7 @@ package com.thread.line
 		
 		override public function preDraw(drawTarget : Sprite) : void
 		{
-			drawTarget.graphics.beginFill( _colorSupplier.currentColor , 1);		}
+			drawTarget.graphics.beginFill( _colorSupplier.currentColor, 1);		}
 
 		override public function postDraw(drawTarget : Sprite) : void
 		{

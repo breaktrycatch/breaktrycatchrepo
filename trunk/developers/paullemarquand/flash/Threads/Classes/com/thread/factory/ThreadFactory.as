@@ -1,7 +1,5 @@
 package com.thread.factory 
 {
-	import com.thread.draw.SizedPolyDrawer;
-	import com.thread.draw.ProximityPolyDrawer;
 	import com.thread.Thread;
 	import com.thread.ai.BitmapFollowAgent;
 	import com.thread.ai.FollowAgent;
@@ -11,20 +9,18 @@ package com.thread.factory
 	import com.thread.color.KulerColorSupplier;
 	import com.thread.constant.ThreadConstants;
 	import com.thread.draw.IDrawer;
-	import com.thread.draw.PolyDrawer;
 	import com.thread.draw.SimpleDrawer;
+	import com.thread.draw.SquareDrawer;
 	import com.thread.line.IDrawStyle;
 	import com.thread.line.SimpleLine;
+	import com.thread.line.SizedLine;
 	import com.thread.motion.bounds.BounceBoundsChecker;
 	import com.thread.motion.bounds.IBoundsChecker;
 	import com.thread.transform.IDrawTransform;
-	import com.thread.transform.MirrorTransform;
 	import com.thread.transform.SimpleTransform;
 	import com.thread.vo.ThreadDataVO;
-
-	import flash.display.BitmapData;
-
-	/**
+	import flash.display.BitmapData;
+	/**
 	 * @author Paul
 	 */
 	public class ThreadFactory 
@@ -38,22 +34,28 @@ package com.thread.factory
 			vo.angle = 360 * _seed;
 			vo.x = ThreadConstants.MANAGER_WIDTH / 2;//* Math.random( );
 			vo.y = ThreadConstants.MANAGER_HEIGHT / 2;//* Math.random( );
-			vo.lineAlpha = .6;
-			vo.lineSize = 5;
-			vo.initialSpeed = 3.1;
+			vo.lineAlpha = 1;
+			vo.lineSize = 1;
+			vo.initialSpeed = 2.1;
 			
 			var colorSupplier : IColorSupplier = new KulerColorSupplier( [0xff0000, 0x00ff00, 0x0000ff], 200 );
-			var transform : IDrawTransform = new MirrorTransform();//( 15, 3, 90 );
+			//var colorSupplier : IColorSupplier = new IncrementalStartKulerColorSupplier( [0x111111], 200 );
+			var transform : IDrawTransform = new SimpleTransform();//new KaleidoscopeRibbonTransform(2, 15, 10);
 			//var transform : IDrawTransform = new SimpleTransform();
-			var drawer : IDrawer = new SizedPolyDrawer();
-			var motionAI : IAgent = (_threadCount < 1) ? (new RightAngleAgent( vo )) : (new FollowAgent( vo ));
+			var drawer : IDrawer = new SquareDrawer();//(50, 6);
+			var motionAI : IAgent = (_threadCount % 3 == 0) ? (new RightAngleAgent( vo )) : (new FollowAgent( vo ));
 			motionAI.randomize( );
 			
 			var boundsChecker : IBoundsChecker = new BounceBoundsChecker( );
 			boundsChecker.target = vo;
 			
+			if(motionAI is RightAngleAgent)
+			{
+				vo.lineAlpha = 0;
+			}
+			
 			//var lineStyle : IDrawStyle = new FillShapeStyle();
-			var lineStyle : IDrawStyle = new SimpleLine( );
+			var lineStyle : IDrawStyle = new SizedLine();
 			lineStyle.colorSupplier = colorSupplier;
 			lineStyle.target = vo;
 			

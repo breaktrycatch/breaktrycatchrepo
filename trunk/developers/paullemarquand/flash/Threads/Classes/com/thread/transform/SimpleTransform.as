@@ -18,9 +18,6 @@ package com.thread.transform
 			var lines : Vector.<Line> = new Vector.<Line>( );
 			lines.push( new Line( d.prevX, d.prevY, d.x, d.y ) );
 			return lines;
-			/*
-			drawTarget.graphics.moveTo( d.prevX, d.prevY );
-			drawTarget.graphics.lineTo( d.x, d.y ) ;*/
 		}
 	}
 }

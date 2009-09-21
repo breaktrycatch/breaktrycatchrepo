@@ -15,7 +15,7 @@ package com.thread.color
 			super( (initialColors == null) ? ([]) : (initialColors), stepSpeed );
 		}
 		
-		private function onResults(event : GetResultEvent) : void
+		protected function onResults(event : GetResultEvent) : void
 		{
 			var sum : Array = new Array();
 			var arr : Array = event.results.swatches;

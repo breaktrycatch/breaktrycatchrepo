@@ -18,7 +18,7 @@ package com.core
 			var threadContainer : ThreadContainer = new ThreadContainer( stage.stageWidth, stage.stageHeight );
 			addChild( threadContainer );
 			
-			KulerSingletonProxy.getInstance().service.getRandom(0, 50);
+			KulerSingletonProxy.getInstance().service.getRandom(0, 5);
 		}
 	}
 }
