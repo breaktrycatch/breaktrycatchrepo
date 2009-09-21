@@ -18,27 +18,27 @@ package com.thread
 	 */
 	public class Thread extends Sprite implements IComponent 
 	{
-		private var _colorSupplier 	: IColorSupplier;
-		private var _boundsChecker 	: IBoundsChecker;
-		private var _lineStyle 		: IDrawStyle;
-		private var _data 			: ThreadDataVO;
-		private var _transform		: IDrawTransform;
-		private var _drawer 		: IDrawer;
-		private var _motionAI 		: IAgent;
+		public var colorSupplier 	: IColorSupplier;
+		public var boundsChecker 	: IBoundsChecker;
+		public var lineStyle 		: IDrawStyle;
+		public var drawTransform	: IDrawTransform;
+		public var drawer 			: IDrawer;
+		public var motionAI 		: IAgent;
+		public var vo	 			: ThreadDataVO;
 
 		private var _worldThreads 	: Vector.<Thread>;
 		private var _worldIndex 	: int;
 
-		public function Thread(data : ThreadDataVO, bounds : IBoundsChecker, color : IColorSupplier, transform : IDrawTransform, drawer : IDrawer, line : IDrawStyle, agent : IAgent)
+		public function Thread(_data : ThreadDataVO, _bounds : IBoundsChecker, _color : IColorSupplier, _transform : IDrawTransform, _drawer : IDrawer, _line : IDrawStyle, _agent : IAgent)
 		{
-			_data = data;
+			vo = _data;
 			
-			_boundsChecker = bounds;
-			_colorSupplier = color;
-			_transform = transform;
-			_drawer = drawer;
-			_lineStyle = line;
-			_motionAI = agent;
+			boundsChecker = _bounds;
+			colorSupplier = _color;
+			drawTransform = _transform;
+			drawer = _drawer;
+			lineStyle = _line;
+			motionAI = _agent;
 		}
 
 		public function setWorldData(threads : Vector.<Thread>, i : Number) : void
@@ -49,32 +49,32 @@ package com.thread
 
 		public function update() : void
 		{
-			_colorSupplier.update( );
-			_lineStyle.setModifiers( _worldThreads, _worldIndex );
-			_motionAI.setModifiers( _worldThreads, _worldIndex );
-			_drawer.setModifiers( _worldThreads, _worldIndex );
-			_motionAI.update( );
+			colorSupplier.update( );
+			lineStyle.setModifiers( _worldThreads, _worldIndex );
+			motionAI.setModifiers( _worldThreads, _worldIndex );
+			drawer.setModifiers( _worldThreads, _worldIndex );
+			motionAI.update( );
 			
-			var dx : Number = Math.cos( NumberUtils.degreeToRad( _data.angle ) ) * _data.speed;
-			var dy : Number = Math.sin( NumberUtils.degreeToRad( _data.angle ) ) * _data.speed;
-			var pt : Point = _boundsChecker.checkBounds( _data.x + dx, _data.y + dy );
+			var dx : Number = Math.cos( NumberUtils.degreeToRad( vo.angle ) ) * vo.speed;
+			var dy : Number = Math.sin( NumberUtils.degreeToRad( vo.angle ) ) * vo.speed;
+			var pt : Point = boundsChecker.checkBounds( vo.x + dx, vo.y + dy );
 			
-			_data.x = pt.x;
-			_data.y = pt.y;
+			vo.x = pt.x;
+			vo.y = pt.y;
 		}
 
 		public function draw() : void
 		{
 			graphics.clear( );
 			
-			_lineStyle.preDraw( this );
-			_drawer.draw( this, _transform.transform( _data ) );
-			_lineStyle.postDraw( this );
+			lineStyle.preDraw( this );
+			drawer.draw( this, drawTransform.transform( vo ) );
+			lineStyle.postDraw( this );
 		}
 
 		public function get data() : ThreadDataVO
 		{
-			return _data;
+			return vo;
 		}
 	}
 }

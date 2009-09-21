@@ -16,5 +16,9 @@ package com.thread.line
 		{
 			drawTarget.graphics.lineStyle( _target.lineSize * (_modifiers[0] * 100), _colorSupplier.currentColor, _target.lineAlpha * (1 - (_modifiers[0].volume)) );
 		}
+
+		override public function postDraw(drawTarget : Sprite) : void
+		{
+		}
 	}
 }

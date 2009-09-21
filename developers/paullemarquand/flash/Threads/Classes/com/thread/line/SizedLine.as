@@ -23,7 +23,11 @@ package com.thread.line
 		{
 			drawTarget.graphics.lineStyle( _target.lineSize * (_index / _worldAgents.length), _colorSupplier.currentColor, _target.lineAlpha );
 		}
-		
+
+		override public function postDraw(drawTarget : Sprite) : void
+		{
+		}
+
 		override public function setModifiers(...args) : void
 		{
 			_worldAgents = args[0];

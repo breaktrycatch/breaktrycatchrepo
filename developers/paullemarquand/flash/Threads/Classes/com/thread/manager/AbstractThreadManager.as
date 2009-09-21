@@ -80,5 +80,10 @@ package com.thread.manager
 			super.y = n;
 			createTransformMatrix( );
 		}
+		
+		public function get threads(): Vector.<Thread>
+		{
+			return _threads;
+		}
 	}
 }
