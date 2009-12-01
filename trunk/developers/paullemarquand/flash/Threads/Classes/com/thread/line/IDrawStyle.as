@@ -1,9 +1,9 @@
 package com.thread.line 
 {
 	import com.thread.color.IColorSupplier;
-	import com.thread.motion.ILineStyleable;
-	
-	import flash.display.Sprite;	
+	import com.thread.vo.ILineStyleable;
+
+	import flash.display.Sprite;
 
 	/**
 	 * @author Paul

@@ -1,13 +1,13 @@
 package com.thread.manager 
 {
-	import com.thread.motion.IComponent;
-	
-	import flash.display.BitmapData;	
+	import com.thread.vo.IVisualComponent;
+
+	import flash.display.BitmapData;
 
 	/**
 	 * @author Paul
 	 */
-	public class ThreadManager extends AbstractThreadManager implements IComponent
+	public class ThreadManager extends AbstractThreadManager implements IVisualComponent
 	{
 		public function ThreadManager(canvas : BitmapData) 
 		{

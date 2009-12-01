@@ -53,7 +53,7 @@ package com.util
 			
 			var classType 	: Class = DescribeUtil.classReference(source);
 			var output 		: * = new classType();
-			var props 		: Array = DescribeUtil.instance.propertyNameList( output );
+			var props 		: Array = DescribeUtil.propertyNameList( output );
 			
 			for each(var key:String in props)
 			{

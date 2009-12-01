@@ -1,7 +1,7 @@
 package com.thread.event 
 {
 	import flash.events.Event;
-	
+
 	/**
 	 * @author Paul
 	 */

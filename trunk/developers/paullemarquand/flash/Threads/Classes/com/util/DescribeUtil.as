@@ -32,36 +32,20 @@ package com.util
 		/**
 		 * map of currently defined classes
 		 */
-		private var _definitionMap : Object = {};
+		private static var _definitionMap : Object = {};
 		/**
 		 * map of currently described class
 		 */
-		private var _describeMap : Object = {};
+		private static var _describeMap : Object = {};
 		/**
 		 * map of object properties
 		 */
-		private var _propertyNameMap : Object = {};
-		/**
-		 * hold the instance of the class
-		 */
-		private static const _instance : DescribeUtil = new DescribeUtil( );
-
-		public function DescribeUtil() 
-		{
-		}
-
-		/**
-		 * Get the instance of the class.
-		 */
-		public static function get instance() : DescribeUtil
-		{
-			return _instance;
-		}
+		private static var _propertyNameMap : Object = {};
 
 		/**
 		 * Get the xml description for the class and add it to the map table.
 		 */
-		public function describe(value : Object) : XML
+		public static function describe(value : Object) : XML
 		{
 			var name : String = className( value );
 
@@ -76,7 +60,7 @@ package com.util
 		/**
 		 * Get the definition by name and return class reference.
 		 */
-		public function definition(value : Object) : Class
+		public static function definition(value : Object) : Class
 		{
 			var name : String = className( value );
                         
@@ -87,7 +71,7 @@ package com.util
 					_definitionMap[name] = getDefinitionByName( name );
 				} catch(e : Error) 
 				{
-					trace(e.getStackTrace());
+					trace( e.getStackTrace( ) );
 					return null;
 				}
 			}
@@ -98,7 +82,7 @@ package com.util
 		/**
 		 * Get a map object containing all variables and get/set accessors.
 		 */
-		public function properties(value : Object) : Object
+		public static function properties(value : Object) : Object
 		{
 			var props : Object = {};
 
@@ -113,7 +97,7 @@ package com.util
 		/**
 		 * Get a list of property name strings. Includes both variables and get/set accessors.
 		 */
-		public function propertyNameList(value : Object) : Array
+		public static function propertyNameList(value : Object) : Array
 		{
 			var desc : XML = describe( value );
 			var name : String = className( value );
@@ -191,7 +175,7 @@ package com.util
 		 */             
 		public static function registerClass(value : Object) : void
 		{
-			registerClassAlias( classPath( value ), instance.definition( value ) );
+			registerClassAlias( classPath( value ), definition( value ) );
 		}
 
 		/**
@@ -200,8 +184,9 @@ package com.util
 		public static function restFormat(restArray : Array) : Array
 		{
 			if(restArray[0] is Array)
-                                restArray = restArray[0];
-                        
+			{
+				restArray = restArray[0];
+			}           
 			return restArray;
 		}
 

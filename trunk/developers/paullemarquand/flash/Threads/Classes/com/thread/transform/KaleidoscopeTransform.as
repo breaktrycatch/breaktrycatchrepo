@@ -2,7 +2,8 @@ package com.thread.transform
 {
 	import com.geom.Line;
 	import com.thread.constant.ThreadConstants;
-	import com.thread.motion.IPositionable;
+	import com.thread.vo.IPositionable;
+	import com.util.Randomizer;
 
 	import flash.geom.Point;
 
@@ -20,9 +21,9 @@ package com.thread.transform
 			super( this );
 		}
 
-		override public function transform(d : IPositionable) : Vector.<Line>
+		override public function transform(d : IPositionable) : Array
 		{
-			var lines : Vector.<Line> = new Vector.<Line>( );
+			var lines : Array = [];
 			
 			for (var i : Number = 0; i < _sections ; i++) 
 			{
@@ -46,6 +47,13 @@ package com.thread.transform
 			np.x += origin.x;
 			np.y += origin.y;
 			return np; 
+		}
+		
+		override public function randomize() : void
+		{
+			var randomizer : Randomizer = new Randomizer( );
+			randomizer.addRule( Number, "sections", 4, 20 );
+			randomizer.randomize( this );
 		}
 	}
 }

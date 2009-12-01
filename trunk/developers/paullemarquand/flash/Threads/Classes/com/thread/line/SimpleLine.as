@@ -1,5 +1,8 @@
 package com.thread.line 
 {
+	import com.thread.color.IColorSupplier;
+	import com.thread.vo.ILineStyleable;
+
 	import flash.display.Sprite;
 
 	/**
@@ -7,9 +10,9 @@ package com.thread.line
 	 */
 	public class SimpleLine extends AbstractLineStyle implements IDrawStyle 
 	{
-		public function SimpleLine() 
+		public function SimpleLine(target : ILineStyleable, colorSupplier : IColorSupplier) 
 		{
-			super(this);
+			super(target, colorSupplier, this);
 		}
 		
 		override public function preDraw(drawTarget : Sprite) : void
@@ -18,6 +21,11 @@ package com.thread.line
 		}
 
 		override public function postDraw(drawTarget : Sprite) : void
+		{
+			// do nothing
+		}
+
+		override public function randomize() : void
 		{
 			// do nothing
 		}

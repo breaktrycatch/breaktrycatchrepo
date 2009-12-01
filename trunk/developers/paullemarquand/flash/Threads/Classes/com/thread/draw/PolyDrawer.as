@@ -1,11 +1,12 @@
 package com.thread.draw 
-{	import com.geom.Line;
-	import com.thread.draw.IDrawer;
+{	import com.thread.draw.IDrawer;
+	import com.thread.vo.IRandomizable;
+	import com.util.Randomizer;
 
 	import flash.display.Sprite;
 	import flash.geom.Point;
 
-	/**	 * @author plemarquand	 */	public class PolyDrawer extends AbstractDrawer implements IDrawer 
+	/**	 * @author plemarquand	 */	public class PolyDrawer extends AbstractDrawer implements IDrawer, IRandomizable
 	{
 		private var _polyRadius : Number;
 		private var _polySides : int;
@@ -22,7 +23,7 @@ package com.thread.draw
 			super( this );
 		}
 
-		override public function draw(drawTarget : Sprite, lines : Vector.<Line>) : void
+		override public function draw(drawTarget : Sprite, lines : Array) : void
 		{
 			for (var j : Number = 0; j < lines.length ; j++) 
 			{
@@ -41,4 +42,32 @@ package com.thread.draw
 				
 				drawTarget.graphics.lineTo( sx, sy );
 			}		}
+
+		override public function randomize() : void
+		{
+			var randomizer : Randomizer = new Randomizer( );
+			randomizer.addRule( Number, "polyRadius", 3, 45 );
+			randomizer.addRule( Number, "polySides", 3, 10 );
+			randomizer.randomize( this );
+		}
+		
+		public function get polyRadius() : Number
+		{
+			return _polyRadius;
+		}
+
+		public function set polyRadius(polyRadius : Number) : void
+		{
+			_polyRadius = polyRadius;
+		}
+
+		public function get polySides() : int
+		{
+			return _polySides;
+		}
+
+		public function set polySides(polySides : int) : void
+		{
+			_polySides = polySides;
+		}
 	}}

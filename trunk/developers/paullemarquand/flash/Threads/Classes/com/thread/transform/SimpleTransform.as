@@ -1,7 +1,7 @@
 package com.thread.transform 
 {
 	import com.geom.Line;
-	import com.thread.motion.IPositionable;
+	import com.thread.vo.IPositionable;
 
 	/**
 	 * @author Paul
@@ -13,11 +13,13 @@ package com.thread.transform
 			super( this );
 		}
 
-		override public function transform(d : IPositionable) : Vector.<Line>
+		override public function transform(d : IPositionable) : Array
 		{
-			var lines : Vector.<Line> = new Vector.<Line>( );
+			var lines : Array = [];
 			lines.push( new Line( d.prevX, d.prevY, d.x, d.y ) );
 			return lines;
 		}
+		override public function randomize() : void		{
+			// do nothing		}
 	}
 }

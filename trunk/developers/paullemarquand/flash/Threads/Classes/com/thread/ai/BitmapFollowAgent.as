@@ -2,10 +2,12 @@ package com.thread.ai
 {
 	import com.thread.ai.IAgent;
 	import com.thread.constant.ThreadConstants;
-	import com.thread.motion.IMotionable;
+	import com.thread.vo.IMotionable;
 	import com.util.NumberUtils;
-	import flash.display.BitmapData;
-	/**
+
+	import flash.display.BitmapData;
+
+	/**
 	 * @author Paul
 	 */
 	public class BitmapFollowAgent extends SimpleAgent implements IAgent 

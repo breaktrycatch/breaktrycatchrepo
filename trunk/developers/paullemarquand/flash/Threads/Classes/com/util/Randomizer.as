@@ -1,10 +1,9 @@
 package com.util 
 {
-	import flash.utils.Dictionary;
-	import flash.utils.describeType;
-	import flash.utils.getDefinitionByName;	
-
-	/**
+	import com.breaktrycatch.collection.util.DictionaryExtensions;
+	import flash.utils.Dictionary;
+	import flash.utils.getDefinitionByName;
+	/**
 	 * @author Paul
 	 */
 	public class Randomizer 
@@ -46,11 +45,16 @@ package com.util
 
 		public function randomize(obj : *) : *
 		{
+			if(!DictionaryExtensions.hasValues(__rules))
+			{
+				return obj;
+			}
+			
 			var objectClass : Class;
 			var child : XML;
 			var propertyType : String;
 			var propertyClass : Class;
-			var objDescriptor : XML = describeType( obj );
+			var objDescriptor : XML = DescribeUtil.describe( obj );
 			
 			for each(child in objDescriptor.children( ))
 			{
@@ -106,7 +110,7 @@ internal class Rule
 	private var __min : *;
 	private var __max : *;
 	private var __property : String;
-
+	
 	public function Rule(min : *, max : *, property : String = null) 
 	{
 		__min = min;
@@ -128,8 +132,7 @@ internal class Rule
 		}
 		else if(!isNaN( input ))
 		{
-			// TODO: Does letting the bytecode do the type casting introduce loss of precision bugs?
-			return __min + Math.random( ) * __max - __min;
+			return __min + Math.random( ) * (__max - __min);
 		} 
 		else
 		{

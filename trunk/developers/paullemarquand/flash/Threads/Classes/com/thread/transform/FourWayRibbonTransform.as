@@ -1,6 +1,5 @@
 package com.thread.transform 
-{	import com.geom.Line;
-	import com.thread.motion.IPositionable;
+{	import com.thread.vo.IPositionable;
 
 	/**	 * @author plemarquand	 */	public class FourWayRibbonTransform extends AbstractTransform implements IDrawTransform 
 	{
@@ -12,10 +11,10 @@ package com.thread.transform
 			_fourWay = new FourWayTransform( );
 			_ribbonDrawer = new RibbonTransform( ribbonSection, ribbonSeparation );			super( this );		}
 
-		override public function transform(d : IPositionable) : Vector.<Line>
+		override public function transform(d : IPositionable) : Array
 		{
-			var lines : Vector.<Line> = new Vector.<Line>( );
-			var ribbons : Vector.<Line> = _ribbonDrawer.transform(d);
+			var lines : Array = [];
+			var ribbons : Array = _ribbonDrawer.transform(d);
 			
 			for (var i : Number = 0; i < ribbons.length; i++) 
 			{
@@ -23,4 +22,9 @@ package com.thread.transform
 			}
 			
 			return lines;		}
+		
+		override public function randomize() : void
+		{
+			// do nothing
+		}
 	}}
