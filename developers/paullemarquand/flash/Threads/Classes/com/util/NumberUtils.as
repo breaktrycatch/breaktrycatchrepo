@@ -7,6 +7,11 @@ package com.util
 	 
 	public class NumberUtils
 	{
+
+		public static function sign(num : Number) : Number
+		{
+			return (num >= 0) ? (1) : (-1);
+		}
 		
 		/**
 		 * Constrains a number between a given range

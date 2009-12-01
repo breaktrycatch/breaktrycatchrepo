@@ -1,31 +1,33 @@
 package com.thread.manager 
 {
+	import com.breaktrycatch.collection.util.ArrayExtensions;
+	import com.thread.vo.IDisposable;
 	import com.thread.Thread;
 	import com.thread.constant.ThreadConstants;
-	import com.thread.factory.ThreadFactory;
-	import com.thread.motion.IComponent;
+	import com.thread.factory.RandomThreadFactory;
+	import com.thread.vo.IVisualComponent;
 
 	import flash.display.BitmapData;
 	import flash.display.Sprite;
-	import flash.geom.Matrix;	
+	import flash.geom.Matrix;
 
 	/**
 	 * @author Paul
 	 */
-	public class AbstractThreadManager extends Sprite implements IComponent 
+	public class AbstractThreadManager extends Sprite implements IVisualComponent, IDisposable 
 	{
-		protected var _threads : Vector.<Thread>;
+		protected var _threads : Array;
 		protected var _canvas : BitmapData;
 		protected var _drawTransform : Matrix;
-		protected var _threadFactory : ThreadFactory;
+		protected var _threadFactory : RandomThreadFactory;
 
 		public function AbstractThreadManager( canvas : BitmapData, enforcer : AbstractThreadManager )
 		{
 			enforcer = null;
 			_canvas = canvas;
-			_threads = new Vector.<Thread>( );
+			_threads = new Array();
 			_drawTransform = new Matrix( );
-			_threadFactory = new ThreadFactory( );
+			_threadFactory = new RandomThreadFactory( );
 			
 			createThreads( );
 			createTransformMatrix( );
@@ -41,7 +43,7 @@ package com.thread.manager
 		
 		protected function addThread() : void
 		{
-			_threads.push( addChild( _threadFactory.getSimpleThread( ) ) );
+			_threads.push( addChild( _threadFactory.getThread() ) );
 		}
 		
 		public function update() : void
@@ -81,9 +83,9 @@ package com.thread.manager
 			createTransformMatrix( );
 		}
 		
-		public function get threads(): Vector.<Thread>
+		public function dispose() : void
 		{
-			return _threads;
+			ArrayExtensions.executeCallbackOnArray(_threads, 'dispose');
 		}
 	}
 }

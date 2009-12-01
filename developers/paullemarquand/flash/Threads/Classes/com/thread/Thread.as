@@ -1,14 +1,19 @@
 package com.thread 
 {
-	import com.thread.draw.IDrawer;
+	import com.breaktrycatch.collection.util.ArrayExtensions;
 	import com.thread.ai.IAgent;
+	import com.thread.bounds.IBoundsChecker;
 	import com.thread.color.IColorSupplier;
+	import com.thread.draw.IDrawer;
 	import com.thread.line.IDrawStyle;
-	import com.thread.motion.IComponent;
-	import com.thread.motion.bounds.IBoundsChecker;
 	import com.thread.transform.IDrawTransform;
+	import com.thread.vo.IDisposable;
+	import com.thread.vo.IVisualComponent;
 	import com.thread.vo.ThreadDataVO;
 	import com.util.NumberUtils;
+
+	import org.as3commons.reflect.Type;
+	import org.as3commons.reflect.Variable;
 
 	import flash.display.Sprite;
 	import flash.geom.Point;
@@ -16,7 +21,7 @@ package com.thread
 	/**
 	 * @author Paul
 	 */
-	public class Thread extends Sprite implements IComponent 
+	public class Thread extends Sprite implements IVisualComponent, IDisposable
 	{
 		public var colorSupplier 	: IColorSupplier;
 		public var boundsChecker 	: IBoundsChecker;
@@ -26,7 +31,7 @@ package com.thread
 		public var motionAI 		: IAgent;
 		public var vo	 			: ThreadDataVO;
 
-		private var _worldThreads 	: Vector.<Thread>;
+		private var _worldThreads 	: Array;
 		private var _worldIndex 	: int;
 
 		public function Thread(_data : ThreadDataVO, _bounds : IBoundsChecker, _color : IColorSupplier, _transform : IDrawTransform, _drawer : IDrawer, _line : IDrawStyle, _agent : IAgent)
@@ -41,7 +46,7 @@ package com.thread
 			motionAI = _agent;
 		}
 
-		public function setWorldData(threads : Vector.<Thread>, i : Number) : void
+		public function setWorldData(threads : Array, i : Number) : void
 		{
 			_worldThreads = threads;
 			_worldIndex = i;
@@ -75,6 +80,32 @@ package com.thread
 		public function get data() : ThreadDataVO
 		{
 			return vo;
+		}
+		
+		public function dispose() : void
+		{
+			var disposableElementNames : Array = getDisposableElementNames( );
+			var parentRef : Thread = this;
+			var elementsToDispose : Array = disposableElementNames.map( function(name : String, ...args):*
+			{
+				return parentRef[name];
+			} );
+			ArrayExtensions.executeCallbackOnArray(elementsToDispose, 'dispose');
+		}
+		
+		private function getDisposableElementNames() : Array
+		{			
+			var disposableNames : Array = [];
+			var typeInfo : Type = Type.forInstance( this );
+			var parentRef : Thread = this;
+			typeInfo.variables.forEach( function(element : Variable, ...args) : void
+			{
+				if(parentRef[element.name] is IDisposable)
+				{
+					disposableNames.push(element.name);
+				}
+			} );
+			return disposableNames;
 		}
 	}
 }

@@ -1,7 +1,7 @@
 package com.thread.ai 
 {
-	import com.thread.motion.IUpdateable;	
-	import com.thread.motion.IMotionable;	
+	import com.thread.vo.IMotionable;
+	import com.thread.vo.IUpdateable;
 
 	/**
 	 * @author Paul

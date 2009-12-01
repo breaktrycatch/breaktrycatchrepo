@@ -1,10 +1,12 @@
 package com.thread.line 
 {
-	import com.thread.Thread;
+	import com.thread.color.IColorSupplier;
 	import com.thread.line.AbstractLineStyle;
 	import com.thread.line.IDrawStyle;
-	
-	import flash.display.Sprite;	
+	import com.thread.vo.ILineStyleable;
+	import com.util.Randomizer;
+
+	import flash.display.Sprite;
 
 	/**
 	 * @author Paul
@@ -12,11 +14,11 @@ package com.thread.line
 	public class AlphaLine extends AbstractLineStyle implements IDrawStyle 
 	{
 		protected var _index : int;
-		protected var _worldAgents : Vector.<Thread>;
+		protected var _worldAgents : Array;
 		
-		public function AlphaLine()
+		public function AlphaLine(target : ILineStyleable, colorSupplier : IColorSupplier) 
 		{
-			super( this );
+			super(target, colorSupplier, this);
 		}
 		
 		override public function preDraw(drawTarget : Sprite) : void
@@ -32,6 +34,12 @@ package com.thread.line
 		{
 			_worldAgents = args[0];
 			_index = args[1];
+		}
+		
+		override public function randomize() : void
+		{
+			var randomizer : Randomizer = new Randomizer( );
+			randomizer.randomize( this );
 		}
 	}
 }

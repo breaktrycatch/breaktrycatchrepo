@@ -3,6 +3,8 @@ package com.thread.factory
 	import com.thread.ai.FollowAgent;
 	import com.thread.ai.IAgent;
 	import com.thread.ai.RightAngleAgent;
+	import com.thread.bounds.BounceBoundsChecker;
+	import com.thread.bounds.IBoundsChecker;
 	import com.thread.color.IColorSupplier;
 	import com.thread.color.KulerColorSupplier;
 	import com.thread.constant.ThreadConstants;
@@ -10,8 +12,6 @@ package com.thread.factory
 	import com.thread.draw.SimpleDrawer;
 	import com.thread.line.IDrawStyle;
 	import com.thread.line.SizedAlphaLine;
-	import com.thread.motion.bounds.BounceBoundsChecker;
-	import com.thread.motion.bounds.IBoundsChecker;
 	import com.thread.transform.IDrawTransform;
 	import com.thread.transform.MirrorTransform;
 	import com.thread.vo.ThreadDataVO;
@@ -37,12 +37,8 @@ package com.thread.factory
 			var motionAI : IAgent = (_threadCount < 1) ? (new RightAngleAgent( vo )) : (new FollowAgent( vo ));
 			motionAI.randomize( );
 			
-			var boundsChecker : IBoundsChecker = new BounceBoundsChecker( );
-			boundsChecker.target = vo;
-			
-			var lineStyle : IDrawStyle = new SizedAlphaLine( );
-			lineStyle.colorSupplier = colorSupplier;
-			lineStyle.target = vo;
+			var boundsChecker : IBoundsChecker = new BounceBoundsChecker( vo );			
+			var lineStyle : IDrawStyle = new SizedAlphaLine( vo, colorSupplier );
 			
 			_threadCount++;
 			

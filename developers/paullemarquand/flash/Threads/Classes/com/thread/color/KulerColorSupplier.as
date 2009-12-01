@@ -1,32 +1,35 @@
 package com.thread.color 
 {
 	import com.adobe.kuler.KulerSingletonProxy;
+	import com.adobe.kuler.events.ColorRecievedEvent;
 	import com.adobe.kuler.events.GetResultEvent;
-	import com.adobe.kuler.swatches.swatch.Swatch;	
+	import com.thread.vo.IDisposable;
 
 	/**
 	 * @author Paul
 	 */
-	public class KulerColorSupplier extends GradientColorSupplier
+	public class KulerColorSupplier extends GradientColorSupplier implements IDisposable
 	{
 		public function KulerColorSupplier(initialColors : Array = null, stepSpeed : int = 10) 
 		{
-			KulerSingletonProxy.getInstance().service.addEventListener( GetResultEvent.GET_RESULTS, onResults );
+			KulerSingletonProxy.getInstance().addEventListener( ColorRecievedEvent.COLORS_RECIEVED, onResults );
+			KulerSingletonProxy.getInstance().getRandomColours();
+			
 			super( (initialColors == null) ? ([]) : (initialColors), stepSpeed );
 		}
 		
-		protected function onResults(event : GetResultEvent) : void
+		protected function onResults(event : ColorRecievedEvent) : void
 		{
-			var sum : Array = new Array();
-			var arr : Array = event.results.swatches;
-			for (var i : Number = 0; i < arr.length; i++) 
-			{
-				var swatch : Swatch = arr[i];
-				sum = sum.concat(swatch.hexColorArray);
-			}
+			KulerSingletonProxy.getInstance().removeEventListener( ColorRecievedEvent.COLORS_RECIEVED, onResults );
 			
-			_colors = sum;
+			_colors = event.colors;
+			trace("SETTING COLORS: " + _colors, _colors.length)
 			activeColorIndex = 0;
+		}
+
+		public function dispose() : void
+		{
+			KulerSingletonProxy.getInstance().service.removeEventListener( GetResultEvent.GET_RESULTS, onResults );
 		}
 	}
 }

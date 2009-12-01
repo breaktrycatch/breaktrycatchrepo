@@ -1,7 +1,7 @@
 package com.thread.ai 
 {	import com.thread.ai.AbstractAgent;
 	import com.thread.ai.IAgent;
-	import com.thread.motion.IMotionable;
+	import com.thread.vo.IMotionable;
 	import com.util.Randomizer;
 
 	/**	 * @author plemarquand	 */	public class RightAngleAgent extends AbstractAgent implements IAgent 

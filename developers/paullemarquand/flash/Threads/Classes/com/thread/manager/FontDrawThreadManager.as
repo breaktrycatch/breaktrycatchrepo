@@ -2,7 +2,7 @@ package com.thread.manager
 {
 	import com.thread.constant.ThreadConstants;
 	import com.thread.manager.AbstractThreadManager;
-	import com.thread.motion.IComponent;
+	import com.thread.vo.IVisualComponent;
 
 	import flash.display.BitmapData;
 	import flash.geom.Matrix;
@@ -14,7 +14,7 @@ package com.thread.manager
 	/**
 	 * @author Paul
 	 */
-	public class FontDrawThreadManager extends AbstractThreadManager implements IComponent 
+	public class FontDrawThreadManager extends AbstractThreadManager implements IVisualComponent 
 	{
 		private var _text : String;
 		private var _font : String;
@@ -50,7 +50,7 @@ package com.thread.manager
 
 		override protected function addThread() : void
 		{
-			_threads.push( addChild( _threadFactory.getAlphabetThread( _testData ) ) );
+			//_threads.push( addChild( _threadFactory.getAlphabetThread( _testData ) ) );
 		}
 
 		override public function update() : void

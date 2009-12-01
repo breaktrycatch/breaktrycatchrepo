@@ -1,12 +1,11 @@
 package com.thread.transform 
 {
-	import com.geom.Line;
-	import com.thread.motion.IPositionable;
+	import com.thread.vo.IPositionable;
 	/**
 	 * @author Paul
 	 */
 	public interface IDrawTransform 
 	{
-		function transform(d : IPositionable) : Vector.<Line>;
+		function transform(d : IPositionable) : Array;
 	}
 }

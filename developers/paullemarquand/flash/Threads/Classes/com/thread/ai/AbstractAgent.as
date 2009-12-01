@@ -1,14 +1,15 @@
 package com.thread.ai 
 {
 	import com.thread.ai.IAgent;
-	import com.thread.motion.IMotionable;
+	import com.thread.vo.IMotionable;
+	import com.thread.vo.IRandomizable;
 
-	import flash.errors.IllegalOperationError;	
+	import flash.errors.IllegalOperationError;
 
 	/**
 	 * @author Paul
 	 */
-	public class AbstractAgent implements IAgent 
+	public class AbstractAgent implements IAgent, IRandomizable
 	{
 		protected var _target : IMotionable;	
 

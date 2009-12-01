@@ -1,9 +1,7 @@
 package com.geom 
-{	import com.thread.motion.IPositionable;
-
-	import flash.geom.Point;
-
-	/**	 * @author plemarquand	 */	public class Line implements IPositionable
+{	import com.thread.vo.IPositionable;
+	import flash.geom.Point;
+	/**	 * @author plemarquand	 */	public class Line implements IPositionable
 	{
 		private var _x1 : Number;
 		private var _x2 : Number;

@@ -1,24 +1,27 @@
 package com.thread.color 
 {
 	import com.breaktrycatch.color.ColorUtil;
-	import com.util.CloneUtil;		
+	import com.thread.vo.IRandomizable;
+	import com.util.CloneUtil;
+	import com.util.Randomizer;
 
 	/**
 	 * @author Paul
 	 */
-	public class GradientColorSupplier implements IColorSupplier
+	public class GradientColorSupplier implements IColorSupplier, IRandomizable
 	{
 		protected var _colors 		: Array;
 		private var _currColor		: Number;
 		private var _oldColor 		: Number;
 		private var _nextColor 		: Number;
 		private var _currColorIndex : Number;
-		private var _framesPerColor 		: int;
+		private var _framesPerColor : int;
 		private var _colCtr			: int;
+		private var _defaultColours	: Array = [0xff0000, 0x00ff00, 0x0000ff];
 		
-		public function GradientColorSupplier(colors : Array, framesPerColor : int = 10) 
+		public function GradientColorSupplier(colors : Array = null, framesPerColor : int = 100) 
 		{
-			_colors = colors;
+			_colors = (colors == null) ? (_defaultColours) : (colors);
 			_framesPerColor = framesPerColor;
 			_currColor = _colors[0];
 			activeColorIndex = 0;
@@ -52,6 +55,7 @@ package com.thread.color
 
 		public function get currentColor() : uint
 		{
+			trace("CURR COLOR: " + _currColor, _colors.length, _currColorIndex, _colCtr )
 			return _currColor;
 		}
 		
@@ -67,7 +71,14 @@ package com.thread.color
 		
 		public function copy() : IColorSupplier
 		{
-			return CloneUtil.clone(this);
+			return CloneUtil.clone(this );
+		}
+		
+		public function randomize() : void
+		{
+			var randomizer : Randomizer = new Randomizer( );
+			randomizer.addRule( uint, "framesPerColor", 500, 1000 );
+			randomizer.randomize( this );
 		}
 	}
 }

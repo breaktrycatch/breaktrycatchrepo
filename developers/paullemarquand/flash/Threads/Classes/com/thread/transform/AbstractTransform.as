@@ -1,23 +1,27 @@
 package com.thread.transform 
 {
-	import com.geom.Line;
-	import com.thread.motion.IPositionable;
+	import com.thread.vo.IPositionable;
+	import com.thread.vo.IRandomizable;
 
 	import flash.errors.IllegalOperationError;
 
 	/**
 	 * @author Paul
 	 */
-	public class AbstractTransform implements IDrawTransform 
+	public class AbstractTransform implements IDrawTransform, IRandomizable
 	{
 		public function AbstractTransform(enforcer : AbstractTransform) 
 		{
 			
 		}
 		
-		public function transform(d : IPositionable) : Vector.<Line>
+		public function transform(d : IPositionable) : Array
 		{
 			throw new IllegalOperationError( "draw() not implemented in" + this );
+		}
+		public function randomize() : void
+		{
+			throw new IllegalOperationError( "randomize() not implemented in" + this );
 		}
 	}
 }

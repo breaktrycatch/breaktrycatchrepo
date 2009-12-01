@@ -1,12 +1,12 @@
 package com.thread.vo 
 {
-	import com.thread.motion.ILineStyleable;
-	import com.thread.motion.IMotionable;		
+	import com.thread.constant.ThreadConstants;
+	import com.util.Randomizer;
 
 	/**
 	 * @author Paul
 	 */
-	public class ThreadDataVO implements IMotionable, ILineStyleable
+	public class ThreadDataVO implements IMotionable, ILineStyleable, IRandomizable
 	{
 		private var _x : Number;
 		private var _y : Number;
@@ -27,6 +27,11 @@ package com.thread.vo
 			prevY = 0;
 			_x = 0;
 			_y = 0;
+			_angle = 0;
+			_speed = 1;
+			_lineSize = 1;
+			_lineAlpha = 1;
+			_initialSpeed = 1;
 		}
 
 		public function get x() : Number
@@ -120,6 +125,21 @@ package com.thread.vo
 		{
 			_initialSpeed = n;
 			speed = n;
+		}
+
+		public function randomize() : void
+		{
+			var randomizer : Randomizer = new Randomizer( );
+			randomizer.addRule( Number, "angle", 0, 360 );
+			randomizer.addRule( Number, "x", 0, ThreadConstants.MANAGER_WIDTH );
+			randomizer.addRule( Number, "y", 0, ThreadConstants.MANAGER_HEIGHT );
+			randomizer.addRule( Number, "initialSpeed", 2, 2 );
+			randomizer.addRule( Number, "lineSize", 75, 125 );
+			randomizer.addRule( Number, "lineAlpha", .1, 1 );
+			randomizer.randomize( this );
+			
+			x = ThreadConstants.MANAGER_WIDTH / 2;
+			y = ThreadConstants.MANAGER_HEIGHT / 2;
 		}
 	}
 }
