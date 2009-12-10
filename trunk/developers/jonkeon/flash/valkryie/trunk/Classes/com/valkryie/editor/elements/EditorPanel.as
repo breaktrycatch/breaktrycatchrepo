@@ -44,7 +44,15 @@ package com.valkryie.editor.elements {
 		}
 		
 		protected function onAddBrushToWorld(e:MouseEvent):void {
-			this.dispatchEvent(new EditorActionEvent(EditorActionEvent.ADD_BRUSH));
+			this.dispatchEvent(new EditorActionEvent(EditorActionEvent.CREATE_ADDITIVE_BRUSH));
+		}
+		
+		public function set activeTool(_activeTool : String) : void {
+			toolsPane_mc.activeTool = _activeTool;
+		}
+		
+		public function set activeSubTool(_activeSubTool : String) : void {
+			toolsPane_mc.activeSubTool = _activeSubTool;
 		}
 	}
 }

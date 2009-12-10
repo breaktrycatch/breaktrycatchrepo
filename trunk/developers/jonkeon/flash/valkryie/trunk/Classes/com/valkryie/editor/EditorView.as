@@ -36,11 +36,13 @@ package com.valkryie.editor {
 			
 			__activeTool = ToolStatics.TOOL_SELECT_BRUSHES;
 			__activeSubTool = ToolStatics.TOOL_SCALE;
+			editorPanel.activeTool = __activeTool;
+			editorPanel.activeSubTool = __activeSubTool;
 			editorEnvironment.activeTool = __activeTool;
+			editorEnvironment.activeSubTool = __activeSubTool;
 			
-			editorPanel.addEventListener(EditorToolSelectEvent.TOOL_SELECTED, onToolSelected);
-			editorPanel.addEventListener(EditorToolSelectEvent.SUB_TOOL_SELECTED, onSubToolSelected);
-			editorPanel.addEventListener(EditorActionEvent.ADD_BRUSH, onAddBrush);
+			editorPanel.addEventListener(EditorToolSelectEvent.TOOL_CHANGE, onToolChange);
+			editorPanel.addEventListener(EditorActionEvent.CREATE_ADDITIVE_BRUSH, onCreateAdditiveBrush);
 			editorEnvironment.addEventListener(ActorEvent.ACTOR_SELECTED, onActorSelected);
 		}
 
@@ -68,18 +70,20 @@ package com.valkryie.editor {
 		}
 		
 		
-		protected function onToolSelected(e:EditorToolSelectEvent):void {
-			__activeTool = e.tool;
-			editorEnvironment.activeTool = __activeTool;
+		protected function onToolChange(e:EditorToolSelectEvent):void {
+			dtrace("TOOL Change " + e.tool, e.subTool);
+			if (__activeTool != e.tool) {
+				__activeTool = e.tool;
+				editorEnvironment.activeTool = __activeTool;
+			}
+			if (__activeSubTool != e.subTool) {
+				__activeSubTool = e.subTool;
+				editorEnvironment.activeSubTool = __activeSubTool;
+			}
 		}
 		
-		protected function onSubToolSelected(e:EditorToolSelectEvent):void {
-			__activeSubTool = e.tool;
-			editorEnvironment.activeSubTool = __activeSubTool;
-		}
-		
-		protected function onAddBrush(e:EditorActionEvent):void {
-			editorEnvironment.addActiveBrush();
+		protected function onCreateAdditiveBrush(e:EditorActionEvent):void {
+			editorEnvironment.createAdditiveBrush();
 		}
 		
 		protected function onActorSelected(e:ActorEvent):void {

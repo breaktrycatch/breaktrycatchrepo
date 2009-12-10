@@ -2,6 +2,7 @@ package com.valkryie.editor.environment {
 	import com.valkryie.actor.events.ActorEvent;
 	import com.valkryie.data.vo.GridVO;
 	import com.valkryie.editor.brush.AbstractBrush;
+	import com.valkryie.editor.brush.AdditiveBrush;
 	import com.valkryie.editor.brush.BuilderBrush;
 	import com.valkryie.editor.grid.IsoGrid;
 	import com.valkryie.editor.statics.ToolStatics;
@@ -243,7 +244,6 @@ package com.valkryie.editor.environment {
 		
 		public function set activeTool(_activeTool : String) : void {
 			__activeTool = _activeTool;
-			dtrace("AT SET");
 		}
 		
 		public function get activeSubTool() : String {
@@ -251,7 +251,6 @@ package com.valkryie.editor.environment {
 		}
 		
 		public function set activeSubTool(_activeSubTool : String) : void {
-			dtrace("AST SET");
 			__activeSubTool = _activeSubTool;
 			handleTools();
 		}
@@ -278,11 +277,20 @@ package com.valkryie.editor.environment {
 		}
 		
 		
-		public function addActiveBrush():void {
-			dtrace(__activeBrush);
-			if (__activeBrush != null) {
+		public function createAdditiveBrush():void {
+			if (__builderBrush != null) {
 				//TODO: Add Added Brush
-				__canvas.addPlane(__activeBrush);
+				var newBrush:AdditiveBrush = new AdditiveBrush();
+				newBrush.linkDisplay();
+				newBrush.dataVO["isoX"] = __builderBrush.dataVO["isoX"];
+				newBrush.dataVO["isoY"] = __builderBrush.dataVO["isoY"];
+				newBrush.dataVO["isoWidth"] = __builderBrush.dataVO["isoWidth"];
+				newBrush.dataVO["isoDepth"] = __builderBrush.dataVO["isoDepth"];
+				newBrush.dataVO["subDivisionsX"] = __builderBrush.dataVO["subDivisionsX"];
+				newBrush.dataVO["subDivisionsY"] = __builderBrush.dataVO["subDivisionsY"];
+				
+				addBrush(newBrush);
+				__canvas.addPlane(newBrush);
 			}
 		}
 		

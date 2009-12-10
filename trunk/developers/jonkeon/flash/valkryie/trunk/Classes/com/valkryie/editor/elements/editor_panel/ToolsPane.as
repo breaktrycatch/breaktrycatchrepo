@@ -19,6 +19,9 @@ package com.valkryie.editor.elements.editor_panel {
 		
 		protected var __toolsArray:Array;
 		
+		protected var __activeTool:String;
+		protected var __activeSubTool:String;
+		
 		public function ToolsPane() {
 		}
 
@@ -83,28 +86,63 @@ package com.valkryie.editor.elements.editor_panel {
 			toolsList_mc.selectedIndex = 0;
 			
 			subTitle_mc.visible = false;
-			
+		}
+		
+		public function set activeTool(_activeTool : String) : void {
+			var toolVO:ToolVO;
+			toolSearch: for (var b in toolsList_mc.dataProvider) {
+				toolVO = toolsList_mc.dataProvider[b];
+				if (toolVO.toolStatic == _activeTool) {
+					if (toolsList_mc.selectedIndex != int(b)) {
+						toolsList_mc.selectedIndex = int(b);
+					}
+					__activeTool = _activeTool;
+					populateChildren(toolVO);
+					break toolSearch;
+				}
+			}
+		}
+		
+		public function set activeSubTool(_activeSubTool : String) : void {
+			var toolVO:ToolVO;
+			toolSearch: for (var b in subToolsList_mc.dataProvider) {
+				toolVO = subToolsList_mc.dataProvider[b];
+				if (toolVO.toolStatic == _activeSubTool) {
+					if (subToolsList_mc.selectedIndex != int(b)) {
+						subToolsList_mc.selectedIndex = int(b);
+					}
+					__activeSubTool = _activeSubTool;
+					break toolSearch;
+				}
+			}
+		}
+		
+		protected function populateChildren(_toolVO:ToolVO):void {
+			subToolsList_mc.dataProvider = _toolVO.childrenTools;
+			if (_toolVO.childrenTools.length > 0) {
+				subTitle_mc.visible = true;
+				subToolsList_mc.selectedIndex = 0;
+				__activeSubTool = (subToolsList_mc.dataProvider[0] as ToolVO).toolStatic;
+			}
+			else {
+				subTitle_mc.visible = false;
+				__activeSubTool = ToolStatics.TOOL_NONE;
+			}
 		}
 		
 		//When a tool is selected
 		protected function onToolSelected(e:ListEvent):void {
 			var toolVO:ToolVO = e.item as ToolVO;
-			subToolsList_mc.dataProvider = toolVO.childrenTools;
-			if (toolVO.childrenTools.length > 0) {
-				subTitle_mc.visible = true;
-				subToolsList_mc.selectedIndex = 0;
-			}
-			else {
-				subTitle_mc.visible = false;
-			}
-			this.dispatchEvent(new EditorToolSelectEvent(EditorToolSelectEvent.TOOL_SELECTED, toolVO.toolStatic));
+			__activeTool = toolVO.toolStatic;
+			populateChildren(toolVO);
+			this.dispatchEvent(new EditorToolSelectEvent(EditorToolSelectEvent.TOOL_CHANGE, __activeTool, __activeSubTool));
 		}
 		
 		//When a sub tool is selected
 		protected function onSubToolSelected(e:ListEvent):void {
 			var toolVO:ToolVO = e.item as ToolVO;
-			dtrace("Is this firing?");
-			this.dispatchEvent(new EditorToolSelectEvent(EditorToolSelectEvent.SUB_TOOL_SELECTED, toolVO.toolStatic));
+			__activeSubTool = toolVO.toolStatic;
+			this.dispatchEvent(new EditorToolSelectEvent(EditorToolSelectEvent.TOOL_CHANGE, __activeTool, __activeSubTool));
 		}
 	}
 }
