@@ -6,7 +6,7 @@ package com.valkryie.editor.events {
 	 */
 	public class EditorActionEvent extends Event {
 		
-		public static const ADD_BRUSH:String = "editor_add_brush";
+		public static const CREATE_ADDITIVE_BRUSH:String = "editor_create_additive_brush";
 		
 		public function EditorActionEvent(type : String, bubbles : Boolean = false, cancelable : Boolean = false) {
 			super(type, bubbles, cancelable);

@@ -21,7 +21,12 @@ package com.valkryie.editor.elements.editor_panel {
 		}
 		
 		public function updateProperties(_dataVO:AbstractDataVO):void {
-			propertyList_mc.dataProvider = _dataVO.properties;
+			if (_dataVO == null) {
+				propertyList_mc.dataProvider = null;
+			}
+			else {
+				propertyList_mc.dataProvider = _dataVO.properties;
+			}
 		}
 	}
 }

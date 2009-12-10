@@ -71,7 +71,7 @@ package com.valkryie.environment.render {
 				var pActor:PolygonActor = new PolygonActor();
 				pActor.linkDisplay();
 				pActor.isoFace = pArray[i] as IsoFace;
-				pActor.debugOutlines(__debugMap);
+				//pActor.debugOutlines(__debugMap);
 				//pActor.debugNormals(__debug);
 				addActor(pActor);
 			}
@@ -91,7 +91,7 @@ package com.valkryie.environment.render {
 				var pActor:PolygonActor = new PolygonActor();
 				pActor.linkDisplay();
 				pActor.isoFace = pArray[i] as IsoFace;
-				pActor.debugOutlines(__debugMap);
+				//pActor.debugOutlines(__debugMap);
 				//pActor.debugNormals(__debug);
 				addActor(pActor);
 			}
