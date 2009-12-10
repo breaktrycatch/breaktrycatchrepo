@@ -1,5 +1,4 @@
 package com.valkryie.data.vo {
-	import com.valkryie.environment.geometric.statics.IsoStatics;
 
 	/**
 	 * @author jkeon
@@ -26,34 +25,7 @@ package com.valkryie.data.vo {
 			super.isoY = _isoY;
 		}
 
-		public function get isoWidth() : int {
-			return get("isoWidth");
-		}
 		
-		public function set isoWidth(_isoWidth : int) : void {
-			if (_isoWidth < 1) {
-				_isoWidth = 1;
-			}
-			else if ((isoX + isoWidth) > IsoStatics.GRID_WIDTH) {
-				_isoWidth = IsoStatics.GRID_WIDTH - isoX;
-			}
-			set("isoWidth", _isoWidth);
-		}
-		
-		public function get isoDepth() : int {
-			return get("isoDepth");
-		}
-		
-		public function set isoDepth(_isoDepth : int) : void {
-			
-			if (_isoDepth < 1) {
-				_isoDepth = 1;
-			}
-			else if ((isoY + _isoDepth) > IsoStatics.GRID_DEPTH) {
-				_isoDepth = IsoStatics.GRID_DEPTH - isoY;
-			}
-			set("isoDepth", _isoDepth);
-		}
 		
 		
 		public function get subDivisionsX() : int {

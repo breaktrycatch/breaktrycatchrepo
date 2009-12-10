@@ -6,8 +6,7 @@ package com.valkryie.editor.statics {
 	public class ToolStatics extends Object {
 		
 		public static const TOOL_NONE:String = "editor_tool_none";
-		
-		public static const TOOL_DRAW_PLANE:String = "editor_tool_draw_plane";
+	
 		public static const TOOL_SELECT_BRUSHES:String = "editor_tool_select_brushes";
 		public static const TOOL_SELECT_GEOMETRIC:String = "editor_tool_select_geometric";
 		public static const TOOL_SELECT_ACTORS:String = "editor_tool_select_actors";

@@ -34,10 +34,6 @@ package com.valkryie.editor.elements.editor_panel {
 			//Creates Tools
 			
 			//MAIN TOOLS
-			var drawPlaneTool:ToolVO = new ToolVO();
-			drawPlaneTool.identifierLetter = "D";
-			drawPlaneTool.toolStatic = ToolStatics.TOOL_DRAW_PLANE;
-			__toolsArray.push(drawPlaneTool);
 			
 			var brushSelectTool:ToolVO = new ToolVO();
 			brushSelectTool.identifierLetter = "B";
