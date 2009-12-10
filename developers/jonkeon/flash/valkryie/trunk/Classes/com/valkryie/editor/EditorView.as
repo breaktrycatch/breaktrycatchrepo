@@ -34,8 +34,8 @@ package com.valkryie.editor {
 		override protected function completeConstruction() : void {
 			super.completeConstruction();
 			
-			__activeTool = ToolStatics.TOOL_DRAW_PLANE;
-			__activeSubTool = ToolStatics.TOOL_NONE;
+			__activeTool = ToolStatics.TOOL_SELECT_BRUSHES;
+			__activeSubTool = ToolStatics.TOOL_SCALE;
 			editorEnvironment.activeTool = __activeTool;
 			
 			editorPanel.addEventListener(EditorToolSelectEvent.TOOL_SELECTED, onToolSelected);

@@ -144,7 +144,6 @@ package com.valkryie.actor {
 		}
 		protected function onMUp(e:MouseEvent):void {
 			e.stopImmediatePropagation();
-			dtrace("Dispatching Selected ");
 			this.dispatchEvent(new ActorEvent(ActorEvent.ACTOR_SELECTED, this));
 		}
 		

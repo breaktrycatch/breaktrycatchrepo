@@ -2,8 +2,8 @@ package com.valkryie.environment {
 	import com.fuelindustries.core.FuelUI;
 	import com.fuelindustries.tween.TweenEnterFrame;
 	import com.module_keyinput.core.InputManager;
+	import com.valkryie.actor.AbstractActor;
 	import com.valkryie.data.vo.CameraVO;
-	import com.valkryie.data.vo.GridVO;
 	import com.valkryie.data.vo.LevelVO;
 	import com.valkryie.environment.camera.IsoCamera;
 	import com.valkryie.environment.geometric.statics.IsoStatics;
@@ -13,6 +13,7 @@ package com.valkryie.environment {
 	import flash.display.MovieClip;
 	import flash.events.Event;
 	import flash.events.MouseEvent;
+	import flash.geom.Point;
 	import flash.geom.Rectangle;
 
 	/**
@@ -34,6 +35,10 @@ package com.valkryie.environment {
 	
 	
 		public static var FLAG_DEBUG_CAMERA_VIEWABLE_AREA:Boolean = true;
+		
+		
+		protected var __pickedActor:AbstractActor;
+		protected var __pickingPoint:Point;
 	
 	
 		public function AbstractEnvironment() {
@@ -148,7 +153,7 @@ package com.valkryie.environment {
 			InputManager.getInstance().mapFunction(InputManager.KEY_LEFTARROW, rotateCameraLeft);
 			InputManager.getInstance().mapFunction(InputManager.KEY_RIGHTARROW, rotateCameraRight);
 			
-			this.addEventListener(MouseEvent.CLICK, onMouseClick);
+			this.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
 			
 			//We want the camera to update the first time we run this loop
 			__cameraNeedToUpdate = true;
@@ -208,8 +213,12 @@ package com.valkryie.environment {
 		
 		
 		
-		protected function onMouseClick(e:MouseEvent):void {
-			dtrace("Mouse CO " + __canvas.mouseX, __canvas.mouseY);	
+		protected function onMouseDown(e:MouseEvent):void {
+			getPickedActor();
+		}
+		
+		protected function getPickedActor():void {
+			__pickingPoint = IsoStatics.screenToWorld(__canvas.mouseX, __canvas.mouseY);
 		}
 		
 		//Updates the Camera Position

@@ -1,7 +1,8 @@
 package com.valkryie.editor.environment {
+	import com.valkryie.actor.events.ActorEvent;
 	import com.valkryie.data.vo.GridVO;
 	import com.valkryie.editor.brush.AbstractBrush;
-	import com.valkryie.editor.brush.events.BrushEvent;
+	import com.valkryie.editor.brush.BuilderBrush;
 	import com.valkryie.editor.grid.IsoGrid;
 	import com.valkryie.editor.statics.ToolStatics;
 	import com.valkryie.environment.AbstractEnvironment;
@@ -11,6 +12,7 @@ package com.valkryie.editor.environment {
 	import flash.events.Event;
 	import flash.events.MouseEvent;
 	import flash.geom.Point;
+	import flash.geom.Rectangle;
 
 	/**
 	 * @author jkeon
@@ -20,8 +22,12 @@ package com.valkryie.editor.environment {
 		
 		protected var __drawingBrush:Boolean;
 		protected var __draggingBrush:Boolean;
+		protected var __scalingBrush:Boolean;
 		
 		protected var __activeBrush:AbstractBrush;
+		protected var __pickingCheckBrush:AbstractBrush;
+		protected var __pickingCheckIsoBounds:Rectangle;
+		protected var __builderBrush:BuilderBrush;
 		
 		protected var __brushMap:MovieClip;
 		
@@ -58,16 +64,21 @@ package com.valkryie.editor.environment {
 			
 			__drawingBrush = false;
 			__draggingBrush = false;
+			__scalingBrush = false;
 			
 			__brushMap = new MovieClip();
 			__canvas.addChild(__brushMap);
 			
-			
+			__builderBrush = new BuilderBrush();
+			__builderBrush.linkDisplay();
+			addBrush(__builderBrush);
+			__activeBrush = __builderBrush;
+		
 			__gridMap = new IsoGrid();
 			__gridMap.linkDisplay();
 			__canvas.addChild(__gridMap.display);
 			
-			this.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
+			
 		}
 		
 		public function setGridData(_gridData:GridVO):void {
@@ -103,41 +114,35 @@ package com.valkryie.editor.environment {
 		}
 
 		
-		
-		
-		protected function onMouseDown(e : MouseEvent) : void {
+		override protected function getPickedActor() : void {
+			super.getPickedActor();
 			
-			var brushIsoStartPoint:Point;
+			for (var i:int = 0; i < __brushes.length; i++) {
+				__pickingCheckBrush = __brushes[i] as AbstractBrush;
+				__pickingCheckIsoBounds = __pickingCheckBrush.dataVO["isoBounds"];
+				if (__pickingCheckIsoBounds.containsPoint(__pickingPoint)) {
+					__pickedActor = __pickingCheckBrush;
+					return;	
+				}
+			}
+			
+			//TODO: Search Actors
+			
+			__pickedActor = null;
+		}
+
+		
+		protected override function onMouseDown(e : MouseEvent) : void {
+			
+			super.onMouseDown(e);
+			dtrace("Picked Actor " + __pickedActor);
+			dispatchEvent(new ActorEvent(ActorEvent.ACTOR_SELECTED, __pickedActor));
 			
 			//Based on the active tool, we want to take action 
 			switch (__activeTool) {
 				
-				case ToolStatics.TOOL_DRAW_PLANE:
-					brushIsoStartPoint = IsoStatics.screenToWorld(__canvas.mouseX, __canvas.mouseY);
-					snapToGrid(brushIsoStartPoint);
-					
-					if (brushIsoStartPoint.x < 0 || brushIsoStartPoint.x > IsoStatics.GRID_WIDTH || brushIsoStartPoint.y < 0 || brushIsoStartPoint.y > IsoStatics.GRID_DEPTH) {
-						//TODO:Show Error
-					}
-					else {
-						this.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
-						this.addEventListener(MouseEvent.MOUSE_UP, onMouseUp);
-						this.stage.addEventListener(Event.MOUSE_LEAVE, onMouseUp);
-						
-						if (__activeBrush != null) {
-							removeBrush(__activeBrush);
-							__activeBrush.destroy();
-						}
-						
-						__activeBrush = new AbstractBrush();
-						__activeBrush.linkDisplay();
-						__activeBrush.dataVO["isoX"] = brushIsoStartPoint.x;
-						__activeBrush.dataVO["isoY"] = brushIsoStartPoint.y;
-						addBrush(__activeBrush);
-						
-						
-						__drawingBrush = true;
-					}
+				case ToolStatics.TOOL_SELECT_BRUSHES:
+					handleBrushes();
 				break;
 				
 				
@@ -147,20 +152,56 @@ package com.valkryie.editor.environment {
 		
 		protected function onMouseUp(e:Event):void {
 			__drawingBrush = false;
+			__draggingBrush = false;
+			__scalingBrush = false;
 			this.removeEventListener(MouseEvent.MOUSE_UP, onMouseUp);
 			this.stage.removeEventListener(Event.MOUSE_LEAVE, onMouseUp);
 			this.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
 		}
 		
+		
+		protected function handleBrushes():void {
+			
+			snapToGrid(__pickingPoint);
+			
+			//If we selected a Brush
+			if (__pickedActor is AbstractBrush) {
+				
+				__activeBrush = (__pickedActor as AbstractBrush);
+				
+				switch (__activeSubTool) {
+					case ToolStatics.TOOL_MOVE:
+						__draggingBrush = true;
+						__brushDragOffsetX = __activeBrush.dataVO["isoX"] - __pickingPoint.x;
+						__brushDragOffsetY = __activeBrush.dataVO["isoY"] - __pickingPoint.y;
+					break;
+					case ToolStatics.TOOL_SCALE:
+						__scalingBrush = true;
+					break;
+				}
+				
+			}
+			//Otherwise we're on open land
+			else {
+				__drawingBrush = true;
+				__activeBrush.dataVO["isoX"] = __pickingPoint.x;
+				__activeBrush.dataVO["isoY"] = __pickingPoint.y;
+			}
+			
+			this.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
+			this.addEventListener(MouseEvent.MOUSE_UP, onMouseUp);
+			this.stage.addEventListener(Event.MOUSE_LEAVE, onMouseUp);
+		}
+		
 		protected function addBrush(_brush:AbstractBrush):void {
 			__brushes.push(_brush);
-			__brushMap.addChild(__activeBrush.display);
+			__brushMap.addChild(_brush.display);
 		}
 		
 		protected function removeBrush(_brush:AbstractBrush):void {
 			var index:int = __brushes.indexOf(_brush);
 			if (index != -1) {
-				__brushMap.removeChild(__activeBrush.display);
+				__brushMap.removeChild(_brush.display);
 				__brushes.splice(index, 1);
 			}
 		}
@@ -182,6 +223,14 @@ package com.valkryie.editor.environment {
 				snapToGrid(__screenPoint);
 				__activeBrush.dataVO["isoX"] = __screenPoint.x + __brushDragOffsetX;
 				__activeBrush.dataVO["isoY"] = __screenPoint.y + __brushDragOffsetY;
+			}
+			
+			if (__scalingBrush) {
+				__screenPoint = IsoStatics.screenToWorld(__canvas.mouseX, __canvas.mouseY);
+				snapToGrid(__screenPoint);
+				__activeBrush.dataVO["isoWidth"] = __screenPoint.x - __activeBrush.dataVO["isoX"];
+				__activeBrush.dataVO["isoDepth"] = __screenPoint.y - __activeBrush.dataVO["isoY"];
+				__activeBrush.render();	
 			}
 			
 			
@@ -225,49 +274,14 @@ package com.valkryie.editor.environment {
 					brush = __brushes[i];
 					brush.activated = _bool;
 				}
-				if (_bool == true) {
-					//We can listen for Brush Events
-					this.addEventListener(BrushEvent.BRUSH_BEGIN_DRAG, onBrushBeginDrag);
-					this.addEventListener(BrushEvent.BRUSH_STOP_DRAG, onBrushStopDrag);
-				}
-				else {
-					//We should remove all Brush Events
-					if (__activeBrush != null) {
-						__activeBrush.selected = false;
-					}
-					this.removeEventListener(BrushEvent.BRUSH_BEGIN_DRAG, onBrushBeginDrag);
-					this.removeEventListener(BrushEvent.BRUSH_STOP_DRAG, onBrushStopDrag);
-				}
 			}
-		}
-		
-		protected function onBrushBeginDrag(e:BrushEvent):void {
-			e.stopImmediatePropagation();
-			dtrace("Brush Was Selected");
-			if (__activeBrush != null) {
-				__activeBrush.selected = false;
-			}
-			__activeBrush = e.brush;
-			__activeBrush.selected = true;
-			
-			__screenPoint = IsoStatics.screenToWorld(__canvas.mouseX, __canvas.mouseY);
-			
-			__brushDragOffsetX = __activeBrush.dataVO["isoX"] - __screenPoint.x;
-			__brushDragOffsetY = __activeBrush.dataVO["isoY"] - __screenPoint.y;
-			
-			__draggingBrush = true;
-			
-		}
-		
-		protected function onBrushStopDrag(e:BrushEvent):void {
-			e.stopImmediatePropagation();
-			__draggingBrush = false;	
 		}
 		
 		
 		public function addActiveBrush():void {
 			dtrace(__activeBrush);
 			if (__activeBrush != null) {
+				//TODO: Add Added Brush
 				__canvas.addPlane(__activeBrush);
 			}
 		}

@@ -2,7 +2,6 @@ package com.valkryie.editor.brush {
 	import com.fuelindustries.core.AssetProxy;
 	import com.valkryie.actor.AbstractActor;
 	import com.valkryie.data.vo.AbstractBrushVO;
-	import com.valkryie.editor.brush.events.BrushEvent;
 	import com.valkryie.environment.geometric.statics.IsoStatics;
 
 	import flash.display.Graphics;
@@ -26,12 +25,13 @@ package com.valkryie.editor.brush {
 		protected var __subDPercentage:Number;
 		protected var __subDValue:Number;
 		
-		
-		
-		
-		
 		protected var __id:int;
 		protected var __stringName:String;
+		
+		protected var __outlineColor:Number;
+		protected var __outlineAlpha:Number;
+		protected var __fillColor:Number;
+		protected var __fillAlpha:Number;
 		
 		public function AbstractBrush() {
 			linkage = AssetProxy.BLANK_MOVIECLIP;
@@ -50,8 +50,6 @@ package com.valkryie.editor.brush {
 
 		override protected function completeConstruction() : void {
 			super.completeConstruction();
-			
-			
 			
 			__dataVO["subDivisionsX"] = 1;
 			__dataVO["subDivisionsY"] = 1;
@@ -95,8 +93,8 @@ package com.valkryie.editor.brush {
 			
 			g.clear();
 			
-			g.lineStyle(3, 0x660000);
-			g.beginFill(0x660000, 0.3);
+			g.lineStyle(3, __outlineColor, __outlineAlpha);
+			g.beginFill(__fillColor, __fillAlpha);
 			g.moveTo(__topLeft.x, __topLeft.y);
 			g.lineTo(__topRight.x, __topRight.y);
 			g.lineTo(__bottomRight.x, __bottomRight.y);
@@ -138,32 +136,16 @@ package com.valkryie.editor.brush {
 			if (__activated == true) {
 				this.useHandCursor = true;
 				this.buttonMode = true;
-				this.addEventListener(MouseEvent.MOUSE_DOWN, onMDown);
-				this.addEventListener(MouseEvent.MOUSE_UP, onMUp);
 				this.addEventListener(MouseEvent.MOUSE_OVER, onMOver);
 				this.addEventListener(MouseEvent.MOUSE_OUT, onMOut);
 			}
 			else {
 				this.useHandCursor = false;
 				this.buttonMode = false;
-				this.removeEventListener(MouseEvent.MOUSE_DOWN, onMDown);
-				this.removeEventListener(MouseEvent.MOUSE_UP, onMUp);
 				this.removeEventListener(MouseEvent.MOUSE_OVER, onMOver);
 				this.removeEventListener(MouseEvent.MOUSE_OUT, onMOut);
 			}
 		}
-		
-		protected override function onMDown(e:MouseEvent):void {
-			super.onMDown(e);
-			this.dispatchEvent(new BrushEvent(BrushEvent.BRUSH_BEGIN_DRAG, this));
-		}
-		protected override function onMUp(e:MouseEvent):void {
-			super.onMUp(e);
-			this.dispatchEvent(new BrushEvent(BrushEvent.BRUSH_STOP_DRAG, this));
-		}
-		
-		
-		
 		
 		public function get stringName() : String {
 			return __stringName;

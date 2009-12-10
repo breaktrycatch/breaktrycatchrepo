@@ -15,10 +15,6 @@ package com.valkryie.actor.static.geometric {
 		protected var __isoFace:IsoFace;
 		protected var __renderCanvas:MovieClip;
 		
-		protected var __editorMode:Boolean;
-		
-		
-		
 		public function PolygonActor() {
 			super();
 			linkage = AssetProxy.BLANK_MOVIECLIP;
@@ -26,7 +22,6 @@ package com.valkryie.actor.static.geometric {
 
 		override protected function completeConstruction() : void {
 			super.completeConstruction();
-			__editorMode = AppStatics.EDITOR_MODE;
 			__renderCanvas = new MovieClip();
 			this.addChild(__renderCanvas);
 		}
@@ -86,25 +81,7 @@ package com.valkryie.actor.static.geometric {
 			
 			
 			calculateBounds();
-		}
-
-		override public function set activated(_activated : Boolean) : void {
-			super.activated = _activated;
-			if (__activated == true) {
-				this.useHandCursor = true;
-				this.buttonMode = true;
-				this.addEventListener(MouseEvent.MOUSE_OVER, onMOver);
-				this.addEventListener(MouseEvent.MOUSE_OUT, onMOut);
-			}
-			else {
-				this.useHandCursor = false;
-				this.buttonMode = false;
-				this.removeEventListener(MouseEvent.MOUSE_OVER, onMOver);
-				this.removeEventListener(MouseEvent.MOUSE_OUT, onMOut);
-			}
-		}
-		
-		
+		}	
 		
 	}
 }
