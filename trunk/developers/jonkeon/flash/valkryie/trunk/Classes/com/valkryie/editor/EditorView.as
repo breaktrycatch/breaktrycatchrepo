@@ -35,7 +35,7 @@ package com.valkryie.editor {
 			super.completeConstruction();
 			
 			__activeTool = ToolStatics.TOOL_SELECT_BRUSHES;
-			__activeSubTool = ToolStatics.TOOL_SCALE;
+			__activeSubTool = ToolStatics.TOOL_MOVE;
 			editorPanel.activeTool = __activeTool;
 			editorPanel.activeSubTool = __activeSubTool;
 			editorEnvironment.activeTool = __activeTool;

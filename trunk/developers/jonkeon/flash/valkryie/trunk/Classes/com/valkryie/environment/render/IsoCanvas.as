@@ -128,7 +128,6 @@ package com.valkryie.environment.render {
 		public function addActor(_actor:AbstractActor):void {
 			__actors.push(_actor);
 			__actorMap.addChild(_actor.display);
-			_actor.activated = true;
 		}
 		
 		//Remove Actors from the Canvas
@@ -138,7 +137,6 @@ package com.valkryie.environment.render {
 				if (_actor.parent == __actorMap) {
 					__actorMap.removeChild(_actor.display);
 				}
-				_actor.activated = false;
 				__actors.splice(index, 1);
 			}
 			

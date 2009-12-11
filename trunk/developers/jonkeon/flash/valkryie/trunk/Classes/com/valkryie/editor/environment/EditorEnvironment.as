@@ -72,7 +72,6 @@ package com.valkryie.editor.environment {
 			
 			__builderBrush = new BuilderBrush();
 			__builderBrush.linkDisplay();
-			addBrush(__builderBrush);
 			__activeBrush = __builderBrush;
 		
 			__gridMap = new IsoGrid();
@@ -81,7 +80,13 @@ package com.valkryie.editor.environment {
 			
 			
 		}
-		
+
+		override protected function onAdded() : void {
+			super.onAdded();
+			
+			addBrush(__builderBrush);
+		}
+
 		public function setGridData(_gridData:GridVO):void {
 			__gridMap.gridData = _gridData;
 			__gridMap.render();
@@ -196,12 +201,23 @@ package com.valkryie.editor.environment {
 		
 		protected function addBrush(_brush:AbstractBrush):void {
 			__brushes.push(_brush);
-			__brushMap.addChild(_brush.display);
+			
+			//Ensure Builder Brush is always on top
+			if (_brush != __builderBrush && __builderBrush.parent == __brushMap) {
+				var depth:int = __brushMap.getChildIndex(__builderBrush.display);
+				__brushMap.addChildAt(_brush.display, depth);
+			}
+			else {
+				__brushMap.addChild(_brush.display);
+			}
+			_brush.activated = true;
+			
 		}
 		
 		protected function removeBrush(_brush:AbstractBrush):void {
 			var index:int = __brushes.indexOf(_brush);
 			if (index != -1) {
+				_brush.activated = false;
 				__brushMap.removeChild(_brush.display);
 				__brushes.splice(index, 1);
 			}
