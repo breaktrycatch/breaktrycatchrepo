@@ -19,13 +19,7 @@ package com.valkryie.actor {
 		
 		protected var __bindings:Array;
 		
-		protected var __activated:Boolean;
-		protected var __selected:Boolean;
 		
-		
-		protected var __overColorTransform:ColorTransform;
-		protected var __normalColorTransform:ColorTransform;
-		protected var __selectedColorTransform:ColorTransform;
 		
 		public function AbstractActor() {
 			super();
@@ -33,20 +27,10 @@ package com.valkryie.actor {
 
 		override protected function completeConstruction() : void {
 			super.completeConstruction();
-			setupColorTransforms();
+			
 			setupData();
 			setupBindings();
 			__bounds = new Rectangle();
-		}
-		
-		protected function setupColorTransforms():void {
-			__overColorTransform = new ColorTransform();
-			__overColorTransform.color = 0xFF6666;
-			
-			__selectedColorTransform = new ColorTransform();
-			__selectedColorTransform.color = 0xAA0000;
-			
-			__normalColorTransform = this.transform.colorTransform;
 		}
 		
 		protected function setupData():void {
@@ -80,14 +64,9 @@ package com.valkryie.actor {
 			
 			__bounds = null;
 			
-			__overColorTransform = null;
-			__normalColorTransform = null;
-			__selectedColorTransform = null;
 			
-			this.removeEventListener(MouseEvent.MOUSE_DOWN, onMDown);
-			this.removeEventListener(MouseEvent.MOUSE_UP, onMUp);
-			this.removeEventListener(MouseEvent.MOUSE_OVER, onMOver);
-			this.removeEventListener(MouseEvent.MOUSE_OUT, onMOut);
+			
+			
 			
 			
 			var b:Binding;
@@ -113,52 +92,10 @@ package com.valkryie.actor {
 			__dataVO = _dataVO;
 		}
 		
-		public function get activated() : Boolean {
-			return __activated;
-		}
-		
-		public function set activated(_activated : Boolean) : void {
-			__activated = _activated;
-		}
-		
-		public function get selected() : Boolean {
-			return __selected;
-		}
-		
-		public function set selected(_selected : Boolean) : void {
-			__selected = _selected;
-			if (__selected) {
-				this.transform.colorTransform = __selectedColorTransform;
-			}
-			else {
-				this.transform.colorTransform = __normalColorTransform;
-			}
-		}
 		
 		
-		//INTERACTION HANDLERS
 		
-		protected function onMDown(e:MouseEvent):void {
-			e.stopImmediatePropagation();
-			
-		}
-		protected function onMUp(e:MouseEvent):void {
-			e.stopImmediatePropagation();
-			this.dispatchEvent(new ActorEvent(ActorEvent.ACTOR_SELECTED, this));
-		}
 		
-		protected function onMOver(e:MouseEvent):void {
-			e.stopImmediatePropagation();
-			if (!__selected) {
-				this.transform.colorTransform = __overColorTransform;
-			}
-		}
-		protected function onMOut(e:MouseEvent):void {
-			e.stopImmediatePropagation();
-			if (!__selected) {
-				this.transform.colorTransform = __normalColorTransform;
-			}
-		}
 		
 		
 	}
