@@ -87,10 +87,10 @@ package com.valkryie.editor {
 		}
 		
 		protected function onActorSelected(e:ActorEvent):void {
-			dtrace("Actor was selected " + e.actor);
+			//dtrace("Actor was selected " + e.actor);
 			__selectedActor = e.actor;
 			if (__selectedActor != null) {
-				editorPanel.updateProperties(__selectedActor.dataVO);
+				editorPanel.updateProperties(__selectedActor);
 			}
 			else {
 				editorPanel.updateProperties(null);

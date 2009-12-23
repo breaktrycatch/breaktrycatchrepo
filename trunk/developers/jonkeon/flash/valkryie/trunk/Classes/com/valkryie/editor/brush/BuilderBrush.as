@@ -27,7 +27,7 @@ package com.valkryie.editor.brush {
 		override protected function completeConstruction() : void {
 			super.completeConstruction();
 			
-			__stringName = "Builder Brush";
+			__stringName = "BUILDER BRUSH";
 			
 			__dataVO["isoX"] = 0;
 			__dataVO["isoY"] = 0;

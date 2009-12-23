@@ -1,11 +1,8 @@
 package com.valkryie.actor {
 	import com.fuelindustries.core.AssetProxy;
 	import com.module_data.Binding;
-	import com.valkryie.actor.events.ActorEvent;
 	import com.valkryie.data.vo.AbstractDataVO;
 
-	import flash.events.MouseEvent;
-	import flash.geom.ColorTransform;
 	import flash.geom.Rectangle;
 
 	/**
@@ -13,16 +10,29 @@ package com.valkryie.actor {
 	 */
 	public class AbstractActor extends AssetProxy {
 		
+		protected static var ACTOR_UID:int = 0;
+		
 		protected var __dataVO:AbstractDataVO;	
 		
 		protected var __bounds:Rectangle;
 		
 		protected var __bindings:Array;
 		
+		protected var __selected:Boolean;
+		
+		protected var __id:int;
+		protected var __stringName:String;
 		
 		
 		public function AbstractActor() {
 			super();
+			init();
+		}
+		
+		protected function init():void {
+			__id = ACTOR_UID;
+			ACTOR_UID++;
+			__stringName = "GENERIC ACTOR " + __id;
 		}
 
 		override protected function completeConstruction() : void {
@@ -92,7 +102,23 @@ package com.valkryie.actor {
 			__dataVO = _dataVO;
 		}
 		
+		public function get selected() : Boolean {
+			return __selected;
+		}
 		
+		public function set selected(_selected : Boolean) : void {
+			if (__selected != _selected) {
+				__selected = _selected;
+			}
+		}
+		
+		public function get stringName() : String {
+			return __stringName;
+		}
+		
+		public function get id() : int {
+			return __id;
+		}
 		
 		
 		

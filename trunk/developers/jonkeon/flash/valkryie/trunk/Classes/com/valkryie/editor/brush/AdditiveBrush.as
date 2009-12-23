@@ -24,6 +24,21 @@ package com.valkryie.editor.brush {
 			
 			__normalColorTransform = this.transform.colorTransform;
 		}
+		
+		public override function set selected(_selected : Boolean) : void {
+			if (__selected != _selected) {
+				__selected = _selected;
+				if (__selected) {
+					this.transform.colorTransform = __selectedColorTransform;
+					__fillAlpha = 0.1;
+				}
+				else {
+					this.transform.colorTransform = __normalColorTransform;
+					__fillAlpha = 0;
+					render();
+				}
+			}
+		}
 
 		override protected function onMOver(e : MouseEvent) : void {
 			super.onMOver(e);

@@ -1,4 +1,5 @@
 package com.valkryie.editor.environment {
+	import com.valkryie.actor.AbstractActor;
 	import com.valkryie.actor.events.ActorEvent;
 	import com.valkryie.data.vo.GridVO;
 	import com.valkryie.editor.brush.AbstractBrush;
@@ -19,7 +20,6 @@ package com.valkryie.editor.environment {
 	 * @author jkeon
 	 */
 	public class EditorEnvironment extends AbstractEnvironment {
-		
 		
 		protected var __drawingBrush:Boolean;
 		protected var __draggingBrush:Boolean;
@@ -83,6 +83,10 @@ package com.valkryie.editor.environment {
 
 		override protected function onAdded() : void {
 			super.onAdded();
+			__builderBrush.dataVO["isoWidth"] = 256;
+			__builderBrush.dataVO["isoDepth"] = 256;
+			__builderBrush.dataVO["isoX"] = int(IsoStatics.GRID_WIDTH/2) - int(__builderBrush.dataVO["isoWidth"]/2);
+			__builderBrush.dataVO["isoY"] = int(IsoStatics.GRID_DEPTH/2) - int(__builderBrush.dataVO["isoDepth"]/2);
 			
 			addBrush(__builderBrush);
 		}
@@ -118,62 +122,101 @@ package com.valkryie.editor.environment {
 				__activeBrush.render();
 			}
 		}
-
 		
-		override protected function getPickedActor() : void {
-			super.getPickedActor();
-			
+		
+		protected function determinePickedActor(_actorType:String):void {
 			for (var i:int = 0; i < __brushes.length; i++) {
 				__pickingCheckBrush = __brushes[i] as AbstractBrush;
 				__pickingCheckIsoBounds = __pickingCheckBrush.dataVO["isoBounds"];
 				if (__pickingCheckIsoBounds.containsPoint(__pickingPoint)) {
-					__pickedActor = __pickingCheckBrush;
+					assignPickedActor(__pickingCheckBrush, _actorType);
 					return;	
 				}
 			}
-			
 			//TODO: Search Actors
 			
-			__pickedActor = null;
+			assignPickedActor(null, _actorType);
+		}
+		
+		
+		protected function assignPickedActor(_abstractActor:AbstractActor, _actorType:String):void {
+			
+			if (_actorType == QUEUED_PICKED_ACTOR) {
+				//Assign the Mouse Down Actor
+				__queuedPickedActor = _abstractActor;
+				//If the currently Selected Actor is not the same as what we just clicked on...
+				if (__selectedActor != __queuedPickedActor) {
+					if (__selectedActor != null) {
+						__selectedActor.selected = false;
+					}
+					__selectedActor = __queuedPickedActor;
+					if (__selectedActor != null) {
+						__selectedActor.selected = true;
+					}
+				}
+			}
+			else if (_actorType == ACTUAL_PICKED_ACTOR) {
+				//Assign the Mouse Up Actor
+				__actualPickedActor = _abstractActor;
+				//If it is the same actor we moused down on...
+				if (__actualPickedActor == __queuedPickedActor) {
+					//Set it to be the selected actor
+					__selectedActor = __actualPickedActor;
+					//It might be null, so only if not null...
+					if (__selectedActor != null) {
+						//assign it to be selected
+						__selectedActor.selected = true;
+					}
+				}
+				//If they're not the same
+				else {
+					//If the selected actor exists
+					if (__selectedActor != null) {
+						//assign it to be selected
+						__selectedActor.selected = false;
+						__selectedActor = null;
+					}
+				}
+			}
 		}
 
 		
 		protected override function onMouseDown(e : MouseEvent) : void {
+			calculatePickingPoint();
+			determinePickedActor(QUEUED_PICKED_ACTOR);
+			dispatchEvent(new ActorEvent(ActorEvent.ACTOR_SELECTED, __selectedActor));
 			
-			super.onMouseDown(e);
-			dtrace("Picked Actor " + __pickedActor);
-			dispatchEvent(new ActorEvent(ActorEvent.ACTOR_SELECTED, __pickedActor));
 			
 			//Based on the active tool, we want to take action 
 			switch (__activeTool) {
-				
 				case ToolStatics.TOOL_SELECT_BRUSHES:
-					handleBrushes();
+					handleBrushesMD();
 				break;
-				
-				
 			}
 
 		}
 		
-		protected function onMouseUp(e:Event):void {
+		
+		protected override function onMouseUp(e:Event):void {
+			calculatePickingPoint();
+			determinePickedActor(ACTUAL_PICKED_ACTOR);
+			dispatchEvent(new ActorEvent(ActorEvent.ACTOR_SELECTED, __selectedActor));
+			
 			__drawingBrush = false;
 			__draggingBrush = false;
 			__scalingBrush = false;
-			this.removeEventListener(MouseEvent.MOUSE_UP, onMouseUp);
 			this.stage.removeEventListener(Event.MOUSE_LEAVE, onMouseUp);
-			this.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
 		}
 		
 		
-		protected function handleBrushes():void {
+		protected function handleBrushesMD():void {
 			
 			snapToGrid(__pickingPoint);
 			
 			//If we selected a Brush
-			if (__pickedActor is AbstractBrush) {
+			if (__selectedActor is AbstractBrush) {
 				
-				__activeBrush = (__pickedActor as AbstractBrush);
+				__activeBrush = (__selectedActor as AbstractBrush);
 				
 				switch (__activeSubTool) {
 					case ToolStatics.TOOL_MOVE:
@@ -187,15 +230,6 @@ package com.valkryie.editor.environment {
 				}
 				
 			}
-			//Otherwise we're on open land
-			else {
-				__drawingBrush = true;
-				__activeBrush.dataVO["isoX"] = __pickingPoint.x;
-				__activeBrush.dataVO["isoY"] = __pickingPoint.y;
-			}
-			
-			this.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
-			this.addEventListener(MouseEvent.MOUSE_UP, onMouseUp);
 			this.stage.addEventListener(Event.MOUSE_LEAVE, onMouseUp);
 		}
 		
@@ -211,7 +245,6 @@ package com.valkryie.editor.environment {
 				__brushMap.addChild(_brush.display);
 			}
 			_brush.activated = true;
-			
 		}
 		
 		protected function removeBrush(_brush:AbstractBrush):void {
@@ -306,7 +339,8 @@ package com.valkryie.editor.environment {
 				newBrush.dataVO["subDivisionsY"] = __builderBrush.dataVO["subDivisionsY"];
 				
 				addBrush(newBrush);
-				__canvas.addPlane(newBrush);
+				//TODO: Enable to allow actual polygons to be added
+				//__canvas.addPlane(newBrush);
 			}
 		}
 		

@@ -36,9 +36,13 @@ package com.valkryie.environment {
 	
 		public static var FLAG_DEBUG_CAMERA_VIEWABLE_AREA:Boolean = true;
 		
-		
-		protected var __pickedActor:AbstractActor;
+		protected var __queuedPickedActor:AbstractActor;
+		protected var __actualPickedActor:AbstractActor;
+		protected var __selectedActor:AbstractActor;
 		protected var __pickingPoint:Point;
+		
+		protected const QUEUED_PICKED_ACTOR:String = "queued_picked_actor";
+		protected const ACTUAL_PICKED_ACTOR:String = "actual_picked_actor";
 	
 	
 		public function AbstractEnvironment() {
@@ -154,6 +158,7 @@ package com.valkryie.environment {
 			InputManager.getInstance().mapFunction(InputManager.KEY_RIGHTARROW, rotateCameraRight);
 			
 			this.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
+			this.addEventListener(MouseEvent.MOUSE_UP, onMouseUp);
 			
 			//We want the camera to update the first time we run this loop
 			__cameraNeedToUpdate = true;
@@ -214,10 +219,14 @@ package com.valkryie.environment {
 		
 		
 		protected function onMouseDown(e:MouseEvent):void {
-			getPickedActor();
+			//OVERRIDE
 		}
 		
-		protected function getPickedActor():void {
+		protected function onMouseUp(e:Event):void {
+			//OVERRIDE
+		}
+		
+		protected function calculatePickingPoint():void {
 			__pickingPoint = IsoStatics.screenToWorld(__canvas.mouseX, __canvas.mouseY);
 		}
 		

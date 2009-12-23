@@ -1,7 +1,7 @@
 package com.valkryie.editor.elements {
 	import com.fuelindustries.controls.buttons.SimpleButton;
 	import com.fuelindustries.core.AssetProxy;
-	import com.valkryie.data.vo.AbstractDataVO;
+	import com.valkryie.actor.AbstractActor;
 	import com.valkryie.data.vo.GridVO;
 	import com.valkryie.editor.elements.editor_panel.PropertiesPane;
 	import com.valkryie.editor.elements.editor_panel.ToolsPane;
@@ -39,8 +39,8 @@ package com.valkryie.editor.elements {
 		}
 
 		
-		public function updateProperties(_dataVO:AbstractDataVO):void {
-			propertiesPane_mc.updateProperties(_dataVO);
+		public function updateProperties(_actor:AbstractActor):void {
+			propertiesPane_mc.updateProperties(_actor);
 		}
 		
 		protected function onAddBrushToWorld(e:MouseEvent):void {

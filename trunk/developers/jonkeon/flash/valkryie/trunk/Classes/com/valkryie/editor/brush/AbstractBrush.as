@@ -15,7 +15,7 @@ package com.valkryie.editor.brush {
 	 */
 	public class AbstractBrush extends AbstractActor {
 		
-		protected static var BRUSH_UID:int = 0;
+		
 		
 		protected var __topLeft:Point;
 		protected var __topRight:Point;
@@ -27,8 +27,7 @@ package com.valkryie.editor.brush {
 		protected var __subDPercentage:Number;
 		protected var __subDValue:Number;
 		
-		protected var __id:int;
-		protected var __stringName:String;
+		
 		
 		protected var __outlineColor:Number;
 		protected var __outlineAlpha:Number;
@@ -36,7 +35,7 @@ package com.valkryie.editor.brush {
 		protected var __fillAlpha:Number;
 		
 		protected var __activated:Boolean;
-		protected var __selected:Boolean;
+		
 		
 		
 		protected var __overColorTransform:ColorTransform;
@@ -48,14 +47,10 @@ package com.valkryie.editor.brush {
 			init();
 		}
 		
-		protected function init():void {
-			
-			__id = BRUSH_UID;
-			__stringName = "Planar Brush " + __id;
-			BRUSH_UID++;
-			
-			__activated = false;
-			
+		protected override function init():void {
+			super.init();
+			__stringName = "PLANAR BRUSH " + __id;
+			__activated = false;	
 		}
 
 		override protected function completeConstruction() : void {
@@ -152,6 +147,7 @@ package com.valkryie.editor.brush {
 			if (__activated != _activated) {
 				__activated = _activated;
 				if (__activated == true) {
+					render();
 					this.useHandCursor = true;
 					this.buttonMode = true;
 					this.addEventListener(MouseEvent.MOUSE_OVER, onMOver);
@@ -167,11 +163,7 @@ package com.valkryie.editor.brush {
 		}
 		
 		
-		public function get selected() : Boolean {
-			return __selected;
-		}
-		
-		public function set selected(_selected : Boolean) : void {
+		public override function set selected(_selected : Boolean) : void {
 			if (__selected != _selected) {
 				__selected = _selected;
 				if (__selected) {
@@ -186,13 +178,7 @@ package com.valkryie.editor.brush {
 		
 		
 		
-		public function get stringName() : String {
-			return __stringName;
-		}
 		
-		public function get id() : int {
-			return __id;
-		}
 		
 		private function get dataRef() : AbstractBrushVO {
 			return __dataVO as AbstractBrushVO;
