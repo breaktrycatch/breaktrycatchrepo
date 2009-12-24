@@ -1,4 +1,6 @@
 package com.valkryie.data.vo {
+	import com.valkryie.editor.elements.editor_panel.properties.statics.PropertyStatics;
+	import com.valkryie.editor.elements.editor_panel.properties.vo.PropertyVO;
 
 	/**
 	 * @author jkeon
@@ -25,6 +27,16 @@ package com.valkryie.data.vo {
 			super.isoY = _isoY;
 		}
 
+		override public function set isoWidth(_isoWidth : int) : void {
+			super.isoWidth = _isoWidth;
+			subDivisionsXSize = isoWidth/subDivisionsX;
+		}
+
+		override public function set isoDepth(_isoDepth : int) : void {
+			super.isoDepth = _isoDepth;
+			subDivisionsYSize = isoDepth/subDivisionsY;
+		}
+
 		
 		
 		
@@ -36,6 +48,7 @@ package com.valkryie.data.vo {
 			if (_subDivisionsX < 1) {
 				_subDivisionsX = 1;
 			}
+			subDivisionsXSize = isoWidth/_subDivisionsX;
 			set("subDivisionsX", _subDivisionsX);
 		}
 		
@@ -47,8 +60,45 @@ package com.valkryie.data.vo {
 			if (_subDivisionsY < 1) {
 				_subDivisionsY = 1;
 			}
+			subDivisionsYSize = isoDepth/_subDivisionsY;
 			set("subDivisionsY", _subDivisionsY);
 		}
 		
+		
+		public function get subDivisionsXSize() : Number {
+			return get("subDivisionsXSize");
+		}
+		
+		public function set subDivisionsXSize(_subDivisionsXSize : Number) : void {
+			set("subDivisionsXSize", _subDivisionsXSize);
+		}
+		
+		public function get subDivisionsYSize() : Number {
+			return get("subDivisionsYSize");
+		}
+		
+		public function set subDivisionsYSize(_subDivisionsYSize : Number) : void {
+			set("subDivisionsYSize", _subDivisionsYSize);
+		}
+
+		
+		override protected function generateProperties() : void {
+			__properties = [];
+			
+			for (var b in _props) {
+				var pvo:PropertyVO = new PropertyVO();
+				pvo.propertyName = b;
+				pvo.dataVO = this;
+				if (pvo.propertyName == "subDivisionsXSize" || pvo.propertyName == "subDivisionsYSize") {
+					pvo.type = PropertyStatics.TYPE_READ_ONLY;
+				} 
+				else {
+					pvo.type = determineType(_props[b]);
+				}
+				__properties.push(pvo);
+			}
+			
+			__properties.sortOn("propertyName");
+		}
 	}
 }

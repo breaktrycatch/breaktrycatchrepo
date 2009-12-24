@@ -22,18 +22,18 @@ package com.valkryie.editor.brush {
 			__selectedColorTransform = new ColorTransform();
 			__selectedColorTransform.color = 0x0000AA;
 			
-			__normalColorTransform = this.transform.colorTransform;
+			__normalColorTransform = __brushDisplay.transform.colorTransform;
 		}
 		
 		public override function set selected(_selected : Boolean) : void {
 			if (__selected != _selected) {
 				__selected = _selected;
 				if (__selected) {
-					this.transform.colorTransform = __selectedColorTransform;
+					__brushDisplay.transform.colorTransform = __selectedColorTransform;
 					__fillAlpha = 0.1;
 				}
 				else {
-					this.transform.colorTransform = __normalColorTransform;
+					__brushDisplay.transform.colorTransform = __normalColorTransform;
 					__fillAlpha = 0;
 					render();
 				}

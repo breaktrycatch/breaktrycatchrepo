@@ -48,7 +48,7 @@ package com.module_subscriber.core {
 				__activeSubscription.issue(_event);
 			}
 			else {
-				throw new Error("[Subscriber::issue] - No Subscription exists " + _event.type);
+				trace("[Subscriber::issue] - No Subscription exists " + _event.type);
 			}
 		}
 	}

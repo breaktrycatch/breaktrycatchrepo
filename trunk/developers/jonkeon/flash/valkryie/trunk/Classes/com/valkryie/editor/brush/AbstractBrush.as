@@ -1,11 +1,12 @@
 package com.valkryie.editor.brush {
 	import com.fuelindustries.core.AssetProxy;
 	import com.valkryie.actor.AbstractActor;
-	import com.valkryie.actor.events.ActorEvent;
 	import com.valkryie.data.vo.AbstractBrushVO;
+	import com.valkryie.environment.geometric.component.IsoVertex;
 	import com.valkryie.environment.geometric.statics.IsoStatics;
 
 	import flash.display.Graphics;
+	import flash.display.MovieClip;
 	import flash.events.MouseEvent;
 	import flash.geom.ColorTransform;
 	import flash.geom.Point;
@@ -14,8 +15,6 @@ package com.valkryie.editor.brush {
 	 * @author jkeon
 	 */
 	public class AbstractBrush extends AbstractActor {
-		
-		
 		
 		protected var __topLeft:Point;
 		protected var __topRight:Point;
@@ -27,37 +26,57 @@ package com.valkryie.editor.brush {
 		protected var __subDPercentage:Number;
 		protected var __subDValue:Number;
 		
-		
-		
 		protected var __outlineColor:Number;
 		protected var __outlineAlpha:Number;
 		protected var __fillColor:Number;
 		protected var __fillAlpha:Number;
 		
-		protected var __activated:Boolean;
-		
-		
-		
 		protected var __overColorTransform:ColorTransform;
 		protected var __normalColorTransform:ColorTransform;
 		protected var __selectedColorTransform:ColorTransform;
 		
+		//Geometric Constructs
+		protected var __verticies:Array;
+		protected var __edges:Array;
+		protected var __faces:Array;
+		
+		
+		protected var __brushDisplay:MovieClip;
+		protected var __vertexDisplay:MovieClip;
+		protected var __edgeDisplay:MovieClip;
+		protected var __faceDisplay:MovieClip;
+		
+		
+		
 		public function AbstractBrush() {
 			linkage = AssetProxy.BLANK_MOVIECLIP;
-			init();
+			super();
 		}
 		
 		protected override function init():void {
 			super.init();
+			__verticies = [];
+			__edges = [];
+			__faces = [];
 			__stringName = "PLANAR BRUSH " + __id;
-			__activated = false;	
+			__brushDisplay = new MovieClip();
+			__vertexDisplay = new MovieClip();
+			__edgeDisplay = new MovieClip();
+			__faceDisplay = new MovieClip();
 		}
 
 		override protected function completeConstruction() : void {
 			super.completeConstruction();
+			addChild(__brushDisplay);
+			addChild(__vertexDisplay);
+			addChild(__edgeDisplay);
+			addChild(__faceDisplay);
 			setupColorTransforms();
-			__dataVO["subDivisionsX"] = 1;
-			__dataVO["subDivisionsY"] = 1;
+			
+			this.useHandCursor = true;
+			this.buttonMode = true;
+			this.addEventListener(MouseEvent.MOUSE_OVER, onMOver);
+			this.addEventListener(MouseEvent.MOUSE_OUT, onMOut);
 		}
 		
 
@@ -67,6 +86,14 @@ package com.valkryie.editor.brush {
 
 		override protected function setupBindings() : void {
 			super.setupBindings();
+			
+			//Defaults
+			__dataVO["isoX"] = 256;
+			__dataVO["isoY"] = 256;
+			__dataVO["isoDepth"] = 256;
+			__dataVO["isoWidth"] = 256;
+			__dataVO["subDivisionsX"] = 1;
+			__dataVO["subDivisionsY"] = 1;
 			
 			__bindings.push(__dataVO.bind("isoX", this, render));
 			__bindings.push(__dataVO.bind("isoY", this, render));
@@ -88,12 +115,50 @@ package com.valkryie.editor.brush {
 			return dataRef.isoDepth;
 		}
 		
+		//Will need to change this to an as needed basis
+		protected function updateGeometry():void {
+			
+			__verticies = [];
+			
+			var v:IsoVertex;
+			var index:int;
+			
+			var h : int = __dataVO["subDivisionsY"] + 1;
+			var w : int = __dataVO["subDivisionsX"] + 1;
+			for(var y : int = 0; y < h; y++)
+			{
+				for(var x : int = 0; x < w; x++)
+				{
+					index = x + y*w;
+					v = new IsoVertex((x*__dataVO["subDivisionsXSize"]) + __dataVO["isoX"],(y*__dataVO["subDivisionsYSize"]) + __dataVO["isoY"], 0);
+				
+					v.u = x/__dataVO["subDivisionsX"];
+					v.v = y/__dataVO["subDivisionsY"];
+					__verticies[index] = v;
+				}
+			}
+			renderGeometry();
+		}
+		
+		protected function renderGeometry():void {
+			
+//			var g:Graphics = __vertexDisplay.graphics;
+//			g.clear();
+//			var v:IsoVertex;
+//			for (var b in __verticies) {
+//				v = __verticies[b];
+//				v.updateScreenCoordinates();
+//				g.beginFill(0xFFFF00);
+//				g.drawCircle(v.transformedX, v.transformedY, 4);
+//				g.endFill();
+//			}
+		}
 		
 		//Renders the Brush
 		public function render():void	{
 			
 			
-			var g:Graphics = this.graphics;
+			var g:Graphics = __brushDisplay.graphics;
 			
 			__topLeft = IsoStatics.worldToScreen(dataRef.isoX, dataRef.isoY, 0);
 			__topRight = IsoStatics.worldToScreen(dataRef.isoX + dataRef.isoWidth, dataRef.isoY, 0);
@@ -136,30 +201,7 @@ package com.valkryie.editor.brush {
 				g.lineTo(__subDSecond.x, __subDSecond.y);
 			}
 			
-			
-		}
-		
-		public function get activated() : Boolean {
-			return __activated;
-		}
-		
-		public function set activated(_activated : Boolean) : void {
-			if (__activated != _activated) {
-				__activated = _activated;
-				if (__activated == true) {
-					render();
-					this.useHandCursor = true;
-					this.buttonMode = true;
-					this.addEventListener(MouseEvent.MOUSE_OVER, onMOver);
-					this.addEventListener(MouseEvent.MOUSE_OUT, onMOut);
-				}
-				else {
-					this.useHandCursor = false;
-					this.buttonMode = false;
-					this.removeEventListener(MouseEvent.MOUSE_OVER, onMOver);
-					this.removeEventListener(MouseEvent.MOUSE_OUT, onMOut);
-				}
-			}
+			updateGeometry();
 		}
 		
 		
@@ -167,10 +209,10 @@ package com.valkryie.editor.brush {
 			if (__selected != _selected) {
 				__selected = _selected;
 				if (__selected) {
-					this.transform.colorTransform = __selectedColorTransform;
+					__brushDisplay.transform.colorTransform = __selectedColorTransform;
 				}
 				else {
-					this.transform.colorTransform = __normalColorTransform;
+					__brushDisplay.transform.colorTransform = __normalColorTransform;
 				}
 			}
 		}
@@ -186,25 +228,16 @@ package com.valkryie.editor.brush {
 		
 		//INTERACTION HANDLERS
 		
-		protected function onMDown(e:MouseEvent):void {
-			e.stopImmediatePropagation();
-			
-		}
-		protected function onMUp(e:MouseEvent):void {
-			e.stopImmediatePropagation();
-			this.dispatchEvent(new ActorEvent(ActorEvent.ACTOR_SELECTED, this));
-		}
-		
 		protected function onMOver(e:MouseEvent):void {
 			e.stopImmediatePropagation();
 			if (!__selected) {
-				this.transform.colorTransform = __overColorTransform;
+				__brushDisplay.transform.colorTransform = __overColorTransform;
 			}
 		}
 		protected function onMOut(e:MouseEvent):void {
 			e.stopImmediatePropagation();
 			if (!__selected) {
-				this.transform.colorTransform = __normalColorTransform;
+				__brushDisplay.transform.colorTransform = __normalColorTransform;
 			}
 		}
 
@@ -213,9 +246,7 @@ package com.valkryie.editor.brush {
 			__topRight = null;
 			__bottomRight = null;
 			__bottomLeft = null;
-			
-			this.removeEventListener(MouseEvent.MOUSE_DOWN, onMDown);
-			this.removeEventListener(MouseEvent.MOUSE_UP, onMUp);
+
 			this.removeEventListener(MouseEvent.MOUSE_OVER, onMOver);
 			this.removeEventListener(MouseEvent.MOUSE_OUT, onMOut);
 			

@@ -1,10 +1,12 @@
 package com.valkryie.editor.environment {
+	import com.module_subscriber.core.Subscriber;
 	import com.valkryie.actor.AbstractActor;
 	import com.valkryie.actor.events.ActorEvent;
 	import com.valkryie.data.vo.GridVO;
 	import com.valkryie.editor.brush.AbstractBrush;
 	import com.valkryie.editor.brush.AdditiveBrush;
 	import com.valkryie.editor.brush.BuilderBrush;
+	import com.valkryie.editor.events.EditorToolSelectEvent;
 	import com.valkryie.editor.grid.IsoGrid;
 	import com.valkryie.editor.statics.ToolStatics;
 	import com.valkryie.environment.AbstractEnvironment;
@@ -35,7 +37,6 @@ package com.valkryie.editor.environment {
 		protected var __screenPoint:Point;
 		
 		protected var __activeTool:String;
-		protected var __activeSubTool:String;	
 		
 		
 		protected var __brushes:Array;
@@ -78,7 +79,7 @@ package com.valkryie.editor.environment {
 			__gridMap.linkDisplay();
 			__canvas.addChild(__gridMap.display);
 			
-			
+			Subscriber.subscribe(EditorToolSelectEvent.TOOL_CHANGE, onToolChange);
 		}
 
 		override protected function onAdded() : void {
@@ -158,25 +159,25 @@ package com.valkryie.editor.environment {
 			else if (_actorType == ACTUAL_PICKED_ACTOR) {
 				//Assign the Mouse Up Actor
 				__actualPickedActor = _abstractActor;
-				//If it is the same actor we moused down on...
-				if (__actualPickedActor == __queuedPickedActor) {
-					//Set it to be the selected actor
-					__selectedActor = __actualPickedActor;
-					//It might be null, so only if not null...
-					if (__selectedActor != null) {
-						//assign it to be selected
-						__selectedActor.selected = true;
-					}
-				}
-				//If they're not the same
-				else {
-					//If the selected actor exists
-					if (__selectedActor != null) {
-						//assign it to be selected
-						__selectedActor.selected = false;
-						__selectedActor = null;
-					}
-				}
+//				//If it is the same actor we moused down on...
+//				if (__actualPickedActor == __queuedPickedActor) {
+//					//Set it to be the selected actor
+//					__selectedActor = __actualPickedActor;
+//					//It might be null, so only if not null...
+//					if (__selectedActor != null) {
+//						//assign it to be selected
+//						__selectedActor.selected = true;
+//					}
+//				}
+//				//If they're not the same
+//				else {
+//					//If the selected actor exists
+//					if (__selectedActor != null) {
+//						//assign it to be selected
+//						__selectedActor.selected = false;
+//						__selectedActor = null;
+//					}
+//				}
 			}
 		}
 
@@ -184,13 +185,15 @@ package com.valkryie.editor.environment {
 		protected override function onMouseDown(e : MouseEvent) : void {
 			calculatePickingPoint();
 			determinePickedActor(QUEUED_PICKED_ACTOR);
-			dispatchEvent(new ActorEvent(ActorEvent.ACTOR_SELECTED, __selectedActor));
-			
-			
+			Subscriber.issue(new ActorEvent(ActorEvent.ACTOR_SELECTED, __selectedActor));
+		
 			//Based on the active tool, we want to take action 
 			switch (__activeTool) {
-				case ToolStatics.TOOL_SELECT_BRUSHES:
-					handleBrushesMD();
+				case ToolStatics.TOOL_MOVE:
+					handleMove();
+				break;
+				case ToolStatics.TOOL_SCALE:
+					handleScale();
 				break;
 			}
 
@@ -200,7 +203,7 @@ package com.valkryie.editor.environment {
 		protected override function onMouseUp(e:Event):void {
 			calculatePickingPoint();
 			determinePickedActor(ACTUAL_PICKED_ACTOR);
-			dispatchEvent(new ActorEvent(ActorEvent.ACTOR_SELECTED, __selectedActor));
+			//dispatchEvent(new ActorEvent(ActorEvent.ACTOR_SELECTED, __selectedActor));
 			
 			__drawingBrush = false;
 			__draggingBrush = false;
@@ -209,7 +212,7 @@ package com.valkryie.editor.environment {
 		}
 		
 		
-		protected function handleBrushesMD():void {
+		protected function handleMove():void {
 			
 			snapToGrid(__pickingPoint);
 			
@@ -218,17 +221,22 @@ package com.valkryie.editor.environment {
 				
 				__activeBrush = (__selectedActor as AbstractBrush);
 				
-				switch (__activeSubTool) {
-					case ToolStatics.TOOL_MOVE:
-						__draggingBrush = true;
-						__brushDragOffsetX = __activeBrush.dataVO["isoX"] - __pickingPoint.x;
-						__brushDragOffsetY = __activeBrush.dataVO["isoY"] - __pickingPoint.y;
-					break;
-					case ToolStatics.TOOL_SCALE:
-						__scalingBrush = true;
-					break;
-				}
+				__draggingBrush = true;
+				__brushDragOffsetX = __activeBrush.dataVO["isoX"] - __pickingPoint.x;
+				__brushDragOffsetY = __activeBrush.dataVO["isoY"] - __pickingPoint.y;
+			}
+			this.stage.addEventListener(Event.MOUSE_LEAVE, onMouseUp);
+		}
+		
+		protected function handleScale():void {
+			snapToGrid(__pickingPoint);
+			
+			//If we selected a Brush
+			if (__selectedActor is AbstractBrush) {
 				
+				__activeBrush = (__selectedActor as AbstractBrush);
+				
+				__scalingBrush = true;
 			}
 			this.stage.addEventListener(Event.MOUSE_LEAVE, onMouseUp);
 		}
@@ -244,13 +252,11 @@ package com.valkryie.editor.environment {
 			else {
 				__brushMap.addChild(_brush.display);
 			}
-			_brush.activated = true;
 		}
 		
 		protected function removeBrush(_brush:AbstractBrush):void {
 			var index:int = __brushes.indexOf(_brush);
 			if (index != -1) {
-				_brush.activated = false;
 				__brushMap.removeChild(_brush.display);
 				__brushes.splice(index, 1);
 			}
@@ -287,43 +293,20 @@ package com.valkryie.editor.environment {
 			super.onTick(e);
 		}
 		
-		public function get activeTool() : String {
-			return __activeTool;
+		protected function onToolChange(e:EditorToolSelectEvent):void {
+			cleanActiveTool();
+			__activeTool = e.tool;
+			setupActiveTool();
 		}
 		
-		public function set activeTool(_activeTool : String) : void {
-			__activeTool = _activeTool;
+		protected function cleanActiveTool():void {
+			//based on the tool, clean it up
 		}
 		
-		public function get activeSubTool() : String {
-			return __activeSubTool;
+		protected function setupActiveTool():void {
+			//based on the tool, setup the tool
 		}
 		
-		public function set activeSubTool(_activeSubTool : String) : void {
-			__activeSubTool = _activeSubTool;
-			handleTools();
-		}
-		
-		protected function handleTools():void {
-			if (__activeTool == ToolStatics.TOOL_SELECT_BRUSHES) {
-				setBrushActivation(true);
-			}
-			else {
-				setBrushActivation(false);
-			}
-		}
-		
-		protected function setBrushActivation(_bool:Boolean):void {
-			
-			if (__brushesActivated != _bool) {
-				__brushesActivated = _bool;
-				var brush:AbstractBrush;
-				for (var i:int = 0; i<__brushes.length; i++) {
-					brush = __brushes[i];
-					brush.activated = _bool;
-				}
-			}
-		}
 		
 		
 		public function createAdditiveBrush():void {

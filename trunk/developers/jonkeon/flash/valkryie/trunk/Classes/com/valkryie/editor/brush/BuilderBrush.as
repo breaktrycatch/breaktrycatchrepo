@@ -21,7 +21,7 @@ package com.valkryie.editor.brush {
 			__selectedColorTransform = new ColorTransform();
 			__selectedColorTransform.color = 0xAA0000;
 			
-			__normalColorTransform = this.transform.colorTransform;
+			__normalColorTransform = __brushDisplay.transform.colorTransform;
 		}
 
 		override protected function completeConstruction() : void {
@@ -29,12 +29,7 @@ package com.valkryie.editor.brush {
 			
 			__stringName = "BUILDER BRUSH";
 			
-			__dataVO["isoX"] = 0;
-			__dataVO["isoY"] = 0;
-			__dataVO["isoDepth"] = 256;
-			__dataVO["isoWidth"] = 256;
-			__dataVO["subDivisionsX"] = 1;
-			__dataVO["subDivisionsY"] = 1;
+			
 		}
 	}
 }
