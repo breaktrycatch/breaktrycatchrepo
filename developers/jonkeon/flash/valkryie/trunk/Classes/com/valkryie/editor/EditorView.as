@@ -1,13 +1,10 @@
 package com.valkryie.editor {
-	import com.valkryie.actor.AbstractActor;
-	import com.valkryie.actor.events.ActorEvent;
 	import com.valkryie.data.vo.GridVO;
 	import com.valkryie.data.vo.LevelVO;
 	import com.valkryie.editor.elements.EditorPanel;
+	import com.valkryie.editor.elements.EditorTopPanel;
 	import com.valkryie.editor.environment.EditorEnvironment;
 	import com.valkryie.editor.events.EditorActionEvent;
-	import com.valkryie.editor.events.EditorToolSelectEvent;
-	import com.valkryie.editor.statics.ToolStatics;
 	import com.valkryie.manager.game.GameStateManager;
 	import com.valkryie.view.BaseView;
 
@@ -20,11 +17,10 @@ package com.valkryie.editor {
 		public var editorEnvironment:EditorEnvironment;
 		//The UI Panel
 		public var editorPanel:EditorPanel;
+		//The Top Panel
+		public var topPanel:EditorTopPanel;
 		
 		
-		protected var __activeTool:String;
-		protected var __activeSubTool:String;
-		protected var __selectedActor:AbstractActor;
 		
 		public function EditorView() {
 			super();
@@ -33,17 +29,7 @@ package com.valkryie.editor {
 
 		override protected function completeConstruction() : void {
 			super.completeConstruction();
-			
-			__activeTool = ToolStatics.TOOL_SELECT_BRUSHES;
-			__activeSubTool = ToolStatics.TOOL_MOVE;
-			editorPanel.activeTool = __activeTool;
-			editorPanel.activeSubTool = __activeSubTool;
-			editorEnvironment.activeTool = __activeTool;
-			editorEnvironment.activeSubTool = __activeSubTool;
-			
-			editorPanel.addEventListener(EditorToolSelectEvent.TOOL_CHANGE, onToolChange);
 			editorPanel.addEventListener(EditorActionEvent.CREATE_ADDITIVE_BRUSH, onCreateAdditiveBrush);
-			editorEnvironment.addEventListener(ActorEvent.ACTOR_SELECTED, onActorSelected);
 		}
 
 		override protected function onAdded() : void {
@@ -70,31 +56,8 @@ package com.valkryie.editor {
 		}
 		
 		
-		protected function onToolChange(e:EditorToolSelectEvent):void {
-			dtrace("TOOL Change " + e.tool, e.subTool);
-			if (__activeTool != e.tool) {
-				__activeTool = e.tool;
-				editorEnvironment.activeTool = __activeTool;
-			}
-			if (__activeSubTool != e.subTool) {
-				__activeSubTool = e.subTool;
-				editorEnvironment.activeSubTool = __activeSubTool;
-			}
-		}
-		
 		protected function onCreateAdditiveBrush(e:EditorActionEvent):void {
 			editorEnvironment.createAdditiveBrush();
-		}
-		
-		protected function onActorSelected(e:ActorEvent):void {
-			//dtrace("Actor was selected " + e.actor);
-			__selectedActor = e.actor;
-			if (__selectedActor != null) {
-				editorPanel.updateProperties(__selectedActor);
-			}
-			else {
-				editorPanel.updateProperties(null);
-			}
 		}
 		
 		override public function destroy() : void {

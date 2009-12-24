@@ -1,7 +1,9 @@
 package com.valkryie.editor.elements.editor_panel {
 	import com.fuelindustries.controls.Label;
 	import com.fuelindustries.core.FuelUI;
+	import com.module_subscriber.core.Subscriber;
 	import com.valkryie.actor.AbstractActor;
+	import com.valkryie.actor.events.ActorEvent;
 	import com.valkryie.editor.elements.editor_panel.properties.controls.PropertiesList;
 
 	/**
@@ -20,6 +22,8 @@ package com.valkryie.editor.elements.editor_panel {
 
 		override protected function completeConstruction() : void {
 			super.completeConstruction();
+			selected_mc.text = "NO ACTOR SELECTED";
+			
 		}
 		
 		public function updateProperties(_actor:AbstractActor):void {
@@ -31,6 +35,11 @@ package com.valkryie.editor.elements.editor_panel {
 				propertyList_mc.dataProvider = _actor.dataVO.properties;
 				selected_mc.text = _actor.stringName;
 			}
+		}
+
+		override public function destroy() : void {
+			
+			super.destroy();
 		}
 	}
 }

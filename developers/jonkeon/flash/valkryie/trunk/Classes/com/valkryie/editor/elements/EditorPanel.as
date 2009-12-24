@@ -1,7 +1,9 @@
 package com.valkryie.editor.elements {
 	import com.fuelindustries.controls.buttons.SimpleButton;
 	import com.fuelindustries.core.AssetProxy;
+	import com.module_subscriber.core.Subscriber;
 	import com.valkryie.actor.AbstractActor;
+	import com.valkryie.actor.events.ActorEvent;
 	import com.valkryie.data.vo.GridVO;
 	import com.valkryie.editor.elements.editor_panel.PropertiesPane;
 	import com.valkryie.editor.elements.editor_panel.ToolsPane;
@@ -31,28 +33,30 @@ package com.valkryie.editor.elements {
 
 		override protected function completeConstruction() : void {
 			super.completeConstruction();
+			Subscriber.subscribe(ActorEvent.ACTOR_SELECTED, onActorSelected);
 			addButton_mc.addEventListener(MouseEvent.CLICK, onAddBrushToWorld);
 		}
 		
+		protected function onActorSelected(_event:ActorEvent):void {
+			var actor:AbstractActor = _event.actor;
+			propertiesPane_mc.updateProperties(actor);
+			toolsPane_mc.updateTools(actor);
+		}
+		
+		
 		public function setGridData(_gridData:GridVO):void {
 			gridTools_mc.gridData = _gridData;
-		}
-
-		
-		public function updateProperties(_actor:AbstractActor):void {
-			propertiesPane_mc.updateProperties(_actor);
 		}
 		
 		protected function onAddBrushToWorld(e:MouseEvent):void {
 			this.dispatchEvent(new EditorActionEvent(EditorActionEvent.CREATE_ADDITIVE_BRUSH));
 		}
 		
-		public function set activeTool(_activeTool : String) : void {
-			toolsPane_mc.activeTool = _activeTool;
-		}
-		
-		public function set activeSubTool(_activeSubTool : String) : void {
-			toolsPane_mc.activeSubTool = _activeSubTool;
+
+		override public function destroy() : void {
+			
+			Subscriber.unsubscribe(ActorEvent.ACTOR_SELECTED, onActorSelected);
+			super.destroy();
 		}
 	}
 }

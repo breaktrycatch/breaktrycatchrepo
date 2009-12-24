@@ -81,6 +81,12 @@ package com.valkryie.editor.elements.editor_panel.properties.controls {
 					right_btn.visible = true;
 					value_txt.type = TextFieldType.DYNAMIC;
 				break;
+				
+				case PropertyStatics.TYPE_READ_ONLY:
+					left_btn.visible = false;
+					right_btn.visible = false;
+					value_txt.type = TextFieldType.DYNAMIC;
+				break;
 			}
 		
 		
