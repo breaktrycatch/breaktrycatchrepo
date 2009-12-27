@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/halo" 
+				width="100%" 
+				height="20">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import com.commitmon.model.ProjectVO;
+			import com.commitmon.view.event.ProjectListEvent;
+			
+			import flash.events.MouseEvent;
+			
+			private var _vo : ProjectVO;
+			
+			protected function onRemoveClicked(event:MouseEvent):void
+			{				
+				dispatchListEvent(ProjectListEvent.DELETE_ITEM);
+			}
+			
+			protected function onEditClicked(event:MouseEvent):void
+			{
+				dispatchListEvent(ProjectListEvent.EDIT_ITEM);
+			}
+			
+			protected function onItemClicked(event:MouseEvent):void
+			{
+				dispatchListEvent(ProjectListEvent.VIEW_ITEM);
+			}
+			
+			private function dispatchListEvent(type:String):void
+			{
+				var evt : ProjectListEvent = new ProjectListEvent(type, true);
+				evt.selectedProject = _vo;
+				dispatchEvent(evt);
+			}
+			
+			override public function set data(obj : Object):void
+			{
+				super.data = obj;
+				_vo = obj as ProjectVO;
+				
+				if(obj)
+				{
+					projectName.text = data.name;
+				}
+				else
+				{
+					clear();
+				}
+			}
+			
+			private function clear() : void
+			{
+				projectName.text = "";
+			}
+			
+		]]>
+	</fx:Script>
+	<s:states>
+		<s:State name="normal"/>
+		<s:State name="hovered"/>
+	</s:states>
+	<s:Rect width="100%" height="100%">
+		<s:fill>
+			<s:SolidColor color.hovered="#212121"/>
+		</s:fill>
+	</s:Rect>
+	<s:Graphic>
+		<s:Line width="100%">
+			<s:stroke>
+				<s:SolidColorStroke weight="1" color="#000000" color.hovered="#ff00ff"/>
+			</s:stroke>
+		</s:Line>
+	</s:Graphic>
+	<s:HGroup rollOver="currentState='hovered';" rollOut="currentState='normal';" styleName="cell-out" styleName.hovered="cell-over" x="0" y="0" width="100%" height="100%" paddingLeft="0" paddingRight="0" gap="0">
+		<s:Button id="remove" click="onRemoveClicked(event)" styleName="close-button" label="X" width="30" height="100%" label.normal="X"/>
+		<s:Button id="edit" click="onEditClicked(event)" styleName="edit-button" label="X" width="30" height="100%"/>
+		<s:HGroup click="onItemClicked(event)" height="100%" width="100%" paddingLeft="5">
+			<s:Label id="projectName" x="0" y="10" styleName="label-content-text" height="100%" verticalAlign="middle"/>
+		</s:HGroup>
+	</s:HGroup>
+</s:ItemRenderer>

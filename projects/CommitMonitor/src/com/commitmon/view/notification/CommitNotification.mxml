@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<local:BaseNotification xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		  xmlns:s="library://ns.adobe.com/flex/spark" 
+		  xmlns:mx="library://ns.adobe.com/flex/halo" 
+		  xmlns:local="com.commitmon.view.notification.*"
+		 click="onNotificationClicked(event)">
+	<fx:Script>
+		<![CDATA[
+			import com.commitmon.model.CommitMonitorLogEntry;
+			import com.commitmon.model.ProjectVO;
+			import com.commitmon.util.DateUtils;
+			import com.commitmon.util.PlatformUtil;
+			import com.fuelindustries.util.NumberUtil;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.ResizeEvent;
+			
+			private var _entry : CommitMonitorLogEntry;
+			
+			override protected function setData(data : ArrayCollection) : void
+			{
+				_entry = data[0];
+				
+				numCommits.text = data.length.toString();
+				commitText.text = (data.length > 1) ? ("New Commits") : ("New Commit");
+				revisionContent.text = NumberUtil.commaDelimitInt(_entry.revision);
+				authorContent.text = _entry.author;
+				message.text = _entry.message;	
+				date.text = DateUtils.formatDate(_entry.date);
+			}
+			
+			override protected function setProject(vo : ProjectVO) : void
+			{
+				projectName.text = vo.name;
+			}
+			
+			protected function onMainGroupResize(event:ResizeEvent) : void
+			{
+				var before : Number = this.height;
+				
+				this.height = border.height = mainGroup.getExplicitOrMeasuredHeight() + 5;
+				rotateInEffect.transformY = this.height / 2;
+				
+				// we need to calculate the height offset and move the window up for it to be positioned properly.
+				// this is because we cant resize until we've initialized, and the initial calculation is done at creation.
+				if(PlatformUtil.USER_OS != PlatformUtil.MAC)
+				{
+					nativeWindow.y -= (height - before);
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	<s:Border id="border" autoLayout="true" styleName="border" borderWeight="2" cornerRadius="5" height="199" borderStyle="inset" borderAlpha=".5" width="100%">
+		<s:HGroup id="mainGroup" verticalAlign="middle" textAlign="center" left="5" top="5" right="5" width="100%" resize="onMainGroupResize(event)">
+			<s:VGroup width="100%" height="100%" paddingLeft="0" paddingRight="0" paddingTop="3" paddingBottom="0">
+				<s:SkinnableContainer width="100%">
+					<s:layout>
+						<s:HorizontalLayout />
+					</s:layout>	
+					<s:Label id="projectName" textAlign="left" styleName="large-label-content-text" left="5" top="5" bottom="49"/>
+				</s:SkinnableContainer>
+				<s:HGroup width="100%" textAlign="right" height="12" gap="0">
+					<s:SkinnableContainer width="100%">
+						<s:layout>
+							<s:HorizontalLayout />
+						</s:layout>
+						<s:Label id="numCommits" text="1" textAlign="left" styleName="label-text emphasis" left="5" top="5" bottom="49"/>
+						<s:Label id="commitText" text="New Commit" textAlign="left" styleName="label-text" left="5" top="5" bottom="49"/>
+					</s:SkinnableContainer>
+					<s:SkinnableContainer>
+						<s:layout>
+							<s:VerticalLayout horizontalAlign="right"/>
+						</s:layout>	
+						<s:Label id="date" text="Date" right="15" top="5" styleName="label-deemphasized-text" textAlign="right" paddingRight="5"/>
+					</s:SkinnableContainer>
+				</s:HGroup>
+				<s:Label id="message" right="7" left="5" bottom="3" styleName="label-content-text" textAlign="left" text="1" width="100%"/>
+				<s:Group width="200" height="20">
+					<s:SkinnableContainer width="100%" height="12" textAlign="right">
+						<s:layout>
+							<s:HorizontalLayout/>
+						</s:layout>	
+						<s:Label id="revision" styleName="label-text" text="Revision:" width="100%"/>
+						<s:Label id="revisionContent" styleName="label-content-text"  paddingRight="5"/>
+					</s:SkinnableContainer>
+					<s:SkinnableContainer right="0" left="0">
+						<s:layout>
+							<s:HorizontalLayout />
+						</s:layout>	
+						<s:Label text="Author:" id="author" styleName="label-text"/>
+						<s:Label id="authorContent" styleName="label-content-text"/>
+					</s:SkinnableContainer>
+				</s:Group>
+			</s:VGroup>
+		</s:HGroup>
+	</s:Border>
+</local:BaseNotification>

@@ -1,0 +1,526 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					   xmlns:s="library://ns.adobe.com/flex/spark" 
+					   xmlns:mx="library://ns.adobe.com/flex/halo" 
+					   xmlns:notification="com.commitmon.view.notification.*"
+					   xmlns:component="com.commitmon.view.component.*" 
+					   xmlns:ui="de.websector.utils.updater.ui.*"
+					   xmlns:ws="de.websector.utils.updater.*"
+					   xmlns:view="com.commitmon.view.*"
+					   preinitialize="onPreinitialize(event)"
+					   initialize="onInitializeApplication(event)" 
+					   creationComplete="onCheckForUpdate(event)"
+					   close="onApplicationClose(event)"
+					   closing="onApplicationClosing(event)"
+					   addedToStage="onAddedToStage(event)"
+					   width="330" height="600" 
+					   minWidth="330" minHeight="300" 
+					   name="Commit Monitor"
+					   color="#000000"
+					   backgroundAlpha="0"
+					   showStatusBar="false"
+					   styleName="background-color">
+	<fx:Style>
+		@namespace s "library://ns.adobe.com/flex/spark";
+		@namespace mx "library://ns.adobe.com/flex/halo";
+		@namespace view "com.commitmon.view.*";
+		@namespace renderer "com.commitmon.view.renderer.*";
+		@namespace firefox "de.websector.utils.updater.ui.skins.firefox.*";
+		
+		.label-text {
+			color:#87AAC3;
+			font-size:10px;
+		}
+		
+		.background-color {
+			backgroundColor:#161616;
+			content-background-color:#161616;
+			base-color:#161616;
+		}
+		
+		.label-content-text {
+			color:#FFFADC;
+			font-size:10px;
+		}
+		
+		.large-label-content-text {
+			color:#FFFADC;
+			font-size:12px;	
+		}
+		
+		.label-deemphasized-text {
+			color:#87AAC3;
+			font-size:10px;
+		}
+		
+		.emphasis {
+			font-weight:bold;	
+		}
+		
+		.header-text {
+			color:#87AAC3;
+			font-size:12px;
+		}
+		
+		.cell-out {
+			background-color:#121212;
+		}
+		
+		.cell-over {
+			background-color:#212121;
+		}
+		
+		.border {
+			border-color:#D4FAD3;
+			background-color:#161616; 	
+		}
+		
+		.close-button {
+			icon:Embed("assets/close_icon.png");
+		}
+		
+		.minimize-button {
+			icon:Embed("assets/minimize_icon.png");
+		}
+		
+		.edit-button {
+			icon:Embed("assets/edit_icon.png");
+		}
+		
+		s|Button {
+			skin-class: ClassReference("com.commitmon.skins.SolidColorButton");
+			color:#D4FAD3;
+			corner-radius:3;
+			border-alpha:0;
+			border-weight:2;
+			over-color:#363636;
+			down-color:#87AAC3;
+			background-color:#262626;
+			
+		}
+		
+		s|TextInput {
+			base-color:#262626;	
+			background-color:#262626;
+		}
+		
+		mx|Alert {
+			accentColor: red;
+			titleStyleName: "alertTitle";
+			messageStyleName: "alertMessage";
+			buttonStyleName: "alertButton";
+			dropShadowEnabled: true;
+			shadowDistance: 5;
+			shadowDirection: right;
+			cornerRadius: 0;
+			background-color:#161616;
+			embedFonts: true;
+		}
+		
+		renderer|CommitListRenderer {
+			highlight-color:#262626;
+			background-color:#161616;
+			border-color:#D4FAD3;
+		}
+		
+		.alertTitle {
+			color:#87AAC3;
+			font-size:16px;
+		}
+		
+		.alertMessage {
+			color:#FFFADC;
+			font-size:10px;
+		}
+		
+		.alertButton {
+			skin: ClassReference("com.commitmon.skins.SolidColorButton");
+		}
+		
+		firefox|AppUpdaterUIFirefoxSkin {
+			base-color:#000000;
+			update-avaliable-background:#35546A;
+			install-update-background:#99FF00;
+			download-progress-background:#262626;
+			no-update-avaliable-background:#FFE13E;
+			error-background:#FF3377;
+			stroke-color:#87AAC3;
+		}
+		
+		firefox|ProgressBarTrackSkin {
+			color:#161616;
+		}
+		
+		firefox|ProgressBarSkin {
+			color:#87AAC3;
+		}
+		
+		renderer|ModifiedItemRenderer, view|CommitDetailsNavigatorContent {
+			added:#214530;
+			deleted:#3A1B1B;
+			replaced:#253A49;
+			modified:#534324;
+		}
+		
+	</fx:Style>
+	<fx:Script>
+		<![CDATA[
+			import com.commitmon.controller.event.NotificationEvent;
+			import com.commitmon.controller.event.NotificationProcessEvent;
+			import com.commitmon.controller.notification.NotificationCore;
+			import com.commitmon.controller.notification.NotificationDispatcher;
+			import com.commitmon.model.ApplicationState;
+			import com.commitmon.model.ChangedItemEntry;
+			import com.commitmon.model.ChangedItemKind;
+			import com.commitmon.model.CommitMonitorLogEntry;
+			import com.commitmon.model.ProjectVO;
+			import com.commitmon.util.PlatformUtil;
+			import com.commitmon.util.WindowsTaskbar;
+			import com.commitmon.view.event.ViewChangeEvent;
+			import com.fuelindustries.svn.core.SVNLogEntryPath;
+			import com.fuelindustries.svn.core.io.svn.SVNNodeKind;
+			import com.fuelindustries.util.ArrayExtensions;
+			
+			import de.websector.utils.updater.ui.skins.firefox.AppUpdaterUIFirefoxSkin;
+			
+			import flash.events.Event;
+			import flash.net.URLLoader;
+			
+			import mx.binding.utils.ChangeWatcher;
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.core.BitmapAsset;
+			import mx.events.FlexEvent;
+			import mx.events.IndexChangedEvent;
+			import mx.events.PropertyChangeEvent;
+			
+			private var _notificationCore : NotificationCore;
+			private var _nameWatcher : ChangeWatcher;
+			private var _taskbar : WindowsTaskbar;
+			
+			private var appUpdater : ApplicationUpdaterUI;
+			private var updateXMLURL : String = "http://www.breaktrycatch.com/files/commitmon/update.xml"; // Server-side XML file describing update
+			
+			public static const APPLICATION_NAME : String = "Commit Monitor";
+			
+			[Embed(source="assets/tray_icon.png")]
+			[Bindable]
+			private var trayIconClass:Class;
+			
+			private function onPreinitialize(event : FlexEvent) : void
+			{
+				ApplicationState.load();
+				
+				nativeWindow.x = ApplicationState.getInstance().aplicationPosX;
+				nativeWindow.y = ApplicationState.getInstance().aplicationPosY;
+				height = ApplicationState.getInstance().applicationHeight;
+				width = ApplicationState.getInstance().applicationWidth;
+			}
+			
+			protected function onCheckForUpdate(event:FlexEvent):void
+			{
+				var loader:URLLoader = new URLLoader();
+				loader.addEventListener(Event.COMPLETE, checkForUpdate);
+				loader.addEventListener(IOErrorEvent.IO_ERROR, onIOError); // Just in case we can't read the update.xml
+				loader.load(new URLRequest(updateXMLURL));
+			}
+			
+			private function checkForUpdate(event:Event):void 
+			{
+				var myXML:XML = new XML(event.target.data);
+				namespace items = "http://ns.adobe.com/air/framework/update/description/1.0";
+				use namespace items;
+				var forceUpdate:String = myXML.force;
+				
+				updater.useWindow = false;
+				updater.setStyle('skinClass', de.websector.utils.updater.ui.skins.firefox.AppUpdaterUIFirefoxSkin);
+				updater.configurationXMLURL = updateXMLURL;
+				updater.checkNow();
+				
+			}
+
+			private function onIOError(event:IOErrorEvent):void
+			{
+				trace("********* Error loading update.xml");
+			}
+			
+			private function onError(event:ErrorEvent):void 
+			{
+				Alert.show(event.toString());
+			}
+			
+			private function onInitializeApplication(event : FlexEvent):void
+			{
+				mainViewStack.addEventListener(ViewChangeEvent.CHANGE_VIEW, onChangeView);
+				header.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDrag);
+				minimizeBtn.addEventListener(MouseEvent.CLICK, onMinimize);
+				closeBtn.addEventListener(MouseEvent.CLICK, onClose);
+				projectsBtn.addEventListener(MouseEvent.CLICK, onProjectListClicked);
+				currentProjectBtn.addEventListener(MouseEvent.CLICK, onCurrentProjectClicked);
+				
+				var settings : ApplicationState = ApplicationState.getInstance();				
+				ChangeWatcher.watch(settings, 'currentProject', onCurrentProjectUpdated);
+				updateCurrentProject(settings.currentProject);
+				
+				_notificationCore = new NotificationCore(settings);
+				_notificationCore.addEventListener(NotificationProcessEvent.REFRESH_STARTED, onRefreshStarted);
+				_notificationCore.addEventListener(NotificationProcessEvent.REFRESH_COMPLETE, onRefreshComplete);
+								
+				// listen to clicks on notifications
+				NotificationDispatcher.getInstance().addEventListener(ViewChangeEvent.CHANGE_VIEW, onChangeView);
+				NotificationDispatcher.getInstance().addEventListener(NotificationEvent.REVISIONS_RECIEVED, onRevisionsRecieved);
+				notificationBarGroup.addEventListener(ViewChangeEvent.CHANGE_VIEW, onChangeView);
+				
+				projectsBtn.enabled = true;
+				currentProjectBtn.enabled = false;
+				
+				if(!ApplicationState.getInstance().currentProject)
+				{
+					mainViewStack.selectedIndex = 2;
+				}
+				
+				if(PlatformUtil.USER_OS == PlatformUtil.WINDOWS)
+				{
+					_taskbar = new WindowsTaskbar(this.nativeApplication, new trayIconClass() as BitmapAsset);
+					_taskbar.addEventListener(NotificationEvent.REFRESH, onRefresh);
+				}
+			}
+			
+			protected function onViewStackIndexUpdated(event:IndexChangedEvent):void
+			{
+				switch(event.newIndex)
+				{
+					case 0:
+						projectsBtn.enabled = true;
+						currentProjectBtn.enabled = false;
+						break;
+					case 2:
+						projectsBtn.enabled = false;
+						currentProjectBtn.enabled = true;
+						break;
+					default:
+						projectsBtn.enabled = true;
+						currentProjectBtn.enabled = true;
+						break;
+				}
+			}
+			
+			private function onRefresh(event:NotificationEvent):void
+			{
+				checkForUpdates();
+			}
+			
+			private function onRefreshStarted(event:NotificationProcessEvent):void
+			{
+				throbber.visible = true;
+			}
+			
+			private function onRefreshComplete(event:NotificationProcessEvent):void
+			{
+				throbber.visible = false;
+			}
+			
+			private function onRevisionsRecieved(event:NotificationEvent):void
+			{
+				if(NativeApplication.supportsDockIcon)
+				{
+					nativeWindow.notifyUser(NotificationType.INFORMATIONAL);
+				}
+			}
+			
+			private function updateCurrentProject(vo:ProjectVO):void
+			{
+				if(_nameWatcher)
+				{
+					_nameWatcher.unwatch();
+				}
+				
+				if(vo)
+				{
+					_nameWatcher = ChangeWatcher.watch(vo, 'name', function(event:PropertyChangeEvent):void {
+						currentProjectBtn.label = event.newValue.toString();
+					});
+					currentProjectBtn.visible = true;
+					currentProjectBtn.label = vo.name;
+				}
+				else
+				{
+					currentProjectBtn.visible = false;
+				}
+			}
+			
+			import com.commitmon.view.AbstractNavigatorContent;
+			private function onChangeView(event:ViewChangeEvent):void
+			{
+				stage.nativeWindow.orderToFront();
+				
+				mainViewStack.selectedIndex = event.selectedView;
+				
+				//import com.commitmon.view.AbstractNavigatorContent
+				var cast : AbstractNavigatorContent = mainViewStack.selectedChild as AbstractNavigatorContent;
+				cast.data = event.data;
+			}
+			
+			protected function onProjectListClicked(event:MouseEvent):void
+			{
+				mainViewStack.selectedIndex = 2;
+			}
+			
+			protected function onCurrentProjectClicked(event:MouseEvent):void
+			{
+				mainViewStack.selectedIndex = 0;
+			}
+			
+			protected function onAddedToStage(event:Event):void
+			{
+				stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyDown);
+			}
+			
+			private function onKeyDown(event:KeyboardEvent):void
+			{
+				if(event.keyCode == Keyboard.F1)
+				{
+					createNotification();
+				}
+				else if(event.keyCode == Keyboard.F5)
+				{
+					checkForUpdates();
+				}
+			}
+			
+			private function checkForUpdates():void
+			{
+				ApplicationState.getInstance().projects.source.forEach(function(item:ProjectVO,...args):void{
+					_notificationCore.checkForUpdates(item);
+				});
+			}
+			
+			private function onCurrentProjectUpdated(event:PropertyChangeEvent):void
+			{
+				updateCurrentProject(event.newValue as ProjectVO);
+			}
+			
+			private function createNotification():void
+			{
+				ApplicationState.getInstance().currentProject.populate(new ArrayCollection([createDebugLogEntry()]));
+			}
+			
+			private function createDebugLogEntry() : CommitMonitorLogEntry
+			{
+				var data : CommitMonitorLogEntry = new CommitMonitorLogEntry();
+				data.author = "paul";
+				data.date = new Date();
+				data.message = ArrayExtensions.aggregate(new Array(150), "", function(seed : String, value : String):String {
+					return seed + String.fromCharCode(Math.round(41 + Math.random() * 26));
+				});
+				data.revision = Math.round(Math.random()*9999);
+				
+				data.changedItems = ArrayExtensions.aggregate(new Array(150), new Dictionary(), function(seed : Dictionary, value : *):void
+				{
+					var pathName : String = ArrayExtensions.aggregate(new Array(45), "", function(seed : String, value : String):String {
+						return seed + String.fromCharCode(Math.round(41 + Math.random() * 26));
+					});
+					
+					var path : ChangedItemEntry = new ChangedItemEntry();
+					path.copyPath = "copyPath";
+					path.copyRevision = Math.round(Math.random()*9999);
+					path.nodeKind = new ChangedItemKind(SVNNodeKind.FILE);
+					path.type = ArrayExtensions.randomElement([SVNLogEntryPath.TYPE_ADDED, SVNLogEntryPath.TYPE_DELETED, SVNLogEntryPath.TYPE_MODIFIED, SVNLogEntryPath.TYPE_REPLACED]);
+					path.path = pathName;
+					
+					//var path : SVNLogEntryPath = new SVNLogEntryPath(pathName, ".as", "copyPath", Math.round(Math.random()*9999), new SVNNodeKind(SVNNodeKind.FILE));
+					seed[pathName] = path;
+				});
+				return data;
+			}
+			
+			private function onMouseDrag(e : MouseEvent):void
+			{
+				stage.nativeWindow.startMove();
+			}
+			
+			private function onMinimize(e : MouseEvent):void
+			{
+				// in Windows we minimize to the system tray
+				if(PlatformUtil.USER_OS == PlatformUtil.WINDOWS)
+				{
+					_taskbar.dock();
+				}
+				else
+				{
+					minimize();
+				}
+			}
+			
+			
+			private function onStartResize(e : MouseEvent):void
+			{
+				startResize(NativeWindowResize.BOTTOM_RIGHT);
+			}
+			
+			private function onClose(e : MouseEvent):void
+			{
+				close();
+			}
+			
+			protected function onApplicationClosing(event:Event):void
+			{
+				ApplicationState.getInstance().aplicationPosX = nativeWindow.x;
+				ApplicationState.getInstance().aplicationPosY = nativeWindow.y;
+				ApplicationState.getInstance().applicationHeight = height;
+				ApplicationState.getInstance().applicationWidth = width;
+			}
+
+			protected function onApplicationClose(event:Event):void
+			{
+				NotificationDispatcher.getInstance().closeAll();
+				ApplicationState.getInstance().setAllRevisionsViewed();
+				ApplicationState.save();
+			}
+
+
+
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<s:Parallel id="showViewEffect">
+			<s:Move target="{mainViewStack}" duration="500" xFrom="{-width}" xTo="0"/>
+			<!--<s:Rotate3D target="{mainViewStack}" duration="500" angleYFrom="-90" angleYTo="0" autoCenterTransform="true"/>
+			<s:Fade target="{mainViewStack}" duration="500" alphaFrom="0" alphaTo="1"/> -->
+		</s:Parallel>
+		<s:Parallel id="hideViewEffect">
+			<s:Move target="{mainViewStack}" duration="500" xFrom="{mainViewStack.x}" xTo="{width}"/>
+			<!--<s:Rotate3D target="{mainViewStack}" duration="500" angleYFrom="0" angleYTo="-90" autoCenterTransform="true"/>
+			<s:Fade target="{mainViewStack}" duration="500" alphaFrom="1" alphaTo="0"/>-->
+		</s:Parallel>
+	</fx:Declarations>
+	<s:Border id="border" autoLayout="true" borderColor="#D4FAD3" backgroundColor="#161616" borderWeight="2" cornerRadius="5" height="100%" borderStyle="inset" borderAlpha=".5" width="100%">
+		<mx:VBox right="0" left="0" bottom="0" top="0" verticalGap="0">
+			<s:Group width="100%" height="25" id="header">
+				<s:Label text="CommitMonitor" styleName="header-text" height="25" verticalAlign="middle" textAlign="center" right="0" left="0"/>
+				<s:Button styleName="minimize-button" width="33" height="25" id="minimizeBtn" y="0" right="33"/>
+				<s:Button styleName="close-button" width="33" height="25" id="closeBtn" textAlign="center" y="0" right="0"/>
+			</s:Group>
+			<s:Group width="100%" height="25" textAlign="right">
+				<s:Button id="projectsBtn" label="Projects" height="25" left="2"/>
+				<s:Button id="currentProjectBtn" height="25" x="70" y="0"/>
+				<s:VGroup width="100%" horizontalAlign="right" paddingRight="20" paddingTop="3">
+					<component:Throbber id="throbber" visible="false"/>
+				</s:VGroup>
+			</s:Group>
+			<ui:ApplicationUpdaterUI id="updater" width="100%"
+				skinClass="de.websector.utils.updater.ui.skins.firefox.AppUpdaterUIFirefoxSkin"
+				invisibleCheck="true" useWindow="false" />
+			<notification:NotificationBarGroup id="notificationBarGroup" width="100%"/>	
+			
+			<component:CustomViewStack change="onViewStackIndexUpdated(event)" cornerRadius="0" borderVisible="true" id="mainViewStack" width="100%" height="100%">
+				<view:ProjectNavigatorContent label="Project Navigator" showEffect="showViewEffect" hideEffect="hideViewEffect" width="100%" height="100%"/><!--  showEffect="showViewEffect" hideEffect="hideViewEffect"  -->
+				<view:CommitDetailsNavigatorContent label="Commit Details" showEffect="showViewEffect" hideEffect="hideViewEffect" width="100%" height="100%"/>
+				<view:ProjectsListNavigatorContent label="Project List" showEffect="showViewEffect" hideEffect="hideViewEffect" width="100%" height="100%"/>
+			</component:CustomViewStack>
+			<mx:HBox width="100%" horizontalAlign="right" height="15">
+				<s:Button alpha=".4" width="20" x="280" height="15" id="verticalResize" mouseDown="onStartResize(event)" useHandCursor="true" buttonMode="true" mouseChildren="false"/>
+			</mx:HBox>
+		</mx:VBox>
+	</s:Border>
+</s:WindowedApplication>

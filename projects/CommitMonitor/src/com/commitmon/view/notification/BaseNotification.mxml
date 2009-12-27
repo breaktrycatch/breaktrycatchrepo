@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Window xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		  xmlns:s="library://ns.adobe.com/flex/spark" 
+		  xmlns:mx="library://ns.adobe.com/flex/halo"
+		  width="210" 
+		  systemChrome="none"
+		  transparent="true"
+		  backgroundAlpha=".4"
+		  showStatusBar="false"
+		  alwaysInFront="true"
+		  initialize="onNotificationInitialize(event)" 
+		  rollOver="onRolledOver(event)">
+	<fx:Script>
+		<![CDATA[
+			import com.commitmon.model.ProjectVO;
+			import com.commitmon.view.event.ViewChangeEvent;
+			
+			import flash.events.MouseEvent;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			
+			private static const SHOW_DURATION : int = 5000;
+			protected static const MAX_CHARACTERS : int = 200;
+			
+			protected var _data : ArrayCollection;
+			protected var _project : ProjectVO;
+			
+			public function set data(d : ArrayCollection) : void
+			{
+				_data = d;
+				setData(d);
+			}
+			
+			protected function setData(data : ArrayCollection):void
+			{
+				// override!
+			}
+			
+			public function set project(vo : ProjectVO) : void
+			{
+				_project = vo;
+				setProject(vo);
+			}
+			
+			protected function setProject(vo : ProjectVO):void
+			{
+				// override!
+			}
+			
+			protected function truncateLongMessage(message : String) : String
+			{
+				if(message.length > MAX_CHARACTERS)
+				{
+					message = message.substr(0, MAX_CHARACTERS) + "...";
+				}
+				return message;
+			}
+			
+			protected function onNotificationInitialize(event:FlexEvent):void
+			{
+				this.nativeWindow.x = Capabilities.screenResolutionX - this.width - 10;
+				animationSequence.play();
+			}
+						
+			private function onOutComplete() : void
+			{
+				close();
+			}
+			
+			protected function onNotificationClicked(event:MouseEvent):void
+			{
+				var evt : ViewChangeEvent = new ViewChangeEvent(ViewChangeEvent.CHANGE_VIEW);
+				evt.selectedView = ViewChangeEvent.COMMIT_DETAILS;
+				evt.data = _data[0];
+				dispatchEvent(evt);
+				
+				animationSequence.pause();
+				fadeOut.play();
+			}
+			
+
+			protected function onRolledOver(event:MouseEvent):void
+			{
+				addEventListener(MouseEvent.ROLL_OUT, onRolledOut);
+				animationSequence.pause();
+				fadeIn.play();
+			}
+			
+			protected function onRolledOut(event:MouseEvent):void
+			{
+				removeEventListener(MouseEvent.ROLL_OUT, onRolledOut);
+				resumeSequence.play();
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<s:BlurFilter id="blurFilter" blurX="5" blurY="5"/>
+		<mx:Sequence id="animationSequence" effectEnd="onOutComplete()">
+			<s:Parallel>
+				<s:Rotate3D target="{this}" id="rotateInEffect" duration="400" angleXFrom="-90" angleXTo="0" angleYFrom="-90" angleYTo="0" transformX="{width/2}" transformY="{height / 2}"/>
+				<s:Fade target="{this}" duration="500" alphaFrom="0" alphaTo="1"/>
+				<s:Scale target="{this}" duration="500" scaleXFrom="0" scaleXTo="1" scaleYFrom="0" scaleYTo="1"/>
+			</s:Parallel>
+			<mx:Pause duration="{SHOW_DURATION}"/>
+			<s:Fade target="{this}" duration="1000" alphaFrom="{alpha}" alphaTo="0" />
+		</mx:Sequence>
+		<mx:Sequence id="resumeSequence" effectEnd="onOutComplete()">
+			<s:Fade target="{this}" duration="500" alphaFrom="{this.alpha}" alphaTo="1"/>
+			<mx:Pause duration="{SHOW_DURATION}"/>
+			<s:Fade target="{this}" duration="1000" alphaTo="0" />
+		</mx:Sequence>
+		<s:Fade id="fadeIn" target="{this}" duration="500" alphaFrom="{alpha}" alphaTo="1"/>
+		<s:Fade id="fadeOut" target="{this}" duration="500" alphaFrom="{alpha}" alphaTo="0" effectEnd="onOutComplete()"/>
+	</fx:Declarations>
+</s:Window>

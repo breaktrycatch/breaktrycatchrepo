@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<local:AbstractNavigatorContent xmlns:fx="http://ns.adobe.com/mxml/2009" 
+								xmlns:s="library://ns.adobe.com/flex/spark" 
+								xmlns:mx="library://ns.adobe.com/flex/halo"
+								xmlns:component="com.commitmon.view.component.*"
+								xmlns:local="com.commitmon.view.*" 
+								width="100%"
+								height="100%">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import com.commitmon.model.ApplicationState;
+			import com.commitmon.model.ProjectVO;
+			import com.commitmon.view.event.ProjectListEvent;
+			import com.commitmon.view.event.SaveActionEvent;
+			import com.commitmon.view.event.ViewChangeEvent;
+			
+			import flash.events.MouseEvent;
+			
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+						
+			private function onDeleteItem(event:ProjectListEvent):void
+			{
+				var alert : Alert = Alert.show("Are you sure you want to remove " + event.selectedProject.name + "?", "Remove Project", 3, this, function onDeleteConfirmed(evt:CloseEvent):void 
+				{
+					if (evt.detail == Alert.YES)
+					{
+						ApplicationState.getInstance().removeProject(event.selectedProject);
+					}
+				});
+				
+				alert.mx_internal::alertForm.mx_internal::textField.selectable = false;
+			}
+			
+			private function onEditItem(event:ProjectListEvent):void
+			{
+				editPanel.data = event.selectedProject;
+				editPanel.visible = true;
+			}
+			
+			private function onViewItem(event:ProjectListEvent):void
+			{
+				navigateToProjectDetails(event.selectedProject);
+			}
+			
+			protected function onListCreationComplete(event:FlexEvent):void
+			{
+				projectList.dataProvider = ApplicationState.getInstance().projects;
+				projectList.addEventListener(ProjectListEvent.DELETE_ITEM, onDeleteItem);
+				projectList.addEventListener(ProjectListEvent.EDIT_ITEM, onEditItem);
+				projectList.addEventListener(ProjectListEvent.VIEW_ITEM, onViewItem);
+			}
+			
+			protected function onAddProjectClicked(event:MouseEvent):void
+			{
+				var vo : ProjectVO = new ProjectVO();
+				editPanel.data = vo;
+				editPanel.visible = true;				
+				editPanel.addEventListener(SaveActionEvent.SAVE, onSave);
+			}
+			
+			private function onSave(event : SaveActionEvent): void
+			{
+				removeEventListener(SaveActionEvent.SAVE, onSave);
+				ApplicationState.getInstance().addProject(event.project);
+				navigateToProjectDetails(event.project);
+				
+				ApplicationState.save();
+			}
+			
+			private function navigateToProjectDetails(vo : ProjectVO):void	
+			{
+				var evt : ViewChangeEvent = new ViewChangeEvent(ViewChangeEvent.CHANGE_VIEW);
+				evt.selectedView = ViewChangeEvent.PROJECT_DETAILS;
+				evt.data = vo;
+				dispatchEvent(evt);
+			}
+
+		]]>
+	</fx:Script>
+	<s:SkinnableContainer height="100%" width="100%">
+		<s:layout>
+			<s:VerticalLayout paddingBottom="2" paddingLeft="2" paddingRight="2" paddingTop="2"/>
+		</s:layout>
+		<s:List id="projectList" creationComplete="onListCreationComplete(event)" styleName="background-color" width="100%" height="100%" itemRenderer="com.commitmon.view.renderer.ProjectListRenderer" borderVisible="false"/>
+		<s:Button id="addProject" label="Add Project" click="onAddProjectClicked(event)"  width="100%"/>
+	</s:SkinnableContainer>
+	<component:EditProjectPanel id="editPanel" visible="false"/>
+</local:AbstractNavigatorContent>

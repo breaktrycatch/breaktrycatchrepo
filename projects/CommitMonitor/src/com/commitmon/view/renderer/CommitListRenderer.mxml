@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					 xmlns:s="library://ns.adobe.com/flex/spark" 
+					 xmlns:mx="library://ns.adobe.com/flex/halo" 
+					 width="280" 
+					 height="100%" 
+					 activate="onActivated(event)" 
+					 deactivate="onDeactivated(event)">
+	<fx:Declarations>
+		<s:Sequence id="fadeOutViewed">
+			<s:Pause duration="10000"/>
+			<s:Fade target="{rect}" duration="1000" alphaFrom="1" alphaTo="0"/>
+		</s:Sequence>
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import com.commitmon.util.DateUtils;
+			import com.fuelindustries.util.NumberUtil;
+			
+			import flash.events.Event;
+			import flash.events.MouseEvent;
+			
+			import mx.events.ResizeEvent;
+			
+			private var _windowActive : Boolean = false;
+			
+			override public function set data(obj : Object):void
+			{
+				super.data = obj;
+				
+				if(obj)
+				{
+					revisionContent.text = NumberUtil.commaDelimitInt(data.revision);
+					authorContent.text = data.author;
+					message.text = data.message;	
+					date.text = DateUtils.formatDate(data.date);
+					
+					trace("Adding new cell. Has it been viewed? ", data.viewed);
+					
+					rect.alpha = 1;
+					rect.visible = !data.viewed;
+					
+					if(_windowActive && !data.viewed)
+					{
+						fadeOutViewed.play();	
+					}
+				}
+				else
+				{
+					clear();
+				}
+			}
+			
+			private function clear() : void
+			{
+				revisionContent.text = "";
+				authorContent.text = "";
+				message.text = "";
+				date.text = "";
+			}
+			
+			protected function onMainGroupResize(event:ResizeEvent):void
+			{
+				this.height = border.height = mainGroup.getExplicitOrMeasuredHeight() + 5;
+				this.height += 2;
+			}
+
+			protected function onActivated(event:Event):void
+			{
+				_windowActive = true;
+				
+				if(!data.viewed && !fadeOutViewed.isPlaying)
+				{
+					data.viewed = true;
+					fadeOutViewed.play();
+				}
+			}
+
+
+			protected function onDeactivated(event:Event):void
+			{
+				_windowActive = false;
+			}
+
+		]]>
+	</fx:Script>
+	<s:states>
+		<s:State name="normal"/>
+		<s:State name="hovered"/>
+	</s:states>
+	<s:Border id="border" autoLayout="true" borderColor="#D4FAD3" backgroundColor="#161616" borderWeight="1" cornerRadius="5" height="199" borderStyle="inset" borderAlpha=".2" borderAlpha.hovered=".6" width="100%">
+		<s:Rect id="rect" radiusX="5" radiusY="5" top="0" left="0" right="0" bottom="0" >
+			<s:fill>
+				<s:SolidColor color="#666666" />
+			</s:fill>
+		</s:Rect>
+		<s:HGroup id="mainGroup" verticalAlign="middle" textAlign="center" left="5" top="5" right="5" width="100%" resize="onMainGroupResize(event)">
+			<s:VGroup width="100%" height="100%" paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
+				<s:HGroup width="100%" textAlign="right" height="12" gap="0">
+					<s:SkinnableContainer left="0">
+						<s:layout>
+							<s:HorizontalLayout />
+						</s:layout>	
+						<s:Label text="Author:" id="author" styleName="label-text"/>
+						<s:Label id="authorContent" styleName="label-content-text"/>
+					</s:SkinnableContainer>
+					<s:SkinnableContainer width="100%">
+						<s:layout>
+							<s:VerticalLayout horizontalAlign="right"/>
+						</s:layout>	
+						<s:Label id="date" text="Date" right="15" top="5" styleName="label-deemphasized-text" textAlign="right" paddingRight="5"/>
+					</s:SkinnableContainer>
+				</s:HGroup>
+				<s:Label id="message" left="5" bottom="3" styleName="label-content-text" textAlign="left" text="1" width="100%"/>
+				<s:Group width="200" height="20">
+					<s:SkinnableContainer width="100%" height="12" textAlign="left">
+						<s:layout>
+							<s:HorizontalLayout/>
+						</s:layout>	
+						<s:Label id="revision" styleName="label-text" text="Revision:"/>
+						<s:Label id="revisionContent" styleName="label-content-text"  paddingRight="5"/>
+					</s:SkinnableContainer>
+				</s:Group>
+			</s:VGroup>
+		</s:HGroup>
+	</s:Border>
+</s:ItemRenderer>

@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<s:SparkSkin 
+	xmlns:fx="http://ns.adobe.com/mxml/2009" 
+	xmlns:s="library://ns.adobe.com/flex/spark" 
+	xmlns:mx="library://ns.adobe.com/flex/halo"
+	minWidth="325" minHeight="35" baseColor="#ffffff"
+	>
+	<fx:Metadata>
+		<![CDATA[ 
+		[HostComponent("de.websector.utils.updater.ui.ApplicationUpdaterUI")]
+		[ResourceBundle("ApplicationUpdaterDialogs")]		
+		]]>
+	</fx:Metadata>
+
+	<fx:Script>
+		<![CDATA[         
+			
+			private static const PADDING_LEFT: int = 15;
+			private static const PADDING_RIGHT: int = 10;
+			
+		]]>        
+	</fx:Script>
+	
+	<!-- states -->
+	<s:states>
+		
+		<s:State name="checkForUpdate" 
+				 stateGroups="button0isUsedState" 
+				 />
+
+		<s:State name="noUpdateAvailable" 
+				 />
+		
+		<s:State name="updateAvailable" 
+				 stateGroups="button0isUsedState" 
+				 />
+		<s:State name="downloadProgress" 
+				 />
+		
+		<s:State name="installUpdate" 
+				 stateGroups="button0isUsedState" 
+				 />
+		
+		<s:State name="updateError" 
+				 stateGroups="errorState" 
+				 />
+		<s:State name="unexpectedError" 
+				 stateGroups="errorState" 
+				 />
+		<s:State name="downloadError" 
+				 stateGroups="errorState" 
+				 />
+		<s:State name="fileError" 
+				 stateGroups="errorState" 
+				 />		
+		
+		<!-- required by Spark's Skin class, but is not in use -->
+		<s:State
+			name="disabled"
+			/>
+		<s:State
+			name="normal"
+			/>
+		
+	</s:states>
+	
+	
+	<!-- bg -->
+	<s:Rect id="bg" 
+			width="100%"
+			height="35"
+			>
+		<s:fill>
+			<s:SolidColor
+				color.updateAvailable="{getStyle('updateAvaliableBackground')}"
+				color.downloadProgress="{getStyle('downloadProgressBackground')}"
+				color.installUpdate="{getStyle('installUpdateBackground')}"
+				color.noUpdateAvailable="{getStyle('noUpdateAvaliableBackground')}"
+				color.errorState="{getStyle('errorBackground')}"
+				/>
+		</s:fill>
+	</s:Rect>
+	
+	<!-- bottom line -->
+	
+	<s:Line 
+		width="100%" 
+		y="35">
+		<s:stroke>
+			<s:SolidColorStroke 
+				color="{getStyle('strokeColor')}" 
+				color.updateAvailable="{getStyle('strokeColor')}"
+				color.downloadProgress="{getStyle('strokeColor')}"
+				color.installUpdate="{getStyle('strokeColor')}"
+				color.noUpdateAvailable="{getStyle('strokeColor')}"
+				color.errorState="{getStyle('strokeColor')}"
+				joints="miter" miterLimit="1" weight="1" />
+		</s:stroke>
+	</s:Line>
+	
+	<!-- buttons -->
+	<s:HGroup
+		id="bContainer"
+		verticalCenter="0"
+		right="{ PADDING_RIGHT }" 
+		verticalAlign="middle">
+		
+		<s:Button
+			id="button0"
+			label="button 0"
+			height="16"
+			skinClass="de.websector.utils.updater.ui.skins.firefox.ButtonSkin"
+			includeIn="button0isUsedState"
+			label.checkForUpdate="{ resourceManager.getString('ApplicationUpdaterDialogs', 'btnCheck' ) }"
+			label.updateAvailable="{ resourceManager.getString('ApplicationUpdaterDialogs', 'btnDownloadLater' ) }"
+			label.installUpdate="{ resourceManager.getString('ApplicationUpdaterDialogs', 'btnInstall' ) }"
+			/>
+		
+		<s:Button
+			id="button1"
+			skinClass="de.websector.utils.updater.ui.skins.firefox.ButtonSkin"
+			height="16"
+			label="{ resourceManager.getString('ApplicationUpdaterDialogs', 'btnCancel' ) }"
+			label.updateError="{ resourceManager.getString('ApplicationUpdaterDialogs', 'btnClose' ) }"
+			label.noUpdateAvailable="{ resourceManager.getString('ApplicationUpdaterDialogs', 'btnClose' ) }"
+			label.updateAvailable="{ resourceManager.getString('ApplicationUpdaterDialogs', 'btnDownload' ) }"
+			label.installUpdate="{ resourceManager.getString('ApplicationUpdaterDialogs', 'btnInstallLater' ) }"
+			/>
+	</s:HGroup>
+	
+	<mx:ProgressBar
+		id="progressBar"
+		height="15"
+		verticalCenter="0"
+		left="{ PADDING_LEFT }" right="{ bContainer.width + PADDING_RIGHT + 15 }"
+		includeIn="downloadProgress"
+		label="" labelWidth="0" fontSize="0"
+		trackSkin="de.websector.utils.updater.ui.skins.firefox.ProgressBarTrackSkin"
+		barSkin="de.websector.utils.updater.ui.skins.firefox.ProgressBarSkin"
+		mode="manual"
+		/>
+	
+	<s:Label
+		id="displayLabel"
+		verticalCenter="0"
+		left="{ PADDING_LEFT }" right="{ bContainer.width + PADDING_RIGHT + 5 }"
+		text=""
+		text.checkForUpdate="Check Update!"
+		text.noUpdateAvailable="No update"
+		text.updateAvailable="New Update!"
+		text.installUpdate="{ resourceManager.getString('ApplicationUpdaterDialogs', 'titleInstall' ) }"
+		text.updateError="{ resourceManager.getString('ApplicationUpdaterDialogs', 'msgCheckError', [ hostComponent.errorID ] ) }"
+		text.downloadError="{ resourceManager.getString('ApplicationUpdaterDialogs', 'msgDownloadError', [ hostComponent.errorID ] ) }"
+		text.unexpectedError="{ resourceManager.getString('ApplicationUpdaterDialogs', 'msgUnexpectedError', [ hostComponent.errorID ] ) }"
+		text.fileError="{ resourceManager.getString('ApplicationUpdaterDialogs', 'msgFileError', [ hostComponent.errorID ] ) }"
+		color="#FFFFFF"		
+		color.noUpdateAvailable="#333333"
+		fontWeight="bold"
+		/>
+</s:SparkSkin>

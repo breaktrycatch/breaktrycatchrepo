@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/halo" width="20" height="20" initialize="rotate.play();">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+		<s:Linear id="linearEase"/>
+		<s:Parallel id="rotate" effectEnd="rotate.play()">
+			<s:Rotate3D target="{this}" angleYFrom="0" angleYTo="180" duration="2000" easer="{linearEase}" autoCenterProjection="true" autoCenterTransform="true"/>
+		</s:Parallel>
+	</fx:Declarations>	
+	<s:Rect id="rect" radiusX="2" radiusY="2" top="0" left="0" right="0" bottom="0" >
+		<s:fill>
+			<s:SolidColor color="{getStyle('backgroundColor')}"/>
+		</s:fill>
+		<s:stroke>
+			<s:SolidColorStroke  alpha="{getStyle('borderAlpha')}" color="{getStyle('borderColor')}" weight="1.5"/>
+		</s:stroke>
+	</s:Rect>
+</s:Group>
