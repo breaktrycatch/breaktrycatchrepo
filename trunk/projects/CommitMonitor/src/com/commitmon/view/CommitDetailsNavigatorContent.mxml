@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?>
+<local:AbstractNavigatorContent xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					xmlns:s="library://ns.adobe.com/flex/spark" 
+					xmlns:mx="library://ns.adobe.com/flex/halo" 
+					xmlns:local="com.commitmon.view.*"
+					contentCreationComplete="onInitialized(event)">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import com.commitmon.model.ChangedItemEntry;
+			import com.commitmon.model.CommitMonitorLogEntry;
+			import com.commitmon.util.DateUtils;
+			import com.fuelindustries.svn.core.SVNLogEntryPath;
+			import com.fuelindustries.util.DictionaryExtensions;
+			import com.fuelindustries.util.NumberUtil;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			
+			import spark.events.IndexChangeEvent;
+			
+			private var _creationComplete : Boolean = false;
+			
+			override protected function setData(data:Object):void
+			{
+				var revision : CommitMonitorLogEntry = data as CommitMonitorLogEntry;
+				if(revision && _creationComplete)
+				{
+					revisionContent.text = NumberUtil.commaDelimitInt(revision.revision);
+					authorContent.text = revision.author;
+					message.text = revision.message;		
+					date.text = DateUtils.formatDate(revision.date);
+					
+					//TODO:Truncate...
+					var collection : ArrayCollection = new ArrayCollection(DictionaryExtensions.values(revision.changedItems)); 
+					changes.dataProvider = collection
+					
+					added.visible = added.includeInLayout = false;
+					deleted.visible = deleted.includeInLayout = false;
+					modified.visible = modified.includeInLayout = false;
+					replaced.visible = replaced.includeInLayout = false;
+					collection.source.forEach(function(item : ChangedItemEntry,...args):void {
+						switch(item.type)
+						{
+							case SVNLogEntryPath.TYPE_ADDED:
+								added.visible = added.includeInLayout = true;
+								break;
+							case SVNLogEntryPath.TYPE_DELETED:
+								deleted.visible = deleted.includeInLayout = true;
+								break;
+							case SVNLogEntryPath.TYPE_MODIFIED:
+								modified.visible = modified.includeInLayout = true;
+								break;
+							case SVNLogEntryPath.TYPE_REPLACED:
+								replaced.visible = replaced.includeInLayout = true;
+								break;
+						}
+					});
+					
+					revision.viewed = true;
+				}
+				else if(!data && _creationComplete)
+				{
+					clear();
+				}
+			}
+			
+			private function clear() : void
+			{
+				revisionContent.text = "";
+				authorContent.text = "";
+				message.text = "";
+				date.text = "";
+			}
+			
+			private function onInitialized(event:FlexEvent):void
+			{
+				_creationComplete = true;
+				setData(_data);
+			}
+			
+			public function onItemSelected(event:IndexChangeEvent):void
+			{
+				//TODO: Handle item selected with native application handling in AIR 2.0.
+			}
+
+		]]>
+	</fx:Script>
+	<s:HGroup paddingLeft="2" paddingRight="2" paddingTop="2" paddingBottom="2" left="0" right="0" top="0" bottom="0">
+		<s:Border borderColor="#D4FAD3" styleName="cell-out" borderWeight="1" borderAlpha="0.5" width="100%" cornerRadius="5" height="100%">
+			<s:HGroup verticalAlign="middle" textAlign="center" left="5" top="5" right="5" bottom="5" width="100%" height="100%">
+				<s:VGroup width="100%" height="100%" paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
+					<s:HGroup width="100%" textAlign="right" height="12" gap="0">
+						<s:SkinnableContainer width="100%">
+							<s:layout>
+								<s:HorizontalLayout />
+							</s:layout>	
+							<s:Label text="Author:" id="author" styleName="label-text"/>
+							<s:Label id="authorContent" styleName="label-content-text"/>
+						</s:SkinnableContainer>
+						<s:SkinnableContainer width="100%">
+							<s:layout>
+								<s:HorizontalLayout />
+							</s:layout>	
+							<s:Label id="revision" paddingLeft="10" styleName="label-text" text="Rev:"/>
+							<s:Label id="revisionContent" styleName="label-content-text"/>
+						</s:SkinnableContainer>
+						<s:SkinnableContainer>
+							<s:layout>
+								<s:VerticalLayout horizontalAlign="right"/>
+							</s:layout>	
+							<s:Label id="date" text="Date" right="15" top="5" styleName="label-deemphasized-text" textAlign="right" paddingRight="5"/>
+						</s:SkinnableContainer>
+					</s:HGroup>
+					<s:Label id="message" styleName="label-content-text" width="100%" textAlign="left"/>
+					<s:SkinnableContainer height="100%" width="100%">
+						<s:layout>
+							<s:VerticalLayout paddingTop="5"/>
+						</s:layout>	
+						<s:Label styleName="label-text" text="Changes" width="100%" textAlign="left"/>
+						<s:List id="changes" allowMultipleSelection="false" itemRenderer="com.commitmon.view.renderer.ModifiedItemRenderer" borderVisible="false" change="onItemSelected(event)" width="100%" height="100%"/>
+					</s:SkinnableContainer>
+					
+					<s:HGroup id="legend">
+						<s:HGroup id="added">
+							<s:Rect width="20" height="10">
+								<s:fill>
+									<s:SolidColor color="{getStyle('added')}"/>
+								</s:fill>
+							</s:Rect>
+							<s:Label text="Added" styleName="label-text"/>
+						</s:HGroup>
+						<s:HGroup id="deleted">
+							<s:Rect width="20" height="10">
+								<s:fill>
+									<s:SolidColor color="{getStyle('deleted')}"/>
+								</s:fill>
+							</s:Rect>
+							<s:Label text="Deleted" styleName="label-text"/>
+						</s:HGroup>
+						<s:HGroup id="modified">
+							<s:Rect width="20" height="10">
+								<s:fill>
+									<s:SolidColor color="{getStyle('modified')}"/>
+								</s:fill>
+							</s:Rect>
+							<s:Label text="Modified" styleName="label-text"/>
+						</s:HGroup>
+						<s:HGroup id="replaced">
+							<s:Rect width="20" height="10">
+								<s:fill>
+									<s:SolidColor color="{getStyle('replaced')}"/>
+								</s:fill>
+							</s:Rect>
+							<s:Label text="Replaced" styleName="label-text"/>
+						</s:HGroup>
+					</s:HGroup>
+				</s:VGroup>
+			</s:HGroup>
+		</s:Border>
+	</s:HGroup>
+	
+	
+</local:AbstractNavigatorContent>

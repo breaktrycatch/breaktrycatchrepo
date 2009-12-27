@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<local:AbstractNavigatorContent xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					xmlns:s="library://ns.adobe.com/flex/spark" 
+					xmlns:mx="library://ns.adobe.com/flex/halo"
+					xmlns:local="com.commitmon.view.*"
+					creationComplete="initializeContent(event)" 
+					height="100%" 
+					width="100%">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import com.commitmon.controller.SVNMonitorClient;
+			import com.commitmon.model.ApplicationState;
+			import com.commitmon.model.CommitMonitorLogEntry;
+			import com.commitmon.model.ProjectVO;
+			import com.commitmon.util.DateUtils;
+			import com.commitmon.view.event.ViewChangeEvent;
+			import com.fuelindustries.util.ArrayExtensions;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			
+			import spark.events.IndexChangeEvent;
+			import spark.events.TextOperationEvent;
+			import spark.skins.spark.TextInputSkin;
+			
+			private static const REVISION_QUALIFIER : String = "r:";
+			private static const DATE_QUALIFIER : String = "d:";
+			private static const AUTHOR_QUALIFIER : String = "a:";
+			private static const MESSAGE_QUALIFIER : String = "m:";
+			
+			/**
+			 * Pause duration after you stop typing before the filter is run.
+			 */
+			private static const FILTER_RUN_DELAY : int = 500;
+			
+			private var _svnClient : SVNMonitorClient;
+			private var _project : ProjectVO;
+			private var _filterTimeout : int;
+			
+			protected function initializeContent(event:FlexEvent):void
+			{
+				_project = ApplicationState.getInstance().currentProject;
+				if(_project)
+				{
+					revisionList.dataProvider = _project.revisions;
+				}
+			}
+			
+			override protected function setData(obj:Object) : void
+			{
+				_project = obj as ProjectVO;
+				ApplicationState.getInstance().currentProject = _project;
+				
+				if(revisionList)
+				{
+					revisionList.dataProvider = _project.revisions;
+				}
+			}
+			
+			private function onListInitialized(event:FlexEvent):void
+			{
+				if(_project)
+				{
+					revisionList.dataProvider = _project.revisions;
+				}
+			}
+
+			protected function onFilterChange(event:TextOperationEvent):void
+			{
+				clearTimeout(_filterTimeout);
+				_filterTimeout = setTimeout(runFilter, FILTER_RUN_DELAY);
+			}
+			
+			private function runFilter() : void
+			{
+				var filterText : String = filterTxt.text;
+				var qualifier : String = getFilterQualifier(filterText);
+				var filterString : String = (qualifier) ? (filterText.substr(qualifier.length)) : (filterText);
+				var filterFunction : Function = getFilter(qualifier, filterString);
+				var toFilter : Array = _project.revisions.source.concat();
+				var filtered : Array = toFilter.filter(filterFunction);
+				
+				revisionList.dataProvider = new ArrayCollection(filtered);
+			}
+			
+			private function getFilterQualifier(str : String) : String
+			{
+				var qualifiers : Array = [REVISION_QUALIFIER, DATE_QUALIFIER, AUTHOR_QUALIFIER, MESSAGE_QUALIFIER];
+				var foundQualifier : String = ArrayExtensions.first(qualifiers, function(item : String, ...args):Boolean {
+					return str.indexOf(item) == 0;
+				});
+				return foundQualifier;
+			}
+			
+			private function getFilter(qualifier : String, filterString : String) : Function
+			{
+				var filterRegExp : RegExp = new RegExp(filterString);
+				var filter : Function;
+				switch(qualifier)
+				{
+					case REVISION_QUALIFIER:
+						filter = function(item : CommitMonitorLogEntry, ...args):Boolean {
+							return filterRegExp.test(item.revision.toString());
+						};
+						break;
+					case DATE_QUALIFIER:
+						filter = function(item : CommitMonitorLogEntry, ...args):Boolean {
+							return filterRegExp.test(DateUtils.formatDate(item.date));
+						};
+						break;
+					case AUTHOR_QUALIFIER:
+						filter = function(item : CommitMonitorLogEntry, ...args):Boolean {
+							return filterRegExp.test(item.author);
+						};
+						break;
+					case MESSAGE_QUALIFIER:
+						filter = function(item : CommitMonitorLogEntry, ...args):Boolean {
+							return filterRegExp.test(item.message);
+						};
+						break;
+					default:
+						filter = function(item : CommitMonitorLogEntry, ...args):Boolean {
+							return filterRegExp.test(item.author) || filterRegExp.test(item.message) || filterRegExp.test(DateUtils.formatDate(item.date)) || filterRegExp.test(item.revision.toString());
+						};
+						break;
+				}
+				return filter;
+			}
+
+			protected function onItemSelected(event:IndexChangeEvent):void
+			{
+				if(event.newIndex != -1)
+				{
+					var evt : ViewChangeEvent = new ViewChangeEvent(ViewChangeEvent.CHANGE_VIEW);
+					evt.selectedView = ViewChangeEvent.COMMIT_DETAILS;
+					evt.data = revisionList.dataProvider[event.newIndex];
+					dispatchEvent(evt);
+				}
+				
+				// reset the selected item so the selected row does not become disabled.
+				revisionList.selectedIndex = -1;
+			}
+
+		]]>
+	</fx:Script>
+	<s:SkinnableContainer height="100%" width="100%">
+		<s:layout>
+			<s:VerticalLayout paddingBottom="2" paddingLeft="2" paddingRight="2" paddingTop="2"/>
+		</s:layout>	
+		<s:List id="revisionList" change="onItemSelected(event)" initialize="onListInitialized(event)" styleName="background-color" width="100%" height="100%" itemRenderer="com.commitmon.view.renderer.CommitListRenderer" borderVisible="false"/>
+		<mx:HBox width="100%" verticalAlign="middle" paddingRight="7" paddingLeft="5" paddingTop="2">
+			<s:Label text="Filter:" styleName="label-content-text" width="34" textAlign="right"/>
+			<s:TextInput id="filterTxt" change="onFilterChange(event)" skinClass="com.commitmon.skins.TextInputSkin" width="100%" paddingRight="5" paddingLeft="3" color="#FFFFFF" paddingBottom="3" paddingTop="3" />
+		</mx:HBox>
+	</s:SkinnableContainer>
+</local:AbstractNavigatorContent>

@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/halo" 
+		 width="100%" 
+		 height="100%" xmlns:util="com.commitmon.util.*">
+	<fx:Declarations>
+		
+		<s:Parallel id="showEffect">
+			<s:Fade target="{this}" duration="300" alphaFrom="0" alphaTo="1"/>
+			<s:Rotate3D target="{this.border}" duration="300" angleXFrom="15" angleXTo="0"/>
+		</s:Parallel>
+		<s:Parallel id="hideEffect" effectEnd="onOutEffectComplete(event)">
+			<s:Fade target="{this}" duration="300" alphaFrom="1" alphaTo="0"/>
+			<s:Rotate3D target="{this.border}" duration="300" angleXFrom="0" angleXTo="-15"/>
+		</s:Parallel>
+		
+		<mx:NumberValidator id="pollValidator" source="{pollTime}" property="text" minValue="0" allowNegative="false"/> 
+		<mx:NumberValidator id="historySizeValidator" source="{historySize}" property="text" minValue="30" maxValue="500" allowNegative="false"/>
+		<mx:StringValidator id="nameValidator" source="{projectName}" property="text" minLength="1"/>
+		<util:SVNURLValidator id="svnURLValidator" source="{svnurl}" property="text"/>
+		<mx:StringValidator id="usernameValidator" source="{username}" property="text" minLength="1"/>
+		<mx:StringValidator id="passwordValidator" source="{password}" property="text" minLength="1"/>		
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.commitmon.model.ProjectVO;
+			import com.commitmon.view.event.SaveActionEvent;
+			
+			import flash.events.KeyboardEvent;
+			import flash.events.MouseEvent;
+			import flash.ui.Keyboard;
+			
+			import mx.events.EffectEvent;
+			import mx.validators.Validator;
+			
+			import spark.events.TextOperationEvent;
+			
+			[Bindable]
+			protected var _data : ProjectVO;
+			
+			public var saveClicked : Boolean = false;
+			
+			public function set data(d : ProjectVO) : void
+			{
+				reset();
+				
+				_data = d;
+				setData(d);
+				
+				// Clear validation error messages.
+				pollTime.errorString = "";
+				projectName.errorString = "";
+				username.errorString = "";
+				svnurl.errorString = "";
+				password.errorString = "";
+				historySize.errorString = "";
+			}
+			
+			protected function setData(data : ProjectVO):void
+			{
+				addEventListener(KeyboardEvent.KEY_DOWN, onKey);
+				
+				projectName.text = _data.name
+				svnurl.text = _data.svnURL;
+				username.text = _data.username;
+				password.text = _data.password;
+				historySize.text = _data.maxEntries.toString();
+				pollTime.text = _data.pollTimeInMinutes.toString();
+					
+				showEffect.play();
+				focusManager.setFocus(projectName);
+			}
+			
+			private function reset():void
+			{
+				pollTime.text = "";
+				projectName.text = "";
+				username.text = "";
+				svnurl.text = "";
+				password.text = "";
+				historySize.text = "";
+			}
+			
+			protected function onSaveClicked(event:MouseEvent):void
+			{
+				if(Validator.validateAll([pollValidator, historySizeValidator,nameValidator,svnURLValidator,usernameValidator,passwordValidator]).length == 0)
+				{
+					_data.name = projectName.text;
+					_data.svnURL = svnurl.text;
+					_data.username = username.text;
+					_data.password = password.text;
+					_data.maxEntries = parseInt(historySize.text);
+					_data.pollTimeInMinutes = parseInt(pollTime.text);
+					
+					saveClicked = true;
+					
+					var evt : SaveActionEvent = new SaveActionEvent(SaveActionEvent.SAVE);
+					evt.project = _data;
+					dispatchEvent(evt);
+					
+					hideEffect.play();
+					
+					removeEventListener(KeyboardEvent.KEY_DOWN, onKey);
+				}
+			}
+			
+			protected function onCancelClicked(event:MouseEvent):void
+			{
+				dispatchEvent(new SaveActionEvent(SaveActionEvent.CANCEL));
+				removeEventListener(KeyboardEvent.KEY_DOWN, onKey);
+				
+				saveClicked = false;
+				hideEffect.play();
+			}
+			
+			private function onKey(event:KeyboardEvent):void
+			{
+				if(event.keyCode == Keyboard.ENTER)
+				{
+					onSaveClicked(null);
+				}
+			}
+			
+			protected function onOutEffectComplete(event:EffectEvent):void
+			{
+				visible = false;
+			}
+		]]>
+	</fx:Script>
+	<s:Rect top="0" right="0" bottom="0" left="0">
+		<s:fill>
+			<s:SolidColor color="#000000" alpha=".5"/>
+		</s:fill>
+	</s:Rect>
+	<s:HGroup verticalAlign="middle" textAlign="center" left="5" top="5" right="5" bottom="5" width="100%" height="100%">
+		<s:Border id="border" autoLayout="true" borderColor="#D4FAD3" styleName="background-color" borderWeight="2" cornerRadius="5" height="199" borderStyle="inset" borderAlpha=".5" width="100%">
+			<s:HGroup id="mainGroup" verticalAlign="middle" textAlign="center" left="5" top="5" right="5" width="100%">
+				<s:VGroup width="100%" height="100%" paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
+					<s:HGroup verticalAlign="middle" width="100%">
+						<s:Label text="Project Name:" width="30%" textAlign="left" styleName="label-text"/>
+						<s:TextInput id="projectName" styleName="label-content-text" textAlign="left" width="100%"/>
+					</s:HGroup>
+					<s:HGroup verticalAlign="middle" width="100%">
+						<s:Label text="SVN Path:" width="30%" textAlign="left" styleName="label-text"/>
+						<s:TextInput id="svnurl" styleName="label-content-text" textAlign="left" width="100%"/>
+					</s:HGroup>
+					<s:HGroup verticalAlign="middle" width="100%">
+						<s:Label text="Username:" width="30%" textAlign="left" styleName="label-text"/> 
+						<s:TextInput id="username" styleName="label-content-text" textAlign="left" width="100%"/>
+					</s:HGroup>
+					<s:HGroup verticalAlign="middle" width="100%">
+						<s:Label text="Password:" width="30%" textAlign="left" styleName="label-text"/> 
+						<s:TextInput id="password" styleName="label-content-text" textAlign="left" displayAsPassword="true" width="100%"/>
+					</s:HGroup>
+					<s:HGroup verticalAlign="middle" width="100%">
+						<s:Label text="History Size:" width="30%" textAlign="left" styleName="label-text"/> 
+						<s:TextInput id="historySize" styleName="label-content-text" textAlign="left" width="100%"/>
+					</s:HGroup>
+					<s:HGroup verticalAlign="middle" width="100%">
+						<s:Label text="Refresh Time (minutes):" width="30%" textAlign="left" styleName="label-text"/> 
+						<s:TextInput id="pollTime" styleName="label-content-text" textAlign="left" width="100%"/>
+					</s:HGroup>
+				</s:VGroup>
+			</s:HGroup>
+			<s:VGroup width="100%" height="100%" horizontalAlign="right" paddingBottom="5" paddingRight="5">
+				<s:HGroup height="100%"  verticalAlign="bottom">
+					<s:Button id="saveButton" label="Save" click="onSaveClicked(event)"/>
+					<s:Button id="cancelButton" label="Cancel" click="onCancelClicked(event)"/>
+				</s:HGroup>
+			</s:VGroup>
+		</s:Border>
+	</s:HGroup>
+</s:Group>

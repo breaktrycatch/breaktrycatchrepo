@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/halo" 
+		 width="100%"
+		 initialize="onInitialized(event)">
+	<fx:Script>
+		<![CDATA[
+			import com.commitmon.controller.event.NotificationEvent;
+			import com.commitmon.controller.notification.NotificationDispatcher;
+			import com.commitmon.model.ProjectVO;
+			import com.commitmon.model.ApplicationState;
+			import com.commitmon.view.event.ViewChangeEvent;
+			import com.fuelindustries.util.ArrayExtensions;
+			
+			import flash.utils.Dictionary;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.CollectionEvent;
+			import mx.events.CollectionEventKind;
+			import mx.events.FlexEvent;
+			
+			import spark.components.SkinnableContainer;
+			
+			private var _projects : ArrayCollection;
+			private var _notificationBars : Dictionary;
+						
+			protected function onInitialized(event:FlexEvent):void
+			{
+				_notificationBars = new Dictionary();
+				_projects = ApplicationState.getInstance().projects;
+				_projects.addEventListener(CollectionEvent.COLLECTION_CHANGE, onProjectsListUpdated);
+				
+				ArrayExtensions.simpleForEach(_projects.source, createBar);
+			}
+			
+			private function onProjectsListUpdated(event:CollectionEvent):void
+			{
+				if(event.kind == CollectionEventKind.ADD)
+				{
+					ArrayExtensions.simpleForEach(event.items, createBar);
+				}
+				else if(event.kind == CollectionEventKind.REMOVE)
+				{
+					ArrayExtensions.simpleForEach(event.items, removeBar);
+				}
+			}
+			
+			private function createBar(item : ProjectVO):void
+			{
+				var bar : NotificationBar = new NotificationBar();
+				bar.data = item;
+				bar.addEventListener(ViewChangeEvent.CHANGE_VIEW, onChangeView);
+				addElement(bar);
+				_notificationBars[item] = bar;
+			}
+			
+			private function removeBar(item:ProjectVO):void
+			{
+				var bar : NotificationBar = _notificationBars[item];
+				bar.hideEffect.play();
+			}
+			
+			private function onChangeView(event:ViewChangeEvent):void
+			{
+				dispatchEvent(event.clone());
+			}
+		]]>
+	</fx:Script>
+	<mx:Spacer width="100%"/>
+	<s:layout>
+		<s:VerticalLayout/>
+	</s:layout>	
+</s:SkinnableContainer>
