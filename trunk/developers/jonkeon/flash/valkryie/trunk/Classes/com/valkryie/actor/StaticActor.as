@@ -1,8 +1,8 @@
-package com.valkryie.actor.static {
+package com.valkryie.actor {
 	import com.valkryie.actor.AbstractActor;
 
 	/**
-	 * @author jkeon
+	 * @author Jon
 	 */
 	public class StaticActor extends AbstractActor {
 		public function StaticActor() {
