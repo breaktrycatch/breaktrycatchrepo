@@ -1,8 +1,8 @@
-package com.valkryie.actor.static.geometric {
-	import com.valkryie.actor.static.StaticActor;
+package com.valkryie.actor.geometric {
+	import com.valkryie.actor.StaticActor;
 
 	/**
-	 * @author jkeon
+	 * @author Jon
 	 */
 	public class VertexActor extends StaticActor {
 		public function VertexActor() {

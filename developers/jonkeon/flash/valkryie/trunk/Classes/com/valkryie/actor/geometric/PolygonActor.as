@@ -1,17 +1,14 @@
-package com.valkryie.actor.static.geometric {
+package com.valkryie.actor.geometric {
 	import com.fuelindustries.core.AssetProxy;
-	import com.valkryie.actor.static.StaticActor;
-	import com.valkryie.data.statics.AppStatics;
+	import com.valkryie.actor.StaticActor;
 	import com.valkryie.environment.geometric.component.IsoFace;
 
 	import flash.display.MovieClip;
-	import flash.events.MouseEvent;
 
 	/**
-	 * @author jkeon
+	 * @author Jon
 	 */
 	public class PolygonActor extends StaticActor {
-		
 		protected var __isoFace:IsoFace;
 		protected var __renderCanvas:MovieClip;
 		
@@ -82,6 +79,5 @@ package com.valkryie.actor.static.geometric {
 			
 			calculateBounds();
 		}	
-		
 	}
 }

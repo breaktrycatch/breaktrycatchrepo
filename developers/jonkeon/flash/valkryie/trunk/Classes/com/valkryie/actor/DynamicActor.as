@@ -1,8 +1,8 @@
-package com.valkryie.actor.dynamic {
+package com.valkryie.actor {
 	import com.valkryie.actor.AbstractActor;
 
 	/**
-	 * @author jkeon
+	 * @author Jon
 	 */
 	public class DynamicActor extends AbstractActor {
 		public function DynamicActor() {
