@@ -2,7 +2,7 @@ package com.valkryie.editor.environment {
 	import com.module_subscriber.core.Subscriber;
 	import com.valkryie.actor.AbstractActor;
 	import com.valkryie.actor.events.ActorEvent;
-	import com.valkryie.data.vo.GridVO;
+	import com.valkryie.data.vo.editor.GridVO;
 	import com.valkryie.editor.brush.AbstractBrush;
 	import com.valkryie.editor.brush.AdditiveBrush;
 	import com.valkryie.editor.brush.BuilderBrush;

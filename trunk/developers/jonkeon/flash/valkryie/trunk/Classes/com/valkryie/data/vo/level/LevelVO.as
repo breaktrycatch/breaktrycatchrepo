@@ -1,4 +1,5 @@
-package com.valkryie.data.vo {
+package com.valkryie.data.vo.level {
+	import com.valkryie.data.vo.core.AbstractDataVO;
 
 	/**
 	 * @author jkeon

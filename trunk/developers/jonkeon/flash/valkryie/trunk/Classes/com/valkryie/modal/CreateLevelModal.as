@@ -4,8 +4,8 @@ package com.valkryie.modal {
 	import com.fuelindustries.controls.buttons.EaseButton;
 	import com.fuelindustries.events.ViewEvent;
 	import com.valkryie.data.statics.UIStatics;
-	import com.valkryie.data.vo.CameraVO;
-	import com.valkryie.data.vo.LevelVO;
+	import com.valkryie.data.vo.level.CameraVO;
+	import com.valkryie.data.vo.level.LevelVO;
 	import com.valkryie.editor.elements.editor_panel.properties.controls.PropertyCellRenderer;
 	import com.valkryie.manager.game.GameStateManager;
 

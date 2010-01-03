@@ -1,4 +1,5 @@
-package com.valkryie.data.vo {
+package com.valkryie.data.vo.actor {
+	import com.valkryie.data.vo.core.AbstractDataVO;
 	import com.valkryie.environment.geometric.statics.IsoStatics;
 
 	import flash.geom.Rectangle;

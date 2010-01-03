@@ -1,7 +1,7 @@
 package com.valkryie.editor.brush {
 	import com.fuelindustries.core.AssetProxy;
 	import com.valkryie.actor.AbstractActor;
-	import com.valkryie.data.vo.AbstractBrushVO;
+	import com.valkryie.data.vo.actor.brush.AbstractBrushVO;
 	import com.valkryie.environment.geometric.statics.IsoStatics;
 
 	import flash.display.Graphics;

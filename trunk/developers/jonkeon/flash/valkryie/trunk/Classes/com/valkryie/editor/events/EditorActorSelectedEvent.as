@@ -1,5 +1,5 @@
 package com.valkryie.editor.events {
-	import com.valkryie.data.vo.AbstractDataVO;
+	import com.valkryie.data.vo.core.AbstractDataVO;
 
 	import flash.events.Event;
 

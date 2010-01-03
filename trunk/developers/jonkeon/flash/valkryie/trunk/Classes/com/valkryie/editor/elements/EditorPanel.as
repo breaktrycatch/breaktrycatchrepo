@@ -4,7 +4,7 @@ package com.valkryie.editor.elements {
 	import com.module_subscriber.core.Subscriber;
 	import com.valkryie.actor.AbstractActor;
 	import com.valkryie.actor.events.ActorEvent;
-	import com.valkryie.data.vo.GridVO;
+	import com.valkryie.data.vo.editor.GridVO;
 	import com.valkryie.editor.elements.editor_panel.PropertiesPane;
 	import com.valkryie.editor.elements.editor_panel.ToolsPane;
 	import com.valkryie.editor.events.EditorActionEvent;

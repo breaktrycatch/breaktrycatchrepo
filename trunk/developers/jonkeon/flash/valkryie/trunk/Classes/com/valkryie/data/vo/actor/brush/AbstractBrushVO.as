@@ -1,4 +1,5 @@
-package com.valkryie.data.vo {
+package com.valkryie.data.vo.actor.brush {
+	import com.valkryie.data.vo.actor.AbstractActorVO;
 	import com.valkryie.editor.elements.editor_panel.properties.statics.PropertyStatics;
 	import com.valkryie.editor.elements.editor_panel.properties.vo.PropertyVO;
 

@@ -3,8 +3,8 @@ package com.valkryie.environment {
 	import com.fuelindustries.tween.TweenEnterFrame;
 	import com.module_keyinput.core.InputManager;
 	import com.valkryie.actor.AbstractActor;
-	import com.valkryie.data.vo.CameraVO;
-	import com.valkryie.data.vo.LevelVO;
+	import com.valkryie.data.vo.level.CameraVO;
+	import com.valkryie.data.vo.level.LevelVO;
 	import com.valkryie.environment.camera.IsoCamera;
 	import com.valkryie.environment.geometric.statics.IsoStatics;
 	import com.valkryie.environment.render.IsoCanvas;

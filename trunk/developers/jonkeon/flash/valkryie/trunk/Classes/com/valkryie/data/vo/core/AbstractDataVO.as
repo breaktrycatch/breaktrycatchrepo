@@ -1,4 +1,4 @@
-package com.valkryie.data.vo {
+package com.valkryie.data.vo.core {
 	import com.valkryie.editor.elements.editor_panel.properties.statics.PropertyStatics;
 	import com.valkryie.editor.elements.editor_panel.properties.vo.PropertyVO;
 
