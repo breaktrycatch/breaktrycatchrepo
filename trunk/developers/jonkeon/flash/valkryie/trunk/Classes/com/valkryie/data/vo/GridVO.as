@@ -1,16 +1,15 @@
 package com.valkryie.data.vo {
-	import flash.events.IEventDispatcher;
 
 	/**
 	 * @author jkeon
 	 */
-	public class GridVO extends SerializableVO {
+	public class GridVO extends AbstractDataVO {
 		
 		public static const GRID_LAYER_BOTTOM:int = 0;
 		public static const GRID_LAYER_TOP:int = 1;
 		
-		public function GridVO(target : IEventDispatcher = null) {
-			super(target);
+		public function GridVO() {
+			super();
 			snap = true;
 			layer = GRID_LAYER_BOTTOM;
 			shown = true;

@@ -1,7 +1,7 @@
 package com.valkryie.environment.render {
 	import com.module_assets.net.AssetManager;
 	import com.valkryie.actor.AbstractActor;
-	import com.valkryie.actor.static.geometric.PolygonActor;
+	import com.valkryie.actor.geometric.PolygonActor;
 	import com.valkryie.editor.brush.AbstractBrush;
 	import com.valkryie.environment.camera.IsoCamera;
 	import com.valkryie.environment.geometric.component.IsoFace;
