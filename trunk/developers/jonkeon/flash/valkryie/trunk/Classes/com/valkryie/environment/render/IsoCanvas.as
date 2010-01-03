@@ -1,7 +1,9 @@
 package com.valkryie.environment.render {
 	import com.module_assets.net.AssetManager;
 	import com.valkryie.actor.AbstractActor;
+	import com.valkryie.actor.geometric.FaceActor;
 	import com.valkryie.actor.geometric.PolygonActor;
+	import com.valkryie.actor.geometric.VertexActor;
 	import com.valkryie.editor.brush.AbstractBrush;
 	import com.valkryie.environment.camera.IsoCamera;
 	import com.valkryie.environment.geometric.component.IsoFace;
@@ -17,9 +19,12 @@ package com.valkryie.environment.render {
 	public class IsoCanvas extends MovieClip {
 		
 		protected var __actorMap:MovieClip;
+		protected var __vertexMap:MovieClip;
 		protected var __debugMap:MovieClip;
 		
 		protected var __actors:Array;
+		protected var __vertices:Array;
+		protected var __faces:Array;
 		protected var __geometry:Array;
 		
 		//Reference to the Camera
@@ -43,19 +48,102 @@ package com.valkryie.environment.render {
 		
 		protected function init():void {
 			
+			
 			__actorMap = new MovieClip();
 			this.addChild(__actorMap);
+			
+			__vertexMap = new MovieClip();
+			this.addChild(__vertexMap);
 			
 			__debugMap = new MovieClip();
 			this.addChild(__debugMap);
 			
 			__actors = [];
+			__vertices = [];
+			__faces = [];
 			__geometry = [];
 			
 			//Creates an arbitrary Rectangle, Overwritten in cullActors
 			__actorCullingBounds = new Rectangle();
 			__cameraCullingBounds = new Rectangle();
 		}
+		
+		public function convertBrushToPoly(_brush:AbstractBrush):void {
+			dtrace("Adding Vertex Actors");
+			
+			var orderedBrushVertices:Array = [];
+			var index:int;
+			var v:VertexActor;
+			var h : int = _brush.dataVO["subDivisionsY"] + 1;
+			var w : int = _brush.dataVO["subDivisionsX"] + 1;
+			var subXAmount:Number = _brush.dataVO["isoWidth"]/_brush.dataVO["subDivisionsX"];
+			var subYAmount:Number = _brush.dataVO["isoDepth"]/_brush.dataVO["subDivisionsY"];
+			
+			for(var y : int = 0; y < h; y++)
+			{
+				for(var x : int = 0; x < w; x++)
+				{
+					index = x + y*w;
+					v = new VertexActor();
+					v.linkDisplay();
+					v.isoX = (x*subXAmount) + _brush.dataVO["isoX"];
+					v.isoY = (y*subYAmount) + _brush.dataVO["isoY"];
+					v.isoZ = 0;
+					v.u = x/(w-1);
+					v.v = y/(h-1); 
+					orderedBrushVertices[index] = v.dataVO;
+					__vertices.push(v);
+					__vertexMap.addChild(v.display);
+				}
+			}
+			
+			dtrace("Adding Face Actors");
+			
+			var f:FaceActor;
+			h--;
+			w--;
+			
+			var index2:int;
+			for(var y : int = 0; y < h; y++)
+			{
+				for(var x : int = 0; x < w; x++)
+				{
+					index = x + y*(w+1);
+					index2 = x + ((y+1) * (w+1));
+					//0, 2, 1
+					f = new FaceActor();
+					f.linkDisplay();
+					f.vertex0 = orderedBrushVertices[index];
+					f.vertex1 = orderedBrushVertices[index2];
+					f.vertex2 = orderedBrushVertices[index + 1];
+					f.construct(subXAmount, subYAmount, _brush.dataVO["isoWidth"], _brush.dataVO["isoDepth"]);
+					f.render();
+					__faces.push(f);
+					__actorMap.addChild(f.display);
+					
+					//3, 1, 2
+					f = new FaceActor();
+					f.linkDisplay();
+					f.vertex0 = orderedBrushVertices[index2 + 1];
+					f.vertex1 = orderedBrushVertices[index + 1];
+					f.vertex2 = orderedBrushVertices[index2];
+					f.direction = -1;
+					f.construct(subXAmount, subYAmount, _brush.dataVO["isoWidth"], _brush.dataVO["isoDepth"]);
+					f.render();
+					__faces.push(f);
+					__actorMap.addChild(f.display);
+				}
+			}
+			
+			//Clean the ordered brush vertices
+			for (var b in orderedBrushVertices) {
+				orderedBrushVertices[b] = null;
+			}
+			orderedBrushVertices = null;
+			
+		}
+		
+		
 		
 		public function addPlane(_planeBrush:AbstractBrush):void {
 			var b:BitmapData = AssetManager.getInstance().getAsset("Texture_Default", true);
