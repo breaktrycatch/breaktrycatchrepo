@@ -21,7 +21,7 @@ package com.valkryie.editor.brush {
 			__selectedColorTransform = new ColorTransform();
 			__selectedColorTransform.color = 0xAA0000;
 			
-			__normalColorTransform = __brushDisplay.transform.colorTransform;
+			__normalColorTransform = this.transform.colorTransform;
 		}
 
 		override protected function completeConstruction() : void {
