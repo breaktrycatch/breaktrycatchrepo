@@ -1,5 +1,5 @@
 package com.valkryie.manager.game {
-	import com.valkryie.data.vo.LevelVO;
+	import com.valkryie.data.vo.level.LevelVO;
 
 	/**
 	 * @author jkeon

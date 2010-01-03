@@ -1,6 +1,6 @@
 package com.valkryie.editor.elements.editor_panel.properties.vo {
 	import com.valkryie.data.enum.Enum;
-	import com.valkryie.data.vo.AbstractDataVO;
+	import com.valkryie.data.vo.core.AbstractDataVO;
 
 	/**
 	 * @author jkeon

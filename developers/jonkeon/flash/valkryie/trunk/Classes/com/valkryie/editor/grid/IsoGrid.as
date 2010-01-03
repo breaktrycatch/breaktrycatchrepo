@@ -1,7 +1,7 @@
 package com.valkryie.editor.grid {
 	import com.fuelindustries.core.AssetProxy;
 	import com.fuelindustries.core.FuelUI;
-	import com.valkryie.data.vo.GridVO;
+	import com.valkryie.data.vo.editor.GridVO;
 	import com.valkryie.environment.geometric.statics.IsoStatics;
 
 	import flash.display.Graphics;

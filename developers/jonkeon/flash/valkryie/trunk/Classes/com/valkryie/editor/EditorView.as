@@ -1,6 +1,6 @@
 package com.valkryie.editor {
-	import com.valkryie.data.vo.GridVO;
-	import com.valkryie.data.vo.LevelVO;
+	import com.valkryie.data.vo.editor.GridVO;
+	import com.valkryie.data.vo.level.LevelVO;
 	import com.valkryie.editor.elements.EditorPanel;
 	import com.valkryie.editor.elements.EditorTopPanel;
 	import com.valkryie.editor.environment.EditorEnvironment;

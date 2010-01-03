@@ -1,7 +1,7 @@
 package com.valkryie.actor {
 	import com.fuelindustries.core.AssetProxy;
 	import com.module_data.Binding;
-	import com.valkryie.data.vo.AbstractDataVO;
+	import com.valkryie.data.vo.core.AbstractDataVO;
 
 	import flash.geom.Rectangle;
 

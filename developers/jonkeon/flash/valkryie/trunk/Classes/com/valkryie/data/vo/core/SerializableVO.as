@@ -1,4 +1,4 @@
-package com.valkryie.data.vo {
+package com.valkryie.data.vo.core {
 	import com.module_data.BindableArray;
 	import com.module_data.BindableObject;
 

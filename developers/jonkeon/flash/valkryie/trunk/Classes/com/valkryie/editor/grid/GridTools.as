@@ -1,9 +1,9 @@
 package com.valkryie.editor.grid {
-	import flash.events.FocusEvent;
 	import com.fuelindustries.controls.buttons.SimpleButton;
 	import com.fuelindustries.core.AssetProxy;
-	import com.valkryie.data.vo.GridVO;
+	import com.valkryie.data.vo.editor.GridVO;
 
+	import flash.events.FocusEvent;
 	import flash.events.MouseEvent;
 	import flash.text.TextField;
 
