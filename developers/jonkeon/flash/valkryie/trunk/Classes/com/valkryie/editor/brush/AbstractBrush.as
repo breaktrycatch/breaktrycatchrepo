@@ -50,8 +50,6 @@ package com.valkryie.editor.brush {
 			
 			this.useHandCursor = true;
 			this.buttonMode = true;
-			this.addEventListener(MouseEvent.MOUSE_OVER, onMOver);
-			this.addEventListener(MouseEvent.MOUSE_OUT, onMOut);
 		}
 		
 
@@ -92,7 +90,7 @@ package com.valkryie.editor.brush {
 		
 		
 		//Renders the Brush
-		public function render():void	{
+		public override function render():void	{
 			
 			var g:Graphics = this.graphics;
 			
@@ -162,13 +160,13 @@ package com.valkryie.editor.brush {
 		
 		//INTERACTION HANDLERS
 		
-		protected function onMOver(e:MouseEvent):void {
+		protected override function onMOver(e:MouseEvent):void {
 			e.stopImmediatePropagation();
 			if (!__selected) {
 				this.transform.colorTransform = __overColorTransform;
 			}
 		}
-		protected function onMOut(e:MouseEvent):void {
+		protected override function onMOut(e:MouseEvent):void {
 			e.stopImmediatePropagation();
 			if (!__selected) {
 				this.transform.colorTransform = __normalColorTransform;
@@ -180,9 +178,6 @@ package com.valkryie.editor.brush {
 			__topRight = null;
 			__bottomRight = null;
 			__bottomLeft = null;
-
-			this.removeEventListener(MouseEvent.MOUSE_OVER, onMOver);
-			this.removeEventListener(MouseEvent.MOUSE_OUT, onMOut);
 			
 			__overColorTransform = null;
 			__normalColorTransform = null;

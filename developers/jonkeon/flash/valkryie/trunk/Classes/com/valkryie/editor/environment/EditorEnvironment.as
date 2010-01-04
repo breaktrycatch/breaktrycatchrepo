@@ -1,51 +1,45 @@
 package com.valkryie.editor.environment {
 	import com.module_subscriber.core.Subscriber;
-	import com.valkryie.actor.AbstractActor;
 	import com.valkryie.actor.events.ActorEvent;
-	import com.valkryie.actor.geometric.VertexActor;
 	import com.valkryie.data.vo.editor.GridVO;
-	import com.valkryie.editor.brush.AbstractBrush;
 	import com.valkryie.editor.brush.AdditiveBrush;
 	import com.valkryie.editor.brush.BuilderBrush;
+	import com.valkryie.editor.elements.editor_top_panel.events.EditorModeEvent;
 	import com.valkryie.editor.events.EditorActionEvent;
 	import com.valkryie.editor.events.EditorToolSelectEvent;
 	import com.valkryie.editor.grid.IsoGrid;
+	import com.valkryie.editor.statics.EditorStatics;
 	import com.valkryie.editor.statics.ToolStatics;
 	import com.valkryie.environment.AbstractEnvironment;
 	import com.valkryie.environment.geometric.statics.IsoStatics;
 
-	import flash.display.MovieClip;
 	import flash.events.Event;
 	import flash.events.MouseEvent;
 	import flash.geom.Point;
-	import flash.geom.Rectangle;
 
 	/**
 	 * @author jkeon
 	 */
 	public class EditorEnvironment extends AbstractEnvironment {
 		
-		protected var __drawingBrush:Boolean;
-		protected var __draggingBrush:Boolean;
-		protected var __scalingBrush:Boolean;
+		//What are we doing currently
+		protected var __draggingActor:Boolean;
+		protected var __scalingActor:Boolean;
 		
-		protected var __activeBrush:AbstractBrush;
-		protected var __pickingCheckBrush:AbstractBrush;
-		protected var __pickingCheckIsoBounds:Rectangle;
+		//The Builder Brush
 		protected var __builderBrush:BuilderBrush;
 		
-		protected var __brushMap:MovieClip;
 		
+		//Point used for converting ISO coordinates into Screen Space
 		protected var __screenPoint:Point;
+		
 		
 		protected var __activeTool:String;
 		
 		
-		protected var __brushes:Array;
-		protected var __brushesActivated:Boolean;
 		
-		protected var __brushDragOffsetX:int;
-		protected var __brushDragOffsetY:int;
+		protected var __actorDragOffsetX:int;
+		protected var __actorDragOffsetY:int;
 		
 		
 		protected var __gridMap:IsoGrid;
@@ -53,6 +47,9 @@ package com.valkryie.editor.environment {
 		
 		
 		protected var __bindings:Array;
+		
+		
+		protected var __editorMode:String;
 		
 		public function EditorEnvironment() {
 			super();
@@ -63,26 +60,22 @@ package com.valkryie.editor.environment {
 			
 			__bindings = [];
 			
-			__brushes = [];
-			__brushesActivated = false;
-			
-			__drawingBrush = false;
-			__draggingBrush = false;
-			__scalingBrush = false;
-			
-			__brushMap = new MovieClip();
-			__canvas.addChild(__brushMap);
+			__draggingActor = false;
+			__scalingActor = false;
 			
 			__builderBrush = new BuilderBrush();
 			__builderBrush.linkDisplay();
-			__activeBrush = __builderBrush;
 		
 			__gridMap = new IsoGrid();
 			__gridMap.linkDisplay();
 			__canvas.addChild(__gridMap.display);
 			
+			__editorMode = EditorStatics.EDITOR_MODE_BRUSH;
+			
 			Subscriber.subscribe(EditorToolSelectEvent.TOOL_CHANGE, onToolChange);
 			Subscriber.subscribe(EditorActionEvent.CREATE_ADDITIVE_BRUSH, createAdditiveBrush);
+			Subscriber.subscribe(ActorEvent.ACTOR_SELECTED, onActorSelected);
+			Subscriber.subscribe(EditorModeEvent.EDITOR_MODE_CHANGE, onModeChange);
 		}
 
 		override protected function onAdded() : void {
@@ -92,7 +85,7 @@ package com.valkryie.editor.environment {
 			__builderBrush.dataVO["isoX"] = int(IsoStatics.GRID_WIDTH/2) - int(__builderBrush.dataVO["isoWidth"]/2);
 			__builderBrush.dataVO["isoY"] = int(IsoStatics.GRID_DEPTH/2) - int(__builderBrush.dataVO["isoDepth"]/2);
 			
-			addBrush(__builderBrush);
+			__canvas.addBrush(__builderBrush);
 		}
 
 		public function setGridData(_gridData:GridVO):void {
@@ -122,76 +115,50 @@ package com.valkryie.editor.environment {
 
 		override protected function updateScreenCoordinates() : void {
 			super.updateScreenCoordinates();
-			if (__activeBrush != null) {
-				__activeBrush.render();
+			//TODO: Anything here?
+		}
+		
+		protected function onModeChange(e:EditorModeEvent):void {
+			deactivateMode();
+			__editorMode = e.mode;
+			activateMode();
+		}
+		
+		protected function deactivateMode():void {
+			switch (__editorMode) {
+				case EditorStatics.EDITOR_MODE_BRUSH:
+					__canvas.hideBrushes();
+				break;
+				case EditorStatics.EDITOR_MODE_VERTEX:
+					__canvas.hideVertices();
+				break;
 			}
 		}
 		
-		
-		protected function determinePickedActor(_actorType:String):void {
-			//TODO: Only if Brushes are visible
-			var i:int;
-			for (i = 0; i < __brushes.length; i++) {
-				__pickingCheckBrush = __brushes[i] as AbstractBrush;
-				__pickingCheckIsoBounds = __pickingCheckBrush.dataVO["isoBounds"];
-				if (__pickingCheckIsoBounds.containsPoint(__pickingPoint)) {
-					assignPickedActor(__pickingCheckBrush, _actorType);
-					return;	
-				}
+		protected function activateMode():void {
+			switch (__editorMode) {
+				case EditorStatics.EDITOR_MODE_BRUSH:
+					__canvas.showBrushes();
+				break;
+				case EditorStatics.EDITOR_MODE_VERTEX:
+					__canvas.showVertices();
+				break;
 			}
-			
-			//TODO: Search Actors
-			
-			assignPickedActor(null, _actorType);
 		}
 		
-		
-		protected function assignPickedActor(_abstractActor:AbstractActor, _actorType:String):void {
-			
-			if (_actorType == QUEUED_PICKED_ACTOR) {
-				//Assign the Mouse Down Actor
-				__queuedPickedActor = _abstractActor;
-				//If the currently Selected Actor is not the same as what we just clicked on...
-				if (__selectedActor != __queuedPickedActor) {
-					if (__selectedActor != null) {
-						__selectedActor.selected = false;
-					}
-					__selectedActor = __queuedPickedActor;
-					if (__selectedActor != null) {
-						__selectedActor.selected = true;
-					}
-				}
+		protected function onActorSelected(e:ActorEvent):void {
+			if (__selectedActor != null) {
+				__selectedActor.selected = false;
 			}
-			else if (_actorType == ACTUAL_PICKED_ACTOR) {
-				//Assign the Mouse Up Actor
-				__actualPickedActor = _abstractActor;
-//				//If it is the same actor we moused down on...
-//				if (__actualPickedActor == __queuedPickedActor) {
-//					//Set it to be the selected actor
-//					__selectedActor = __actualPickedActor;
-//					//It might be null, so only if not null...
-//					if (__selectedActor != null) {
-//						//assign it to be selected
-//						__selectedActor.selected = true;
-//					}
-//				}
-//				//If they're not the same
-//				else {
-//					//If the selected actor exists
-//					if (__selectedActor != null) {
-//						//assign it to be selected
-//						__selectedActor.selected = false;
-//						__selectedActor = null;
-//					}
-//				}
+			__selectedActor = e.actor;
+			if (__selectedActor != null) {
+				__selectedActor.selected = true;
 			}
 		}
 
 		
 		protected override function onMouseDown(e : MouseEvent) : void {
 			calculatePickingPoint();
-			determinePickedActor(QUEUED_PICKED_ACTOR);
-			Subscriber.issue(new ActorEvent(ActorEvent.ACTOR_SELECTED, __selectedActor));
 		
 			//Based on the active tool, we want to take action 
 			switch (__activeTool) {
@@ -208,12 +175,9 @@ package com.valkryie.editor.environment {
 		
 		protected override function onMouseUp(e:Event):void {
 			calculatePickingPoint();
-			determinePickedActor(ACTUAL_PICKED_ACTOR);
-			//dispatchEvent(new ActorEvent(ActorEvent.ACTOR_SELECTED, __selectedActor));
 			
-			__drawingBrush = false;
-			__draggingBrush = false;
-			__scalingBrush = false;
+			__draggingActor = false;
+			__scalingActor = false;
 			this.stage.removeEventListener(Event.MOUSE_LEAVE, onMouseUp);
 		}
 		
@@ -221,15 +185,12 @@ package com.valkryie.editor.environment {
 		protected function handleMove():void {
 			
 			snapToGrid(__pickingPoint);
-			
 			//If we selected a Brush
-			if (__selectedActor is AbstractBrush) {
+			if (__selectedActor != null) {
 				
-				__activeBrush = (__selectedActor as AbstractBrush);
-				
-				__draggingBrush = true;
-				__brushDragOffsetX = __activeBrush.dataVO["isoX"] - __pickingPoint.x;
-				__brushDragOffsetY = __activeBrush.dataVO["isoY"] - __pickingPoint.y;
+				__draggingActor = true;
+				__actorDragOffsetX = __selectedActor.dataVO["isoX"] - __pickingPoint.x;
+				__actorDragOffsetY = __selectedActor.dataVO["isoY"] - __pickingPoint.y;
 			}
 			this.stage.addEventListener(Event.MOUSE_LEAVE, onMouseUp);
 		}
@@ -238,61 +199,33 @@ package com.valkryie.editor.environment {
 			snapToGrid(__pickingPoint);
 			
 			//If we selected a Brush
-			if (__selectedActor is AbstractBrush) {
-				
-				__activeBrush = (__selectedActor as AbstractBrush);
-				
-				__scalingBrush = true;
+			if (__selectedActor != null) {
+				__scalingActor = true;
 			}
 			this.stage.addEventListener(Event.MOUSE_LEAVE, onMouseUp);
 		}
 		
-		protected function addBrush(_brush:AbstractBrush):void {
-			__brushes.push(_brush);
-			
-			//Ensure Builder Brush is always on top
-			if (_brush != __builderBrush && __builderBrush.parent == __brushMap) {
-				var depth:int = __brushMap.getChildIndex(__builderBrush.display);
-				__brushMap.addChildAt(_brush.display, depth);
-			}
-			else {
-				__brushMap.addChild(_brush.display);
-			}
-		}
 		
-		protected function removeBrush(_brush:AbstractBrush):void {
-			var index:int = __brushes.indexOf(_brush);
-			if (index != -1) {
-				__brushMap.removeChild(_brush.display);
-				__brushes.splice(index, 1);
-			}
-		}
 	
 
 		override protected function onTick(e : Event) : void {
 			
-			if (__drawingBrush) {
-				__screenPoint = IsoStatics.screenToWorld(__canvas.mouseX, __canvas.mouseY);
-				snapToGrid(__screenPoint);
-				__activeBrush.dataVO["isoWidth"] = __screenPoint.x - __activeBrush.dataVO["isoX"];
-				__activeBrush.dataVO["isoDepth"] = __screenPoint.y - __activeBrush.dataVO["isoY"];
-				__activeBrush.render();	
-			}
-			
-			if (__draggingBrush) {
-				//TODO Fix to axis
-				__screenPoint = IsoStatics.screenToWorld(__canvas.mouseX, __canvas.mouseY);
-				snapToGrid(__screenPoint);
-				__activeBrush.dataVO["isoX"] = __screenPoint.x + __brushDragOffsetX;
-				__activeBrush.dataVO["isoY"] = __screenPoint.y + __brushDragOffsetY;
-			}
-			
-			if (__scalingBrush) {
-				__screenPoint = IsoStatics.screenToWorld(__canvas.mouseX, __canvas.mouseY);
-				snapToGrid(__screenPoint);
-				__activeBrush.dataVO["isoWidth"] = __screenPoint.x - __activeBrush.dataVO["isoX"];
-				__activeBrush.dataVO["isoDepth"] = __screenPoint.y - __activeBrush.dataVO["isoY"];
-				__activeBrush.render();	
+			if (__selectedActor != null) {
+				if (__draggingActor) {
+					//TODO Fix to axis
+					__screenPoint = IsoStatics.screenToWorld(__canvas.mouseX, __canvas.mouseY);
+					snapToGrid(__screenPoint);
+					__selectedActor.dataVO["isoX"] = __screenPoint.x + __actorDragOffsetX;
+					__selectedActor.dataVO["isoY"] = __screenPoint.y + __actorDragOffsetY;
+				}
+				
+				if (__scalingActor) {
+					__screenPoint = IsoStatics.screenToWorld(__canvas.mouseX, __canvas.mouseY);
+					snapToGrid(__screenPoint);
+					__selectedActor.dataVO["isoWidth"] = __screenPoint.x - __selectedActor.dataVO["isoX"];
+					__selectedActor.dataVO["isoDepth"] = __screenPoint.y - __selectedActor.dataVO["isoY"];
+					__selectedActor.render();	
+				}
 			}
 			
 			
@@ -327,7 +260,7 @@ package com.valkryie.editor.environment {
 				newBrush.dataVO["subDivisionsX"] = __builderBrush.dataVO["subDivisionsX"];
 				newBrush.dataVO["subDivisionsY"] = __builderBrush.dataVO["subDivisionsY"];
 				
-				addBrush(newBrush);
+				__canvas.addBrush(newBrush);
 				__canvas.convertBrushToPoly(newBrush);
 			}
 		}

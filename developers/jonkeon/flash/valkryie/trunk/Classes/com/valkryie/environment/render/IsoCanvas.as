@@ -20,11 +20,16 @@ package com.valkryie.environment.render {
 		
 		protected var __actorMap:MovieClip;
 		protected var __vertexMap:MovieClip;
+		protected var __brushMap:MovieClip;
+		
 		protected var __debugMap:MovieClip;
 		
 		protected var __actors:Array;
 		protected var __vertices:Array;
 		protected var __faces:Array;
+		protected var __brushes:Array;
+		
+		
 		protected var __geometry:Array;
 		
 		//Reference to the Camera
@@ -52,15 +57,24 @@ package com.valkryie.environment.render {
 			__actorMap = new MovieClip();
 			this.addChild(__actorMap);
 			
+			//ONLY IF IN EDITOR
 			__vertexMap = new MovieClip();
 			this.addChild(__vertexMap);
+			__vertices = [];
 			
+			__brushMap = new MovieClip();
+			this.addChild(__brushMap);
+			__brushes = [];
+			
+			__faces = [];
+			//END ONLY IF IN EDITOR
+			
+			//ONLY IF IN DEBUG MODE
 			__debugMap = new MovieClip();
 			this.addChild(__debugMap);
+			//END ONLY IF IN DEBUG MODE
 			
 			__actors = [];
-			__vertices = [];
-			__faces = [];
 			__geometry = [];
 			
 			//Creates an arbitrary Rectangle, Overwritten in cullActors
@@ -225,7 +239,7 @@ package com.valkryie.environment.render {
 			}
 		}
 		//Show Vertices
-		protected function showVertices():void {
+		public function showVertices():void {
 			var v:VertexActor;
 			for (var i:int = 0; i < __vertices.length; i++) {
 				v = __vertices[i];
@@ -233,7 +247,7 @@ package com.valkryie.environment.render {
 			}
 		}
 		//Hide Vertices
-		protected function hideVertices():void {
+		public function hideVertices():void {
 			var v:VertexActor;
 			for (var i:int = 0; i < __vertices.length; i++) {
 				v = __vertices[i];
@@ -259,6 +273,37 @@ package com.valkryie.environment.render {
 			}
 			
 		}
+		
+		public function addBrush(_brush:AbstractBrush):void {
+			__brushes.push(_brush);
+			__brushMap.addChild(_brush.display);
+		}
+		
+		public function removeBrush(_brush:AbstractBrush):void {
+			var index:int = __brushes.indexOf(_brush);
+			if (index != -1) {
+				__brushMap.removeChild(_brush.display);
+				__brushes.splice(index, 1);
+			}
+		}
+		
+		//Show Brushes
+		public function showBrushes():void {
+			var b:AbstractBrush;
+			for (var i:int = 0; i < __brushes.length; i++) {
+				b = __brushes[i];
+				__brushMap.addChild(b.display);
+			}
+		}
+		//Hide Brushes
+		public function hideBrushes():void {
+			var b:AbstractBrush;
+			for (var i:int = 0; i < __vertices.length; i++) {
+				b = __brushes[i];
+				__brushMap.removeChild(b.display);
+			}
+		}
+		
 		
 		public function cullActors():void {
 			
