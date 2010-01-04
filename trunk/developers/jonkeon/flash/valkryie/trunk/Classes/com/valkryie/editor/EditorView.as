@@ -29,7 +29,6 @@ package com.valkryie.editor {
 
 		override protected function completeConstruction() : void {
 			super.completeConstruction();
-			editorPanel.addEventListener(EditorActionEvent.CREATE_ADDITIVE_BRUSH, onCreateAdditiveBrush);
 		}
 
 		override protected function onAdded() : void {
@@ -55,10 +54,6 @@ package com.valkryie.editor {
 			
 		}
 		
-		
-		protected function onCreateAdditiveBrush(e:EditorActionEvent):void {
-			editorEnvironment.createAdditiveBrush();
-		}
 		
 		override public function destroy() : void {
 			

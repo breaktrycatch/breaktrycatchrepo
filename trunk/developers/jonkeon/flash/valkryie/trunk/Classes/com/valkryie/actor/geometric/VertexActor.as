@@ -1,17 +1,20 @@
 package com.valkryie.actor.geometric {
 	import com.fuelindustries.core.AssetProxy;
-	import com.module_subscriber.core.Subscriber;
 	import com.valkryie.actor.StaticActor;
-	import com.valkryie.actor.events.ActorEvent;
 	import com.valkryie.data.vo.geometric.VertexVO;
 
 	import flash.events.MouseEvent;
+	import flash.geom.ColorTransform;
 
 	/**
 	 * @author Jon
 	 */
 	public class VertexActor extends StaticActor {
 		
+		
+		protected var __overColorTransform:ColorTransform;
+		protected var __normalColorTransform:ColorTransform;
+		protected var __selectedColorTransform:ColorTransform;
 		
 		public function VertexActor() {
 			linkage = AssetProxy.BLANK_MOVIECLIP;
@@ -31,13 +34,15 @@ package com.valkryie.actor.geometric {
 			graphics.drawCircle(0, 0, 4);
 			graphics.endFill();
 			
-			this.addEventListener(MouseEvent.MOUSE_DOWN, onMDown);
+			setupColorTransforms();
+			
+			this.useHandCursor = true;
+			this.buttonMode = true;
+			this.addEventListener(MouseEvent.MOUSE_OVER, onMOver);
+			this.addEventListener(MouseEvent.MOUSE_OUT, onMOut);
 		}
 		
-		protected function onMDown(e:MouseEvent):void {
-			e.stopImmediatePropagation();
-			Subscriber.issue(new ActorEvent(ActorEvent.ACTOR_SELECTED, this));
-		}
+
 
 		override protected function setupData() : void {
 			__dataVO = new VertexVO();
@@ -56,6 +61,46 @@ package com.valkryie.actor.geometric {
 			__bindings.push(__dataVO.bind("isoX", this, reposition));
 			__bindings.push(__dataVO.bind("isoY", this, reposition));
 			__bindings.push(__dataVO.bind("isoZ", this, reposition));
+		}
+		
+		
+		
+		
+		protected function setupColorTransforms():void {
+			__overColorTransform = new ColorTransform();
+			__overColorTransform.color = 0xFF6666;
+			
+			__selectedColorTransform = new ColorTransform();
+			__selectedColorTransform.color = 0xAA0000;
+			
+			__normalColorTransform = this.transform.colorTransform;
+		}
+		
+		//INTERACTION HANDLERS
+		
+		protected function onMOver(e:MouseEvent):void {
+			e.stopImmediatePropagation();
+			if (!__selected) {
+				this.transform.colorTransform = __overColorTransform;
+			}
+		}
+		protected function onMOut(e:MouseEvent):void {
+			e.stopImmediatePropagation();
+			if (!__selected) {
+				this.transform.colorTransform = __normalColorTransform;
+			}
+		}
+		
+		public override function set selected(_selected : Boolean) : void {
+			if (__selected != _selected) {
+				__selected = _selected;
+				if (__selected) {
+					this.transform.colorTransform = __selectedColorTransform;
+				}
+				else {
+					this.transform.colorTransform = __normalColorTransform;
+				}
+			}
 		}
 		
 		

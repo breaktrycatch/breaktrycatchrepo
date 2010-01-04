@@ -92,7 +92,7 @@ package com.valkryie.environment.render {
 					v.u = x/(w-1);
 					v.v = y/(h-1); 
 					orderedBrushVertices[index] = v.dataVO;
-					__vertices.push(v);
+					addVertex(v);
 					__vertexMap.addChild(v.display);
 				}
 			}
@@ -210,6 +210,33 @@ package com.valkryie.environment.render {
 			}
 		}
 		
+		//Add Vertex
+		protected function addVertex(_vertex:VertexActor):void {
+			__vertices.push(_vertex);
+		}
+		//Remove Vertex
+		protected function removeVertex(_vertex:VertexActor):void {
+			var index:int = __vertices.indexOf(_vertex);
+			if (index != -1) {
+				__vertices.splice(index, 1);
+			}
+		}
+		//Show Vertices
+		protected function showVertices():void {
+			var v:VertexActor;
+			for (var i:int = 0; i < __vertices.length; i++) {
+				v = __vertices[i];
+				__vertexMap.addChild(v.display);
+			}
+		}
+		//Hide Vertices
+		protected function hideVertices():void {
+			var v:VertexActor;
+			for (var i:int = 0; i < __vertices.length; i++) {
+				v = __vertices[i];
+				__vertexMap.removeChild(v.display);
+			}
+		}
 		
 		
 		//Add Actors to the Canvas
@@ -304,6 +331,10 @@ package com.valkryie.environment.render {
 		
 		public function get debugMap() : MovieClip {
 			return __debugMap;
+		}
+		
+		public function get vertices() : Array {
+			return __vertices;
 		}
 	}
 }

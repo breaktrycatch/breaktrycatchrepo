@@ -2,9 +2,12 @@ package com.valkryie.editor.environment {
 	import com.module_subscriber.core.Subscriber;
 	import com.valkryie.actor.AbstractActor;
 	import com.valkryie.actor.events.ActorEvent;
+	import com.valkryie.actor.geometric.VertexActor;
 	import com.valkryie.data.vo.editor.GridVO;
 	import com.valkryie.editor.brush.AbstractBrush;
+	import com.valkryie.editor.brush.AdditiveBrush;
 	import com.valkryie.editor.brush.BuilderBrush;
+	import com.valkryie.editor.events.EditorActionEvent;
 	import com.valkryie.editor.events.EditorToolSelectEvent;
 	import com.valkryie.editor.grid.IsoGrid;
 	import com.valkryie.editor.statics.ToolStatics;
@@ -79,6 +82,7 @@ package com.valkryie.editor.environment {
 			__canvas.addChild(__gridMap.display);
 			
 			Subscriber.subscribe(EditorToolSelectEvent.TOOL_CHANGE, onToolChange);
+			Subscriber.subscribe(EditorActionEvent.CREATE_ADDITIVE_BRUSH, createAdditiveBrush);
 		}
 
 		override protected function onAdded() : void {
@@ -125,7 +129,9 @@ package com.valkryie.editor.environment {
 		
 		
 		protected function determinePickedActor(_actorType:String):void {
-			for (var i:int = 0; i < __brushes.length; i++) {
+			//TODO: Only if Brushes are visible
+			var i:int;
+			for (i = 0; i < __brushes.length; i++) {
 				__pickingCheckBrush = __brushes[i] as AbstractBrush;
 				__pickingCheckIsoBounds = __pickingCheckBrush.dataVO["isoBounds"];
 				if (__pickingCheckIsoBounds.containsPoint(__pickingPoint)) {
@@ -133,6 +139,7 @@ package com.valkryie.editor.environment {
 					return;	
 				}
 			}
+			
 			//TODO: Search Actors
 			
 			assignPickedActor(null, _actorType);
@@ -308,21 +315,20 @@ package com.valkryie.editor.environment {
 		
 		
 		
-		public function createAdditiveBrush():void {
+		protected function createAdditiveBrush(e:EditorActionEvent):void {
 			if (__builderBrush != null) {
-//				//TODO: Add Added Brush
-//				var newBrush:AdditiveBrush = new AdditiveBrush();
-//				newBrush.linkDisplay();
-//				newBrush.dataVO["isoX"] = __builderBrush.dataVO["isoX"];
-//				newBrush.dataVO["isoY"] = __builderBrush.dataVO["isoY"];
-//				newBrush.dataVO["isoWidth"] = __builderBrush.dataVO["isoWidth"];
-//				newBrush.dataVO["isoDepth"] = __builderBrush.dataVO["isoDepth"];
-//				newBrush.dataVO["subDivisionsX"] = __builderBrush.dataVO["subDivisionsX"];
-//				newBrush.dataVO["subDivisionsY"] = __builderBrush.dataVO["subDivisionsY"];
-//				
-//				addBrush(newBrush);
-				//TODO: Enable to allow actual polygons to be added
-				__canvas.convertBrushToPoly(__builderBrush);
+				//TODO: Add Added Brush
+				var newBrush:AdditiveBrush = new AdditiveBrush();
+				newBrush.linkDisplay();
+				newBrush.dataVO["isoX"] = __builderBrush.dataVO["isoX"];
+				newBrush.dataVO["isoY"] = __builderBrush.dataVO["isoY"];
+				newBrush.dataVO["isoWidth"] = __builderBrush.dataVO["isoWidth"];
+				newBrush.dataVO["isoDepth"] = __builderBrush.dataVO["isoDepth"];
+				newBrush.dataVO["subDivisionsX"] = __builderBrush.dataVO["subDivisionsX"];
+				newBrush.dataVO["subDivisionsY"] = __builderBrush.dataVO["subDivisionsY"];
+				
+				addBrush(newBrush);
+				__canvas.convertBrushToPoly(newBrush);
 			}
 		}
 		
