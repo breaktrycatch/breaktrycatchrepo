@@ -1,8 +1,6 @@
 package com.valkryie.actor.geometric {
 	import com.fuelindustries.core.AssetProxy;
-	import com.module_subscriber.core.Subscriber;
 	import com.valkryie.actor.StaticActor;
-	import com.valkryie.actor.events.ActorEvent;
 	import com.valkryie.data.vo.geometric.VertexVO;
 
 	import flash.events.MouseEvent;
@@ -40,15 +38,6 @@ package com.valkryie.actor.geometric {
 			
 			this.useHandCursor = true;
 			this.buttonMode = true;
-			this.addEventListener(MouseEvent.MOUSE_OVER, onMOver);
-			this.addEventListener(MouseEvent.MOUSE_OUT, onMOut);
-			
-			this.addEventListener(MouseEvent.MOUSE_DOWN, onMDown);
-		}
-		
-		protected function onMDown(e:MouseEvent):void {
-			e.stopImmediatePropagation();
-			Subscriber.issue(new ActorEvent(ActorEvent.ACTOR_SELECTED, this));
 		}
 		
 
@@ -87,13 +76,13 @@ package com.valkryie.actor.geometric {
 		
 		//INTERACTION HANDLERS
 		
-		protected function onMOver(e:MouseEvent):void {
+		protected override function onMOver(e:MouseEvent):void {
 			e.stopImmediatePropagation();
 			if (!__selected) {
 				this.transform.colorTransform = __overColorTransform;
 			}
 		}
-		protected function onMOut(e:MouseEvent):void {
+		protected override function onMOut(e:MouseEvent):void {
 			e.stopImmediatePropagation();
 			if (!__selected) {
 				this.transform.colorTransform = __normalColorTransform;

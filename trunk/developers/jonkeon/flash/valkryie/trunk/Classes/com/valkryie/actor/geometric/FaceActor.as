@@ -265,7 +265,7 @@ package com.valkryie.actor.geometric {
 			__textureMatrix = new Matrix(a, b, c, d, tx, ty);
 		}
 		
-		public function render():void {
+		public override function render():void {
 			if (__texture != null) {
 				var g:Graphics = __renderCanvas.graphics;
 				g.clear();

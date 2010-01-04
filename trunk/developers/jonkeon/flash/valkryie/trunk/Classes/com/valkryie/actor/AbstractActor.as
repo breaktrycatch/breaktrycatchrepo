@@ -1,8 +1,12 @@
 package com.valkryie.actor {
 	import com.fuelindustries.core.AssetProxy;
 	import com.module_data.Binding;
+	import com.module_subscriber.core.Subscriber;
+	import com.valkryie.actor.events.ActorEvent;
 	import com.valkryie.data.vo.core.AbstractDataVO;
 
+	import flash.events.Event;
+	import flash.events.MouseEvent;
 	import flash.geom.Rectangle;
 
 	/**
@@ -41,6 +45,21 @@ package com.valkryie.actor {
 			setupData();
 			setupBindings();
 			__bounds = new Rectangle();
+			
+			addEventListener(Event.ADDED_TO_STAGE, onAdded);
+			addEventListener(Event.REMOVED_FROM_STAGE, onRemoved);
+		}
+		
+		protected function onAdded(e:Event):void {
+			addEventListener(MouseEvent.MOUSE_OVER, onMOver);
+			addEventListener(MouseEvent.MOUSE_OUT, onMOut);
+			addEventListener(MouseEvent.MOUSE_DOWN, onMDown);
+		}
+		
+		protected function onRemoved(e:Event):void {
+			removeEventListener(MouseEvent.MOUSE_OVER, onMOver);
+			removeEventListener(MouseEvent.MOUSE_OUT, onMOut);
+			removeEventListener(MouseEvent.MOUSE_DOWN, onMDown);
 		}
 		
 		protected function setupData():void {
@@ -49,6 +68,10 @@ package com.valkryie.actor {
 		
 		protected function setupBindings():void {
 			__bindings = [];
+		}
+		
+		public function render():void {
+			//OVERRIDE
 		}
 
 		
@@ -69,7 +92,19 @@ package com.valkryie.actor {
 			}
 		}
 	
-
+		//INTERACTION HANDLERS
+		protected function onMOver(e:MouseEvent):void {
+			
+		}
+		
+		protected function onMOut(e:MouseEvent):void {
+			
+		}
+		
+		protected function onMDown(e:MouseEvent):void {
+			Subscriber.issue(new ActorEvent(ActorEvent.ACTOR_SELECTED, this));
+		}
+		
 		override public function destroy() : void {
 			
 			__bounds = null;
@@ -89,7 +124,11 @@ package com.valkryie.actor {
 			
 			__dataVO = null;
 			
-			
+			removeEventListener(Event.ADDED_TO_STAGE, onAdded);
+			removeEventListener(Event.REMOVED_FROM_STAGE, onRemoved);
+			removeEventListener(MouseEvent.MOUSE_OVER, onMOver);
+			removeEventListener(MouseEvent.MOUSE_OUT, onMOut);
+			removeEventListener(MouseEvent.MOUSE_DOWN, onMDown);
 			
 			super.destroy();
 		}

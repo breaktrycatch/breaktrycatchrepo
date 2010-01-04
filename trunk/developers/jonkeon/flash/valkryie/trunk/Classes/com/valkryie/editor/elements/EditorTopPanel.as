@@ -3,7 +3,9 @@ package com.valkryie.editor.elements {
 	import com.fuelindustries.controls.buttons.SimpleButton;
 	import com.fuelindustries.core.AssetProxy;
 	import com.module_subscriber.core.Subscriber;
+	import com.valkryie.editor.elements.editor_top_panel.events.EditorModeEvent;
 	import com.valkryie.editor.elements.editor_top_panel.events.EditorTopPanelEvent;
+	import com.valkryie.editor.statics.EditorStatics;
 
 	import flash.events.MouseEvent;
 
@@ -59,19 +61,19 @@ package com.valkryie.editor.elements {
 		}
 		
 		protected function onBrushVisibility(e:MouseEvent):void {
-			Subscriber.issue(new EditorTopPanelEvent(EditorTopPanelEvent.EDITOR_TOP_PANEL_BRUSH_VISIBILITY, brushVisibility_btn.selected));
+			Subscriber.issue(new EditorModeEvent(EditorModeEvent.EDITOR_MODE_CHANGE, EditorStatics.EDITOR_MODE_BRUSH));
 		}
 		protected function onActorVisibility(e:MouseEvent):void {
-			Subscriber.issue(new EditorTopPanelEvent(EditorTopPanelEvent.EDITOR_TOP_PANEL_ACTOR_VISIBILITY, actorVisibility_btn.selected));
+			//TODO: handle actors
 		}
 		protected function onVertexVisibility(e:MouseEvent):void {
-			Subscriber.issue(new EditorTopPanelEvent(EditorTopPanelEvent.EDITOR_TOP_PANEL_VERTEX_VISIBILITY, vertexVisibility_btn.selected));
+			Subscriber.issue(new EditorModeEvent(EditorModeEvent.EDITOR_MODE_CHANGE, EditorStatics.EDITOR_MODE_VERTEX));
 		}
 		protected function onEdgeVisibility(e:MouseEvent):void {
-			Subscriber.issue(new EditorTopPanelEvent(EditorTopPanelEvent.EDITOR_TOP_PANEL_EDGE_VISIBILITY, edgeVisibility_btn.selected));
+			Subscriber.issue(new EditorModeEvent(EditorModeEvent.EDITOR_MODE_CHANGE, EditorStatics.EDITOR_MODE_EDGE));
 		}
 		protected function onFaceVisibility(e:MouseEvent):void {
-			Subscriber.issue(new EditorTopPanelEvent(EditorTopPanelEvent.EDITOR_TOP_PANEL_FACE_VISIBILITY, faceVisibility_btn.selected));
+			Subscriber.issue(new EditorModeEvent(EditorModeEvent.EDITOR_MODE_CHANGE, EditorStatics.EDITOR_MODE_FACE));
 		}
 
 		override public function destroy() : void {
