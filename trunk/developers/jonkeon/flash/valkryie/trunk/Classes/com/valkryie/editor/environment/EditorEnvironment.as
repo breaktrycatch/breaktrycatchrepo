@@ -85,7 +85,7 @@ package com.valkryie.editor.environment {
 			__builderBrush.dataVO["isoX"] = int(IsoStatics.GRID_WIDTH/2) - int(__builderBrush.dataVO["isoWidth"]/2);
 			__builderBrush.dataVO["isoY"] = int(IsoStatics.GRID_DEPTH/2) - int(__builderBrush.dataVO["isoDepth"]/2);
 			
-			__canvas.addBrush(__builderBrush);
+			__canvas.addBrush(__builderBrush, __editorMode == EditorStatics.EDITOR_MODE_BRUSH);
 		}
 
 		public function setGridData(_gridData:GridVO):void {
@@ -260,8 +260,8 @@ package com.valkryie.editor.environment {
 				newBrush.dataVO["subDivisionsX"] = __builderBrush.dataVO["subDivisionsX"];
 				newBrush.dataVO["subDivisionsY"] = __builderBrush.dataVO["subDivisionsY"];
 				
-				__canvas.addBrush(newBrush);
-				__canvas.convertBrushToPoly(newBrush);
+				__canvas.addBrush(newBrush, __editorMode == EditorStatics.EDITOR_MODE_BRUSH);
+				__canvas.convertBrushToPoly(newBrush, __editorMode == EditorStatics.EDITOR_MODE_VERTEX);
 			}
 		}
 		

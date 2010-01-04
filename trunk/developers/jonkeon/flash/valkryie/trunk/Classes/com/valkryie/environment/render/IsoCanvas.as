@@ -1,6 +1,7 @@
 package com.valkryie.environment.render {
 	import com.module_assets.net.AssetManager;
 	import com.valkryie.actor.AbstractActor;
+	import com.valkryie.actor.geometric.EdgeActor;
 	import com.valkryie.actor.geometric.FaceActor;
 	import com.valkryie.actor.geometric.PolygonActor;
 	import com.valkryie.actor.geometric.VertexActor;
@@ -20,12 +21,14 @@ package com.valkryie.environment.render {
 		
 		protected var __actorMap:MovieClip;
 		protected var __vertexMap:MovieClip;
+		protected var __edgeMap:MovieClip;
 		protected var __brushMap:MovieClip;
 		
 		protected var __debugMap:MovieClip;
 		
 		protected var __actors:Array;
 		protected var __vertices:Array;
+		protected var __edges:Array;
 		protected var __faces:Array;
 		protected var __brushes:Array;
 		
@@ -58,6 +61,10 @@ package com.valkryie.environment.render {
 			this.addChild(__actorMap);
 			
 			//ONLY IF IN EDITOR
+			__edgeMap = new MovieClip();
+			this.addChild(__edgeMap);
+			__edges = [];
+			
 			__vertexMap = new MovieClip();
 			this.addChild(__vertexMap);
 			__vertices = [];
@@ -82,11 +89,12 @@ package com.valkryie.environment.render {
 			__cameraCullingBounds = new Rectangle();
 		}
 		
-		public function convertBrushToPoly(_brush:AbstractBrush):void {
+		public function convertBrushToPoly(_brush:AbstractBrush, _add:Boolean):void {
 			dtrace("Adding Vertex Actors");
 			
 			var orderedBrushVertices:Array = [];
 			var index:int;
+			var index2:int;
 			var v:VertexActor;
 			var h : int = _brush.dataVO["subDivisionsY"] + 1;
 			var w : int = _brush.dataVO["subDivisionsX"] + 1;
@@ -109,10 +117,26 @@ package com.valkryie.environment.render {
 					v.u = x/(w-1);
 					v.v = y/(h-1); 
 					orderedBrushVertices[index] = v.dataVO;
-					addVertex(v);
-					__vertexMap.addChild(v.display);
+					addVertex(v, _add);
 				}
 			}
+			
+			dtrace("Adding Edge Actors");
+			var e:EdgeActor;
+			
+			e = new EdgeActor(orderedBrushVertices[0], orderedBrushVertices[2]);
+			e.linkDisplay();
+			__edges.push(e);
+			__edgeMap.addChild(e.display);
+			
+			for(y = 0; y < h; y++)
+			{
+				for(x = 0; x < w; x++)
+				{
+					
+				}
+			}
+			
 			
 			dtrace("Adding Face Actors");
 			
@@ -120,7 +144,7 @@ package com.valkryie.environment.render {
 			h--;
 			w--;
 			
-			var index2:int;
+			
 			for(y = 0; y < h; y++)
 			{
 				for(x = 0; x < w; x++)
@@ -228,8 +252,11 @@ package com.valkryie.environment.render {
 		}
 		
 		//Add Vertex
-		protected function addVertex(_vertex:VertexActor):void {
+		protected function addVertex(_vertex:VertexActor, _add:Boolean):void {
 			__vertices.push(_vertex);
+			if (_add) {
+				__vertexMap.addChild(_vertex.display);
+			}
 		}
 		//Remove Vertex
 		protected function removeVertex(_vertex:VertexActor):void {
@@ -274,15 +301,20 @@ package com.valkryie.environment.render {
 			
 		}
 		
-		public function addBrush(_brush:AbstractBrush):void {
+		//Add Brush
+		public function addBrush(_brush:AbstractBrush, _add:Boolean):void {
 			__brushes.push(_brush);
-			__brushMap.addChild(_brush.display);
+			if (_add) {
+				__brushMap.addChild(_brush.display);
+			}
 		}
-		
+		//Remove Brush
 		public function removeBrush(_brush:AbstractBrush):void {
 			var index:int = __brushes.indexOf(_brush);
 			if (index != -1) {
-				__brushMap.removeChild(_brush.display);
+				if (_brush.display.parent == __brushMap) {
+					__brushMap.removeChild(_brush.display);
+				}
 				__brushes.splice(index, 1);
 			}
 		}
@@ -292,15 +324,21 @@ package com.valkryie.environment.render {
 			var b:AbstractBrush;
 			for (var i:int = 0; i < __brushes.length; i++) {
 				b = __brushes[i];
-				__brushMap.addChild(b.display);
+				if (b != null) {
+					__brushMap.addChild(b.display);
+				}
 			}
 		}
 		//Hide Brushes
 		public function hideBrushes():void {
 			var b:AbstractBrush;
-			for (var i:int = 0; i < __vertices.length; i++) {
+			for (var i:int = 0; i < __brushes.length; i++) {
 				b = __brushes[i];
-				__brushMap.removeChild(b.display);
+				if (b != null) {
+					if (b.display.parent == __brushMap) {
+						__brushMap.removeChild(b.display);
+					}
+				}
 			}
 		}
 		
