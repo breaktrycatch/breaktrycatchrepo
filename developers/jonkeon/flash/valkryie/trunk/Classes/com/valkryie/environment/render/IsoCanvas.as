@@ -79,9 +79,12 @@ package com.valkryie.environment.render {
 			var subXAmount:Number = _brush.dataVO["isoWidth"]/_brush.dataVO["subDivisionsX"];
 			var subYAmount:Number = _brush.dataVO["isoDepth"]/_brush.dataVO["subDivisionsY"];
 			
-			for(var y : int = 0; y < h; y++)
+			var x:int;
+			var y:int;
+			
+			for(y = 0; y < h; y++)
 			{
-				for(var x : int = 0; x < w; x++)
+				for(x = 0; x < w; x++)
 				{
 					index = x + y*w;
 					v = new VertexActor();
@@ -104,9 +107,9 @@ package com.valkryie.environment.render {
 			w--;
 			
 			var index2:int;
-			for(var y : int = 0; y < h; y++)
+			for(y = 0; y < h; y++)
 			{
-				for(var x : int = 0; x < w; x++)
+				for(x = 0; x < w; x++)
 				{
 					index = x + y*(w+1);
 					index2 = x + ((y+1) * (w+1));

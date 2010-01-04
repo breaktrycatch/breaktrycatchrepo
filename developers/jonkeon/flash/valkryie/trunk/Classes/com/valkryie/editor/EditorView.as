@@ -4,7 +4,6 @@ package com.valkryie.editor {
 	import com.valkryie.editor.elements.EditorPanel;
 	import com.valkryie.editor.elements.EditorTopPanel;
 	import com.valkryie.editor.environment.EditorEnvironment;
-	import com.valkryie.editor.events.EditorActionEvent;
 	import com.valkryie.manager.game.GameStateManager;
 	import com.valkryie.view.BaseView;
 
