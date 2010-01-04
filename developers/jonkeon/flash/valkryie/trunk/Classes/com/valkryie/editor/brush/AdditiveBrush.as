@@ -6,6 +6,10 @@ package com.valkryie.editor.brush {
 	 * @author jkeon
 	 */
 	public class AdditiveBrush extends AbstractBrush {
+		
+		protected var __faces:Array;
+		
+		
 		public function AdditiveBrush() {
 			super();
 			
@@ -13,6 +17,8 @@ package com.valkryie.editor.brush {
 			__outlineAlpha = 1;
 			__fillColor = 0x000066;
 			__fillAlpha = 0;
+			
+			__faces = [];
 		}
 		
 		override protected function setupColorTransforms() : void {

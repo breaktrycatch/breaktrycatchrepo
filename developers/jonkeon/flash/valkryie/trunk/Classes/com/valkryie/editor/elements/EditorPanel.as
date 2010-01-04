@@ -49,7 +49,7 @@ package com.valkryie.editor.elements {
 		}
 		
 		protected function onAddBrushToWorld(e:MouseEvent):void {
-			this.dispatchEvent(new EditorActionEvent(EditorActionEvent.CREATE_ADDITIVE_BRUSH));
+			Subscriber.issue(new EditorActionEvent(EditorActionEvent.CREATE_ADDITIVE_BRUSH));
 		}
 		
 
