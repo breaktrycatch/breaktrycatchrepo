@@ -1,6 +1,8 @@
 package com.valkryie.actor.geometric {
 	import com.fuelindustries.core.AssetProxy;
+	import com.module_subscriber.core.Subscriber;
 	import com.valkryie.actor.StaticActor;
+	import com.valkryie.actor.events.ActorEvent;
 	import com.valkryie.data.vo.geometric.VertexVO;
 
 	import flash.events.MouseEvent;
@@ -40,6 +42,13 @@ package com.valkryie.actor.geometric {
 			this.buttonMode = true;
 			this.addEventListener(MouseEvent.MOUSE_OVER, onMOver);
 			this.addEventListener(MouseEvent.MOUSE_OUT, onMOut);
+			
+			this.addEventListener(MouseEvent.MOUSE_DOWN, onMDown);
+		}
+		
+		protected function onMDown(e:MouseEvent):void {
+			e.stopImmediatePropagation();
+			Subscriber.issue(new ActorEvent(ActorEvent.ACTOR_SELECTED, this));
 		}
 		
 
