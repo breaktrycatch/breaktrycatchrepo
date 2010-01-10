@@ -44,10 +44,18 @@ package com.valkryie.actor.geometric {
 		
 		override protected function setupData() : void {
 			__dataVO = new EdgeVO();
+			
+			__dataVO["isoX"] = (__vertex0.isoX + __vertex1.isoX)/2;
+			__dataVO["isoY"] = (__vertex0.isoY + __vertex1.isoY)/2;
+			__dataVO["isoZ"] = (__vertex0.isoZ + __vertex1.isoZ)/2;
 		}
 
 		override protected function setupBindings() : void {
 			super.setupBindings();
+			
+			__bindings.push(__dataVO.bind("isoX", this, affectVerticesX));
+			__bindings.push(__dataVO.bind("isoY", this, affectVerticesY));
+			__bindings.push(__dataVO.bind("isoZ", this, affectVerticesZ));
 			
 			__bindings.push(__vertex0.bind("isoX", this, render));
 			__bindings.push(__vertex0.bind("isoY", this, render));
@@ -69,6 +77,8 @@ package com.valkryie.actor.geometric {
 		}
 
 		override public function render() : void {
+			__vertex0.updateScreenCoordinates();
+			__vertex1.updateScreenCoordinates();
 			//construct shape
 			graphics.clear();
 			graphics.lineStyle(3, 0xFFFF00);
@@ -77,6 +87,23 @@ package com.valkryie.actor.geometric {
 			this.x = __vertex0.transformedX;
 			this.y = __vertex0.transformedY;
 		}
+		
+		protected function affectVerticesX(_newValue:int, _oldValue:int):void {
+			var delta:int = _newValue - _oldValue;
+			__vertex0.isoX += delta;
+			__vertex1.isoX += delta;
+		}
+		protected function affectVerticesY(_newValue:int, _oldValue:int):void {
+			var delta:int = _newValue - _oldValue;
+			__vertex0.isoY += delta;
+			__vertex1.isoY += delta;
+		}
+		protected function affectVerticesZ(_newValue:int, _oldValue:int):void {
+			var delta:int = _newValue - _oldValue;
+			__vertex0.isoZ += delta;
+			__vertex1.isoZ += delta;
+		}
+		
 
 		//INTERACTION HANDLERS
 		
@@ -103,14 +130,6 @@ package com.valkryie.actor.geometric {
 					this.transform.colorTransform = __normalColorTransform;
 				}
 			}
-		}
-		
-		
-		protected function reposition():void {
-			__vertex0.updateScreenCoordinates();
-			
-			x = __vertex0["transformedX"];
-			y = __vertex0["transformedY"];
 		}
 	}
 }

@@ -16,6 +16,7 @@ package com.module_tracer.core {
 		public static var LIVE_MODE:Boolean = false;
 		
 		public function TraceManager() {
+			
 		}
 	}
 }
