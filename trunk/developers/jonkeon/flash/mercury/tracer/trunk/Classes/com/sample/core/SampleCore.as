@@ -60,6 +60,11 @@ package com.sample.core {
 			//Setup the buttons
 			setupButtons();
 			
+			//Because this will be on a Webserver, we want the initial values to allow all traces
+			TraceManager.DEPLOYED_QUICK_TRACE = true;
+			TraceManager.DEPLOYED_DEBUG_TRACE = true;
+			TraceManager.DEPLOYED_ERROR_TRACE = true;
+			
 			//Initialize the textfields with the current default settings
 			qtraceLive_txt.text = "QTRACE LIVE MODE ENABLED: " + TraceManager.DEPLOYED_QUICK_TRACE;
 			dtraceLive_txt.text = "DTRACE LIVE MODE ENABLED: " + TraceManager.DEPLOYED_DEBUG_TRACE;
