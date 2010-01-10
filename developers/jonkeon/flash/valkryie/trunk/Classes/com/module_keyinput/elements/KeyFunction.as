@@ -34,6 +34,10 @@ package com.module_keyinput.elements {
 		
 		public function clean():void {
 			__function = null;
+			for (var i:int = __params.length - 1; i >= 0; i--) {
+				__params[i] = null;
+				__params.splice(i,1);
+			}
 			__params = null;
 		}
 		

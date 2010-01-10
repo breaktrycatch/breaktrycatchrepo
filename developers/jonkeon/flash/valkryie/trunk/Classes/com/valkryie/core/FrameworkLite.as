@@ -9,6 +9,7 @@ package com.valkryie.core {
 	import com.valkryie.data.statics.ProjectStatics;
 
 	import flash.events.Event;
+	import flash.system.Capabilities;
 
 	/**
 	 * @author jkeon
@@ -51,11 +52,10 @@ package com.valkryie.core {
 				ProjectStatics.setStatic( name, params[name] );
 			}
 				
-			
-			if (ProjectStatics.getStatic( "urlassets" ) == "../" ) 
-			{
+			if (Capabilities.playerType == "External") {
 				AppStatics.DEBUG_MODE = true;
-			} 
+				TraceManager.LIVE_MODE = false;
+			}
 			else {
 				TraceManager.LIVE_MODE = true;
 				TraceManager.DEPLOYED_DEBUG_TRACE = true;
