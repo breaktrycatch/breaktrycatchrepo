@@ -19,7 +19,7 @@ public class NeedMoreHumansCore extends Stage
 		super(app);
 		
 		_mainViewManager = new ViewManager(app);
-		_mainViewManager.changeView(ViewManager.CAPTURE_VIEW);
+		_mainViewManager.changeView(ViewManager.TRACING_VIEW);
 		add(_mainViewManager);
 	}
 	
