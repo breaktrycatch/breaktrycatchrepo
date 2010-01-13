@@ -29,8 +29,12 @@ public class TracingDebugView extends AbstractView
 	private PixelDataVO preciseCenter;
 	
 	private PixelDataVO farthestPixel;
+	private PixelDataVO nearestPixel;
+	private PixelDataVO tempPixelFar;
+	private PixelDataVO tempPixelNear;
 	
 	private ArrayList<PixelDataVO> farPixels;
+	private ArrayList<PixelDataVO> nearPixels;
 	
 	public TracingDebugView()
 	{
@@ -172,7 +176,7 @@ public class TracingDebugView extends AbstractView
 	   PVector line;
 	   PVector plane = new PVector(0, 0 - preciseCenter.y);
 	   //Now lets radially figure out this distance from the center
-	   for (int i = 1; i < outline.size(); i++) {
+	   for (int i = 0; i < outline.size(); i++) {
 		   pTest = outline.get(i);
 		   pTest.distanceFromPreciseCenter = Math.sqrt(Math.pow((pTest.x - preciseCenter.x), 2) + Math.pow((pTest.y - preciseCenter.y), 2));
 		   line = new PVector(pTest.x - preciseCenter.x, pTest.y - preciseCenter.y);
@@ -180,29 +184,115 @@ public class TracingDebugView extends AbstractView
 		   if (pTest.x < preciseCenter.x) {
 			   pTest.angle = 360 - pTest.angle;
 		   }
-		   PApplet.println(pTest.angle);
+		   //PApplet.println(pTest.angle);
 	   }
 	   
 	   farPixels = new ArrayList<PixelDataVO>();
+	   nearPixels = new ArrayList<PixelDataVO>();
 	   
 	   //Find the farthest pixel from the center
 	   farthestPixel = outline.get(0);
+	   nearestPixel = outline.get(0);
+	   PApplet.println("Nearest Pixel " + nearestPixel.distanceFromPreciseCenter + " " + nearestPixel.x + " " + nearestPixel.y);
 	   for (int i = 1; i < outline.size(); i++) {
 		   pTest = outline.get(i);
 		   if (pTest.distanceFromPreciseCenter > farthestPixel.distanceFromPreciseCenter) {
 			   farthestPixel = pTest;
+		   }
+		   if (pTest.distanceFromPreciseCenter < nearestPixel.distanceFromPreciseCenter) {
+			   nearestPixel = pTest;
+			   PApplet.println("Nearest Pixel Candidate " + nearestPixel.distanceFromPreciseCenter);
 		   }
 	   }
 	   
 	   farPixels.add(farthestPixel);
+	   nearPixels.add(nearestPixel);
+	   PApplet.println("Nearest Pixel Set " + nearestPixel.distanceFromPreciseCenter);
 	   
-	   farthestPixel = outline.get(0);
-	   for (int i = 1; i < outline.size(); i++) {
-		   pTest = outline.get(i);
-		   //if (pTest.angle )
-		   if (pTest.distanceFromPreciseCenter > farthestPixel.distanceFromPreciseCenter) {
-			   farthestPixel = pTest;
+	   
+	   double upperBoundsFar;
+	   double lowerBoundsFar;
+	   double upperBoundsNear;
+	   double lowerBoundsNear;
+	   
+	   
+	   
+	   //Want to get 4 other extremities
+	   for (int j = 0; j < 4; j++) {
+		   //last added pixel is the farthest pixel
+		   tempPixelFar = farthestPixel;
+		   tempPixelNear = nearestPixel;
+//		   PApplet.println("Current Angle " + tempPixel.angle);
+		   //generate upper and lower bounds to search in
+		   upperBoundsFar = tempPixelFar.angle + 90;
+		   lowerBoundsFar = tempPixelFar.angle + 18;
+		   upperBoundsNear = tempPixelNear.angle + 90;
+		   lowerBoundsNear = tempPixelNear.angle + 18;
+//		   PApplet.println("UpperBounds " + upperBounds);
+//		   PApplet.println("LowerBounds " + lowerBounds);
+		   //validate bounds
+		   if (upperBoundsFar > 360) {
+			   upperBoundsFar -= 360;
 		   }
+		   if (lowerBoundsFar < 0) {
+			   lowerBoundsFar = 360 - lowerBoundsFar;
+		   }
+		   if (upperBoundsNear > 360) {
+			   upperBoundsNear -= 360;
+		   }
+		   if (lowerBoundsNear < 0) {
+			   lowerBoundsNear = 360 - lowerBoundsNear;
+		   }
+//		   PApplet.println("Validated UpperBounds " + upperBounds);
+//		   PApplet.println("Validated LowerBounds " + lowerBounds);
+		   //start at the beginning of the list
+		   farthestPixel = outline.get(0);
+		   nearestPixel = outline.get(0);
+		   for (int i = 1; i < outline.size(); i++) {
+			   pTest = outline.get(i);
+			   
+			   //difference = Math.abs(pTest.angle - tempPixel.angle);
+			   boolean inRangeFar = false;
+			   boolean inRangeNear = false;
+			   
+			   if (lowerBoundsFar > upperBoundsFar) {
+				   if ((pTest.angle >= lowerBoundsFar && pTest.angle <= 360) || (pTest.angle <= upperBoundsFar && pTest.angle >= 0)) {
+					   inRangeFar = true;
+//					   PApplet.println("Overlap in Range " + pTest.angle);
+				   }
+			   }
+			   else if (pTest.angle >= lowerBoundsFar && pTest.angle <= upperBoundsFar){
+				   inRangeFar = true;
+//				   PApplet.println("Regualr in Range " + pTest.angle);
+			   }
+			   
+			   if (lowerBoundsNear > upperBoundsNear) {
+				   if ((pTest.angle >= lowerBoundsNear && pTest.angle <= 360) || (pTest.angle <= upperBoundsNear && pTest.angle >= 0)) {
+					   inRangeNear = true;
+					   PApplet.println("Overlap in Range " + pTest.angle);
+				   }
+			   }
+			   else if (pTest.angle >= lowerBoundsNear && pTest.angle <= upperBoundsNear){
+				   inRangeNear = true;
+				   PApplet.println("Regualr in Range " + pTest.angle);
+			   }
+			   
+			   if (inRangeFar) {
+				   if (pTest.distanceFromPreciseCenter > farthestPixel.distanceFromPreciseCenter) {
+					   farthestPixel = pTest;
+//					   PApplet.println("CHOSEN " + pTest.angle);
+				   }
+			   }
+			   if (inRangeNear) {
+				   if (pTest.distanceFromPreciseCenter < nearestPixel.distanceFromPreciseCenter) {
+					   nearestPixel = pTest;
+					   PApplet.println("CHOSEN " + pTest.angle);
+				   }
+			   }
+		   }
+		   PApplet.println("ACTUAL " + nearestPixel.angle);
+		   farPixels.add(farthestPixel);
+		   nearPixels.add(nearestPixel);
 	   }
 	   
 	   
@@ -248,7 +338,16 @@ public class TracingDebugView extends AbstractView
 		app.strokeWeight(3);
 		app.stroke(0, 0, 255);
 		
-		app.line(preciseCenter.x + __originalImage.width, preciseCenter.y, farthestPixel.x + __originalImage.width, farthestPixel.y);
+		for (int i = 0; i < farPixels.size(); i++) {
+			app.line(preciseCenter.x + __originalImage.width, preciseCenter.y, farPixels.get(i).x + __originalImage.width, farPixels.get(i).y);
+		}
+		
+		app.stroke(255, 0, 255);
+		
+		for (int i = 0; i < nearPixels.size(); i++) {
+			app.line(preciseCenter.x + __originalImage.width, preciseCenter.y, nearPixels.get(i).x + __originalImage.width, nearPixels.get(i).y);
+		}
+		
 		
 	}
 }
