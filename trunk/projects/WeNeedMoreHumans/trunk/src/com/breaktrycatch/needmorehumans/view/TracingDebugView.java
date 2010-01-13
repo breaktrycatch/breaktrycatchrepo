@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import processing.core.PApplet;
 import processing.core.PImage;
+import processing.core.PVector;
 
 import com.breaktrycatch.lib.view.AbstractView;
 import com.breaktrycatch.needmorehumans.tracing.PixelDataVO;
@@ -26,6 +27,10 @@ public class TracingDebugView extends AbstractView
 	private PixelDataVO pCenter;
 	
 	private PixelDataVO preciseCenter;
+	
+	private PixelDataVO farthestPixel;
+	
+	private ArrayList<PixelDataVO> farPixels;
 	
 	public TracingDebugView()
 	{
@@ -164,12 +169,44 @@ public class TracingDebugView extends AbstractView
 	   
 	   PApplet.println("PRECISE CENTER " + preciseCenter.x + " " + preciseCenter.y);
 	   
-	   
+	   PVector line;
+	   PVector plane = new PVector(0, 0 - preciseCenter.y);
 	   //Now lets radially figure out this distance from the center
 	   for (int i = 1; i < outline.size(); i++) {
 		   pTest = outline.get(i);
 		   pTest.distanceFromPreciseCenter = Math.sqrt(Math.pow((pTest.x - preciseCenter.x), 2) + Math.pow((pTest.y - preciseCenter.y), 2));
+		   line = new PVector(pTest.x - preciseCenter.x, pTest.y - preciseCenter.y);
+		   pTest.angle = PApplet.degrees(PVector.angleBetween(line, plane));
+		   if (pTest.x < preciseCenter.x) {
+			   pTest.angle = 360 - pTest.angle;
+		   }
+		   PApplet.println(pTest.angle);
 	   }
+	   
+	   farPixels = new ArrayList<PixelDataVO>();
+	   
+	   //Find the farthest pixel from the center
+	   farthestPixel = outline.get(0);
+	   for (int i = 1; i < outline.size(); i++) {
+		   pTest = outline.get(i);
+		   if (pTest.distanceFromPreciseCenter > farthestPixel.distanceFromPreciseCenter) {
+			   farthestPixel = pTest;
+		   }
+	   }
+	   
+	   farPixels.add(farthestPixel);
+	   
+	   farthestPixel = outline.get(0);
+	   for (int i = 1; i < outline.size(); i++) {
+		   pTest = outline.get(i);
+		   //if (pTest.angle )
+		   if (pTest.distanceFromPreciseCenter > farthestPixel.distanceFromPreciseCenter) {
+			   farthestPixel = pTest;
+		   }
+	   }
+	   
+	   
+	   
 	   
 	   
 	   pCenter = new PixelDataVO();
@@ -201,11 +238,17 @@ public class TracingDebugView extends AbstractView
 		
 		app.fill(0, 0, 255);
 		app.ellipse(preciseCenter.x + __originalImage.width, preciseCenter.y, 20, 20);
+		app.ellipse(farthestPixel.x + __originalImage.width, farthestPixel.y, 20, 20);
 		
 		app.noFill();
 		
 		app.stroke(255, 0, 0);
 		app.rect(pLeft.x + __originalImage.width, pTop.y, pRight.x - pLeft.x, pBottom.y - pTop.y);
+		
+		app.strokeWeight(3);
+		app.stroke(0, 0, 255);
+		
+		app.line(preciseCenter.x + __originalImage.width, preciseCenter.y, farthestPixel.x + __originalImage.width, farthestPixel.y);
 		
 	}
 }

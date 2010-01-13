@@ -6,6 +6,7 @@ public class PixelDataVO {
 	public int y;
 	
 	public double distanceFromPreciseCenter;
+	public double angle;
 	
 	public PixelDataVO() {
 		
