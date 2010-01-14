@@ -4,6 +4,7 @@ import processing.core.PApplet;
 
 import com.breaktrycatch.lib.display.Stage;
 import com.breaktrycatch.needmorehumans.view.ViewManager;
+import com.breaktrycatch.needmorehumans.utils.FPS;
 
 public class NeedMoreHumansCore extends Stage
 {
@@ -21,7 +22,11 @@ public class NeedMoreHumansCore extends Stage
 		_mainViewManager = new ViewManager(app);
 		_mainViewManager.changeView(ViewManager.TRACING_VIEW);
 		add(_mainViewManager);
+		
+		
+		add(FPS.register(app));
 	}
+	
 	
 	@Override
 	public void draw()
@@ -36,6 +41,10 @@ public class NeedMoreHumansCore extends Stage
 		else if(app.key == '2')
 		{
 			_mainViewManager.changeView(ViewManager.TRACING_VIEW);
+		}
+		else if(app.key == '3')
+		{
+			_mainViewManager.changeView(ViewManager.PHYSICS_VIEW);
 		}
 	}
 	
