@@ -7,8 +7,8 @@ import processing.core.PImage;
 import processing.core.PVector;
 
 import com.breaktrycatch.lib.view.AbstractView;
+import com.breaktrycatch.needmorehumans.tracing.EdgeVO;
 import com.breaktrycatch.needmorehumans.tracing.PixelDataVO;
-import com.breaktrycatch.needmorehumans.tracing.PixelLinkedNode;
 
 public class TracingDebugView extends AbstractView
 {
@@ -39,6 +39,7 @@ public class TracingDebugView extends AbstractView
 	private ArrayList<PixelDataVO> nearPixels;
 	
 	private ArrayList<PixelDataVO> outline;
+	private ArrayList<EdgeVO> edges;
 	
 	private PixelDataVO startingNode;
 	private PixelDataVO currentNode;
@@ -280,6 +281,30 @@ public class TracingDebugView extends AbstractView
 		__linkedImage.updatePixels();
 		
 		nodeCount = count;
+		
+		boolean edgesCompleted = false;
+		
+		currentPixel = startPixel;
+		
+		edges = new ArrayList<EdgeVO>();
+		
+		EdgeVO e;
+		while (edgesCompleted == false) {
+			e = new EdgeVO(currentPixel, currentPixel.next);
+			edges.add(e);
+			currentPixel = currentPixel.next;
+			if (currentPixel.x == startPixel.x && currentPixel.y == startPixel.y) {
+				PApplet.println("EDGES COMPLETED");
+				edgesCompleted = true;
+				break;
+			}
+		}
+		
+		//Delete all edges with length less than 5 
+		for (int i = edges.size() - 1; i >= 0; i-- ) {
+			e = edges.get(i);
+			if (e.)
+		}
 		
 		
 	}
