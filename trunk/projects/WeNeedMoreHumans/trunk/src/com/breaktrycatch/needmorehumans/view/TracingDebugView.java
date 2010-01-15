@@ -289,23 +289,69 @@ public class TracingDebugView extends AbstractView
 		edges = new ArrayList<EdgeVO>();
 		
 		EdgeVO e;
+		int edgeCount = 0;
 		while (edgesCompleted == false) {
 			e = new EdgeVO(currentPixel, currentPixel.next);
 			edges.add(e);
+			edgeCount++;
 			currentPixel = currentPixel.next;
 			if (currentPixel.x == startPixel.x && currentPixel.y == startPixel.y) {
-				PApplet.println("EDGES COMPLETED");
+				PApplet.println("EDGES COMPLETED " + edgeCount);
 				edgesCompleted = true;
 				break;
 			}
 		}
 		
-		//Delete all edges with length less than 5 
-		for (int i = edges.size() - 1; i >= 0; i-- ) {
-			e = edges.get(i);
-			if (e.)
-		}
+		EdgeVO ahead;
+		EdgeVO behind;
+		int aheadIndex;
+		int behindIndex;
+		int removeCount = 0;
+		boolean iterate = true;
+		double angle;
 		
+		
+		while(iterate == true) {
+			iterate = false;
+			//Delete all edges with length less than 5 
+			for (int i = edges.size() - 1; i >= 0; i-- ) {
+				e = edges.get(i);
+				if (i+1 > edges.size() - 1) {
+					aheadIndex = 0;
+				}
+				else {
+					aheadIndex = i+1;
+				}
+				if (i-1 < 0) {
+					behindIndex = edges.size() - 1;
+				}
+				else {
+					behindIndex = i-1;
+				}
+				ahead = edges.get(aheadIndex);
+				behind = edges.get(behindIndex);
+				
+				angle = PApplet.degrees(PVector.angleBetween(e.getVector(), ahead.getVector()));
+				PApplet.println(angle);
+				//First we should distance cull to get a more manageable number.
+				//then check for interest points. Angles that are sharp.
+				//cull all the almost straight lines.
+				
+				
+				if (e.length <= 10 && angle <= 30) {
+					ahead.p1 = e.p1;
+					behind.p2 = e.p2;
+					ahead.updateLength();
+					behind.updateLength();
+					edges.remove(i);
+					removeCount++;
+					iterate = true;
+					break;
+				}
+			}
+		}
+		PApplet.println("REMOVE EDGES " + removeCount);
+		PApplet.println("Total Edges " + (edgeCount - removeCount));
 		
 	}
 
@@ -639,27 +685,38 @@ public class TracingDebugView extends AbstractView
 //		}
 		
 		app.stroke(255, 0, 255);
-		currentNode = startingNode;
-		currentNode.rendered = true;
-		int renderCount = 0;
-		int renderSkip = 25;
-		while (true) {
-			renderCount++;
-			tempNode = currentNode;
-			for (int i = 0; i < renderSkip; i++) {
-				nextNode = tempNode.next;
-				nextNode.rendered = true;
-				tempNode = nextNode;
+		int index;
+		for (int i = 0; i < edges.size(); i++) {
+			if (i+1 > edges.size() - 1) {
+				index = 0;
 			}
-			nextNode = tempNode.next;
-			app.line(currentNode.x, currentNode.y, nextNode.x, nextNode.y);
-			currentNode = nextNode;
-			if (currentNode.rendered) {
-				break;
+			else {
+				index = i+1;
 			}
+			app.line(edges.get(i).p2.x, edges.get(i).p2.y, edges.get(index).p1.x, edges.get(index).p1.y);
 		}
 		
-		PApplet.println("RenderCount " + renderCount);
+//		currentNode = startingNode;
+//		currentNode.rendered = true;
+//		int renderCount = 0;
+//		int renderSkip = 25;
+//		while (true) {
+//			renderCount++;
+//			tempNode = currentNode;
+//			for (int i = 0; i < renderSkip; i++) {
+//				nextNode = tempNode.next;
+//				nextNode.rendered = true;
+//				tempNode = nextNode;
+//			}
+//			nextNode = tempNode.next;
+//			app.line(currentNode.x, currentNode.y, nextNode.x, nextNode.y);
+//			currentNode = nextNode;
+//			if (currentNode.rendered) {
+//				break;
+//			}
+//		}
+		
+//		PApplet.println("RenderCount " + renderCount);
 		
 	}
 }
