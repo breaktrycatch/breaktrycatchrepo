@@ -11,10 +11,8 @@ import processing.core.PVector;
 import com.breaktrycatch.lib.view.AbstractView;
 import com.breaktrycatch.needmorehumans.tracing.EdgeVO;
 import com.breaktrycatch.needmorehumans.tracing.PixelDataVO;
-<<<<<<< .mine
+
 import com.breaktrycatch.needmorehumans.utils.LogRepository;
-=======
->>>>>>> .r70
 
 public class TracingDebugView extends AbstractView
 {
@@ -701,9 +699,8 @@ public class TracingDebugView extends AbstractView
 			app.line(edges.get(i).p2.x, edges.get(i).p2.y, edges.get(index).p1.x, edges.get(index).p1.y);
 		}
 		
-<<<<<<< .mine
-		LogRepository.getInstance().getJonsLogger().info("RenderCount " + renderCount);
-=======
+//		LogRepository.getInstance().getJonsLogger().info("RenderCount " + renderCount);
+
 //		currentNode = startingNode;
 //		currentNode.rendered = true;
 //		int renderCount = 0;
@@ -723,7 +720,6 @@ public class TracingDebugView extends AbstractView
 //				break;
 //			}
 //		}
->>>>>>> .r70
 		
 //		PApplet.println("RenderCount " + renderCount);
 		
