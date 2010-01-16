@@ -2,6 +2,8 @@ package com.breaktrycatch.needmorehumans.view;
 
 import java.util.ArrayList;
 
+import org.apache.log4j.Logger;
+
 import processing.core.PApplet;
 import processing.core.PImage;
 import processing.core.PVector;
@@ -9,6 +11,10 @@ import processing.core.PVector;
 import com.breaktrycatch.lib.view.AbstractView;
 import com.breaktrycatch.needmorehumans.tracing.EdgeVO;
 import com.breaktrycatch.needmorehumans.tracing.PixelDataVO;
+<<<<<<< .mine
+import com.breaktrycatch.needmorehumans.utils.LogRepository;
+=======
+>>>>>>> .r70
 
 public class TracingDebugView extends AbstractView
 {
@@ -101,7 +107,7 @@ public class TracingDebugView extends AbstractView
 			index = (currentPixel.y)*__debugImage.width + (currentPixel.x + 1);
 			//If it's a red pixel...
 			if (pixels[index] == 0xFFFF0000) {
-				PApplet.println("Found red to the right");
+				LogRepository.getInstance().getJonsLogger().info("Found red to the right");
 				checkPixel = getPixelByXY(currentPixel.x + 1, currentPixel.y);
 				if (checkPixel.marked == false) {
 					checkPixel.marked = true;
@@ -111,7 +117,7 @@ public class TracingDebugView extends AbstractView
 					__linkedImage.pixels[checkPixel.y*__debugImage.width + checkPixel.x] = 0xFF00FF00;
 					count++;
 					if (currentPixel.x == startPixel.x && currentPixel.y == startPixel.y) {
-						PApplet.println("FOUND START RIGHT");
+						LogRepository.getInstance().getJonsLogger().info("FOUND START RIGHT");
 						found = true;
 						break;
 					}
@@ -123,7 +129,7 @@ public class TracingDebugView extends AbstractView
 			index = (currentPixel.y + 1)*__debugImage.width + (currentPixel.x);
 			//If it's a red pixel...
 			if (pixels[index] == 0xFFFF0000) {
-				PApplet.println("Found red to the down");
+				LogRepository.getInstance().getJonsLogger().info("Found red to the down");
 				checkPixel = getPixelByXY(currentPixel.x, currentPixel.y + 1);
 				if (checkPixel.marked == false) {
 					checkPixel.marked = true;
@@ -133,7 +139,7 @@ public class TracingDebugView extends AbstractView
 					__linkedImage.pixels[checkPixel.y*__debugImage.width + checkPixel.x] = 0xFF00FF00;
 					count++;
 					if (currentPixel.x == startPixel.x && currentPixel.y == startPixel.y) {
-						PApplet.println("FOUND START DOWN");
+						LogRepository.getInstance().getJonsLogger().info("FOUND START DOWN");
 						found = true;
 						break;
 					}
@@ -145,7 +151,7 @@ public class TracingDebugView extends AbstractView
 			index = (currentPixel.y + 1)*__debugImage.width + (currentPixel.x + 1);
 			//If it's a red pixel...
 			if (pixels[index] == 0xFFFF0000) {
-				PApplet.println("Found red to the down right");
+				LogRepository.getInstance().getJonsLogger().info("Found red to the down right");
 				checkPixel = getPixelByXY(currentPixel.x + 1, currentPixel.y + 1);
 				if (checkPixel.marked == false) {
 					checkPixel.marked = true;
@@ -155,7 +161,7 @@ public class TracingDebugView extends AbstractView
 					__linkedImage.pixels[checkPixel.y*__debugImage.width + checkPixel.x] = 0xFF00FF00;
 					count++;
 					if (currentPixel.x == startPixel.x && currentPixel.y == startPixel.y) {
-						PApplet.println("FOUND START DOWN RIGHT");
+						LogRepository.getInstance().getJonsLogger().info("FOUND START DOWN RIGHT");
 						found = true;
 						break;
 					}
@@ -167,7 +173,7 @@ public class TracingDebugView extends AbstractView
 			index = (currentPixel.y)*__debugImage.width + (currentPixel.x - 1);
 			//If it's a red pixel...
 			if (pixels[index] == 0xFFFF0000) {
-				PApplet.println("Found red to the left");
+				LogRepository.getInstance().getJonsLogger().info("Found red to the left");
 				checkPixel = getPixelByXY(currentPixel.x - 1, currentPixel.y);
 				if (checkPixel.marked == false) {
 					checkPixel.marked = true;
@@ -177,7 +183,7 @@ public class TracingDebugView extends AbstractView
 					__linkedImage.pixels[checkPixel.y*__debugImage.width + checkPixel.x] = 0xFF00FF00;
 					count++;
 					if (currentPixel.x == startPixel.x && currentPixel.y == startPixel.y) {
-						PApplet.println("FOUND START LEFT");
+						LogRepository.getInstance().getJonsLogger().info("FOUND START LEFT");
 						found = true;
 						break;
 					}
@@ -189,7 +195,7 @@ public class TracingDebugView extends AbstractView
 			index = (currentPixel.y + 1)*__debugImage.width + (currentPixel.x - 1);
 			//If it's a red pixel...
 			if (pixels[index] == 0xFFFF0000) {
-				PApplet.println("Found red to the down left");
+				LogRepository.getInstance().getJonsLogger().info("Found red to the down left");
 				checkPixel = getPixelByXY(currentPixel.x - 1, currentPixel.y + 1);
 				if (checkPixel.marked == false) {
 					checkPixel.marked = true;
@@ -199,7 +205,7 @@ public class TracingDebugView extends AbstractView
 					__linkedImage.pixels[checkPixel.y*__debugImage.width + checkPixel.x] = 0xFF00FF00;
 					count++;
 					if (currentPixel.x == startPixel.x && currentPixel.y == startPixel.y) {
-						PApplet.println("FOUND START DOWN LEFT");
+						LogRepository.getInstance().getJonsLogger().info("FOUND START DOWN LEFT");
 						found = true;
 						break;
 					}
@@ -211,7 +217,7 @@ public class TracingDebugView extends AbstractView
 			index = (currentPixel.y - 1)*__debugImage.width + (currentPixel.x);
 			//If it's a red pixel...
 			if (pixels[index] == 0xFFFF0000) {
-				PApplet.println("Found red to the up");
+				LogRepository.getInstance().getJonsLogger().info("Found red to the up");
 				checkPixel = getPixelByXY(currentPixel.x, currentPixel.y - 1);
 				if (checkPixel.marked == false) {
 					checkPixel.marked = true;
@@ -221,7 +227,7 @@ public class TracingDebugView extends AbstractView
 					__linkedImage.pixels[checkPixel.y*__debugImage.width + checkPixel.x] = 0xFF00FF00;
 					count++;
 					if (currentPixel.x == startPixel.x && currentPixel.y == startPixel.y) {
-						PApplet.println("FOUND START UP");
+						LogRepository.getInstance().getJonsLogger().info("FOUND START UP");
 						found = true;
 						break;
 					}
@@ -233,7 +239,7 @@ public class TracingDebugView extends AbstractView
 			index = (currentPixel.y - 1)*__debugImage.width + (currentPixel.x - 1);
 			//If it's a red pixel...
 			if (pixels[index] == 0xFFFF0000) {
-				PApplet.println("Found red to the up left");
+				LogRepository.getInstance().getJonsLogger().info("Found red to the up left");
 				checkPixel = getPixelByXY(currentPixel.x - 1, currentPixel.y - 1);
 				if (checkPixel.marked == false) {
 					checkPixel.marked = true;
@@ -243,7 +249,7 @@ public class TracingDebugView extends AbstractView
 					__linkedImage.pixels[checkPixel.y*__debugImage.width + checkPixel.x] = 0xFF00FF00;
 					count++;
 					if (currentPixel.x == startPixel.x && currentPixel.y == startPixel.y) {
-						PApplet.println("FOUND START UP LEFT");
+						LogRepository.getInstance().getJonsLogger().info("FOUND START UP LEFT");
 						found = true;
 						break;
 					}
@@ -255,7 +261,7 @@ public class TracingDebugView extends AbstractView
 			index = (currentPixel.y - 1)*__debugImage.width + (currentPixel.x + 1);
 			//If it's a red pixel...
 			if (pixels[index] == 0xFFFF0000) {
-				PApplet.println("Found red to the up right");
+				LogRepository.getInstance().getJonsLogger().info("Found red to the up right");
 				checkPixel = getPixelByXY(currentPixel.x + 1, currentPixel.y - 1);
 				if (checkPixel.marked == false) {
 					checkPixel.marked = true;
@@ -265,7 +271,7 @@ public class TracingDebugView extends AbstractView
 					__linkedImage.pixels[checkPixel.y*__debugImage.width + checkPixel.x] = 0xFF00FF00;
 					count++;
 					if (currentPixel.x == startPixel.x && currentPixel.y == startPixel.y) {
-						PApplet.println("FOUND START UP RIGHT");
+						LogRepository.getInstance().getJonsLogger().info("FOUND START UP RIGHT");
 						found = true;
 						break;
 					}
@@ -273,11 +279,11 @@ public class TracingDebugView extends AbstractView
 				}
 			}
 			
-			PApplet.println("NO PIXEL FOUND ALL AROUND!");
+			LogRepository.getInstance().getJonsLogger().info("NO PIXEL FOUND ALL AROUND!");
 			currentPixel = currentPixel.prev;
 			
 		}
-		PApplet.println("LINKS COMPLETED " + count);
+		LogRepository.getInstance().getJonsLogger().info("LINKS COMPLETED " + count);
 		__linkedImage.updatePixels();
 		
 		nodeCount = count;
@@ -468,9 +474,8 @@ public class TracingDebugView extends AbstractView
 	    
 	    
 	    __debugImage.updatePixels();
-	    PApplet.println("Outline Size " + outline.size());
-	   
-	   //PApplet.println("Trying to find top, left, right and bottom most pixels");
+	    LogRepository.getInstance().getJonsLogger().info("Outline Size " + outline.size());
+	   //LogRepository.getInstance().getJonsLogger().info("Trying to find top, left, right and bottom most pixels");
 	   
 	   pTop = outline.get(0);
 	   pBottom = outline.get(0);
@@ -503,12 +508,12 @@ public class TracingDebugView extends AbstractView
 	   
 	   preciseCenter = new PixelDataVO(xAggregate/outline.size(), yAggregate/outline.size(), -1);
 	   
-	   //PApplet.println("TOP PIXEL " + pTop.x + " " + pTop.y);
-	   //PApplet.println("BOTTOM PIXEL " + pBottom.x + " " + pBottom.y);
-	   //PApplet.println("RIGHT PIXEL " + pRight.x + " " + pRight.y);
-	  // PApplet.println("LEFT PIXEL " + pLeft.x + " " + pLeft.y);
+	   //LogRepository.getInstance().getJonsLogger().info("TOP PIXEL " + pTop.x + " " + pTop.y);
+	   //LogRepository.getInstance().getJonsLogger().info("BOTTOM PIXEL " + pBottom.x + " " + pBottom.y);
+	   //LogRepository.getInstance().getJonsLogger().info("RIGHT PIXEL " + pRight.x + " " + pRight.y);
+	  // LogRepository.getInstance().getJonsLogger().info("LEFT PIXEL " + pLeft.x + " " + pLeft.y);
 	   
-	   //PApplet.println("PRECISE CENTER " + preciseCenter.x + " " + preciseCenter.y);
+	   //LogRepository.getInstance().getJonsLogger().info("PRECISE CENTER " + preciseCenter.x + " " + preciseCenter.y);
 	   
 	   PVector line;
 	   PVector plane = new PVector(0, 0 - preciseCenter.y);
@@ -521,7 +526,7 @@ public class TracingDebugView extends AbstractView
 		   if (pTest.x < preciseCenter.x) {
 			   pTest.angle = 360 - pTest.angle;
 		   }
-		   //PApplet.println(pTest.angle);
+		   //LogRepository.getInstance().getJonsLogger().info(pTest.angle);
 	   }
 	   
 	   farPixels = new ArrayList<PixelDataVO>();
@@ -530,7 +535,7 @@ public class TracingDebugView extends AbstractView
 	   //Find the farthest pixel from the center
 	   farthestPixel = outline.get(0);
 	   nearestPixel = outline.get(0);
-	   //PApplet.println("Nearest Pixel " + nearestPixel.distanceFromPreciseCenter + " " + nearestPixel.x + " " + nearestPixel.y);
+	   //LogRepository.getInstance().getJonsLogger().info("Nearest Pixel " + nearestPixel.distanceFromPreciseCenter + " " + nearestPixel.x + " " + nearestPixel.y);
 	   for (int i = 1; i < outline.size(); i++) {
 		   pTest = outline.get(i);
 		   if (pTest.distanceFromPreciseCenter > farthestPixel.distanceFromPreciseCenter) {
@@ -538,13 +543,13 @@ public class TracingDebugView extends AbstractView
 		   }
 		   if (pTest.distanceFromPreciseCenter < nearestPixel.distanceFromPreciseCenter) {
 			   nearestPixel = pTest;
-			   //PApplet.println("Nearest Pixel Candidate " + nearestPixel.distanceFromPreciseCenter);
+			   //LogRepository.getInstance().getJonsLogger().info("Nearest Pixel Candidate " + nearestPixel.distanceFromPreciseCenter);
 		   }
 	   }
 	   
 	   farPixels.add(farthestPixel);
 	   nearPixels.add(nearestPixel);
-	   //PApplet.println("Nearest Pixel Set " + nearestPixel.distanceFromPreciseCenter);
+	   //LogRepository.getInstance().getJonsLogger().info("Nearest Pixel Set " + nearestPixel.distanceFromPreciseCenter);
 	   
 	   
 	   double upperBoundsFar;
@@ -559,14 +564,14 @@ public class TracingDebugView extends AbstractView
 		   //last added pixel is the farthest pixel
 		   tempPixelFar = farthestPixel;
 		   tempPixelNear = nearestPixel;
-//		   PApplet.println("Current Angle " + tempPixel.angle);
+//		   LogRepository.getInstance().getJonsLogger().info("Current Angle " + tempPixel.angle);
 		   //generate upper and lower bounds to search in
 		   upperBoundsFar = tempPixelFar.angle + 90;
 		   lowerBoundsFar = tempPixelFar.angle + 18;
 		   upperBoundsNear = tempPixelNear.angle + 90;
 		   lowerBoundsNear = tempPixelNear.angle + 18;
-//		   PApplet.println("UpperBounds " + upperBounds);
-//		   PApplet.println("LowerBounds " + lowerBounds);
+//		   LogRepository.getInstance().getJonsLogger().info("UpperBounds " + upperBounds);
+//		   LogRepository.getInstance().getJonsLogger().info("LowerBounds " + lowerBounds);
 		   //validate bounds
 		   if (upperBoundsFar > 360) {
 			   upperBoundsFar -= 360;
@@ -580,8 +585,8 @@ public class TracingDebugView extends AbstractView
 		   if (lowerBoundsNear < 0) {
 			   lowerBoundsNear = 360 - lowerBoundsNear;
 		   }
-//		   PApplet.println("Validated UpperBounds " + upperBounds);
-//		   PApplet.println("Validated LowerBounds " + lowerBounds);
+//		   LogRepository.getInstance().getJonsLogger().info("Validated UpperBounds " + upperBounds);
+//		   LogRepository.getInstance().getJonsLogger().info("Validated LowerBounds " + lowerBounds);
 		   //start at the beginning of the list
 		   farthestPixel = outline.get(0);
 		   nearestPixel = outline.get(0);
@@ -595,39 +600,39 @@ public class TracingDebugView extends AbstractView
 			   if (lowerBoundsFar > upperBoundsFar) {
 				   if ((pTest.angle >= lowerBoundsFar && pTest.angle <= 360) || (pTest.angle <= upperBoundsFar && pTest.angle >= 0)) {
 					   inRangeFar = true;
-//					   PApplet.println("Overlap in Range " + pTest.angle);
+//					   LogRepository.getInstance().getJonsLogger().info("Overlap in Range " + pTest.angle);
 				   }
 			   }
 			   else if (pTest.angle >= lowerBoundsFar && pTest.angle <= upperBoundsFar){
 				   inRangeFar = true;
-//				   PApplet.println("Regualr in Range " + pTest.angle);
+//				   LogRepository.getInstance().getJonsLogger().info("Regualr in Range " + pTest.angle);
 			   }
 			   
 			   if (lowerBoundsNear > upperBoundsNear) {
 				   if ((pTest.angle >= lowerBoundsNear && pTest.angle <= 360) || (pTest.angle <= upperBoundsNear && pTest.angle >= 0)) {
 					   inRangeNear = true;
-					   //PApplet.println("Overlap in Range " + pTest.angle);
+					   //LogRepository.getInstance().getJonsLogger().info("Overlap in Range " + pTest.angle);
 				   }
 			   }
 			   else if (pTest.angle >= lowerBoundsNear && pTest.angle <= upperBoundsNear){
 				   inRangeNear = true;
-				   //PApplet.println("Regualr in Range " + pTest.angle);
+				   //LogRepository.getInstance().getJonsLogger().info("Regualr in Range " + pTest.angle);
 			   }
 			   
 			   if (inRangeFar) {
 				   if (pTest.distanceFromPreciseCenter > farthestPixel.distanceFromPreciseCenter) {
 					   farthestPixel = pTest;
-//					   //PApplet.println("CHOSEN " + pTest.angle);
+//					   //LogRepository.getInstance().getJonsLogger().info("CHOSEN " + pTest.angle);
 				   }
 			   }
 			   if (inRangeNear) {
 				   if (pTest.distanceFromPreciseCenter < nearestPixel.distanceFromPreciseCenter) {
 					   nearestPixel = pTest;
-					   //PApplet.println("CHOSEN " + pTest.angle);
+					   //LogRepository.getInstance().getJonsLogger().info("CHOSEN " + pTest.angle);
 				   }
 			   }
 		   }
-		   //PApplet.println("ACTUAL " + nearestPixel.angle);
+		   //LogRepository.getInstance().getJonsLogger().info("ACTUAL " + nearestPixel.angle);
 		   farPixels.add(farthestPixel);
 		   nearPixels.add(nearestPixel);
 	   }
@@ -638,7 +643,7 @@ public class TracingDebugView extends AbstractView
 	   
 	   pCenter = new PixelDataVO((pRight.x + pLeft.x + pTop.x + pBottom.x)/4, (pRight.y + pLeft.y + pTop.y + pBottom.y)/4, -1);
 	   
-	   PApplet.println("CENTER PIXEL " + pCenter.x + " " + pCenter.y);
+	   LogRepository.getInstance().getJonsLogger().info("CENTER PIXEL " + pCenter.x + " " + pCenter.y);
 	   
 	   
 		
@@ -696,6 +701,9 @@ public class TracingDebugView extends AbstractView
 			app.line(edges.get(i).p2.x, edges.get(i).p2.y, edges.get(index).p1.x, edges.get(index).p1.y);
 		}
 		
+<<<<<<< .mine
+		LogRepository.getInstance().getJonsLogger().info("RenderCount " + renderCount);
+=======
 //		currentNode = startingNode;
 //		currentNode.rendered = true;
 //		int renderCount = 0;
@@ -715,6 +723,7 @@ public class TracingDebugView extends AbstractView
 //				break;
 //			}
 //		}
+>>>>>>> .r70
 		
 //		PApplet.println("RenderCount " + renderCount);
 		

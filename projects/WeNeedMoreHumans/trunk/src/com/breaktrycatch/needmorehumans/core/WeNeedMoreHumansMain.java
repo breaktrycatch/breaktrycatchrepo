@@ -1,5 +1,8 @@
 package com.breaktrycatch.needmorehumans.core;
 
+import org.igfay.jfig.JFig;
+import org.igfay.jfig.JFigException;
+
 import processing.core.PApplet;
 
 import com.breaktrycatch.lib.display.Stage;
@@ -22,7 +25,6 @@ public class WeNeedMoreHumansMain extends PApplet
 		PApplet.main(new String[] { "--present", "com.breaktrycatch.needmorehumans.core.WeNeedMoreHumansMain" });
 	}
 
-	
 	private Stage _stage;
 
 	public WeNeedMoreHumansMain()
@@ -35,9 +37,15 @@ public class WeNeedMoreHumansMain extends PApplet
 	{
 		super.setup();
 
-		frameRate(60);
-		size(800, 600, P2D);
+		try
+		{
+			JFig.initialize();
+		} catch (JFigException e)
+		{
+			e.getMessage();
+		}
 		
+
 		_stage = new NeedMoreHumansCore(this);
 
 	}
