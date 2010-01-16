@@ -8,7 +8,8 @@ import processing.core.PVector;
 
 import com.breaktrycatch.lib.view.AbstractView;
 import com.breaktrycatch.needmorehumans.tracing.EdgeVO;
-import com.breaktrycatch.needmorehumans.tracing.PixelDataVO;
+import com.breaktrycatch.needmorehumans.tracing.ImageAnalysis;
+import com.breaktrycatch.needmorehumans.tracing.PixelVO;
 import com.breaktrycatch.needmorehumans.tracing.algorithms.BetterRelevancy;
 import com.breaktrycatch.needmorehumans.utils.LogRepository;
 
@@ -24,58 +25,46 @@ public class TracingDebugView extends AbstractView
 	private PImage __debugImage;
 	private PImage __linkedImage;
 	
-	private PixelDataVO pTop;
-	private PixelDataVO pBottom;
-	private PixelDataVO pLeft;
-	private PixelDataVO pRight;
-	private PixelDataVO pCenter;
+	private PixelVO pTop;
+	private PixelVO pBottom;
+	private PixelVO pLeft;
+	private PixelVO pRight;
+	private PixelVO pCenter;
 	
-	private PixelDataVO preciseCenter;
+	private PixelVO preciseCenter;
 	
-	private PixelDataVO farthestPixel;
-	private PixelDataVO nearestPixel;
-	private PixelDataVO tempPixelFar;
-	private PixelDataVO tempPixelNear;
+	private PixelVO farthestPixel;
+	private PixelVO nearestPixel;
+	private PixelVO tempPixelFar;
+	private PixelVO tempPixelNear;
 	
-	private ArrayList<PixelDataVO> farPixels;
-	private ArrayList<PixelDataVO> nearPixels;
+	private ArrayList<PixelVO> farPixels;
+	private ArrayList<PixelVO> nearPixels;
 	
-	private ArrayList<PixelDataVO> outline;
+	private ArrayList<PixelVO> outline;
 	private ArrayList<EdgeVO> edges;
 	
-	private PixelDataVO startingNode;
-	private PixelDataVO currentNode;
-	private PixelDataVO tempNode;
-	private PixelDataVO nextNode;
+	private PixelVO startingNode;
+	private PixelVO currentNode;
+	private PixelVO tempNode;
+	private PixelVO nextNode;
 	private int nodeCount;
+	
+	
+	private ImageAnalysis __imageAnalysis;
 	
 	public TracingDebugView()
 	{
 		// all PApplet related commands should be made in setup().
 	}
 	
-	protected PixelDataVO getPixelByXY(int _x, int _y) {
+	protected PixelVO getPixelByXY(int _x, int _y) {
 		for (int i = 0; i < outline.size(); i++) {
 			if (outline.get(i).x == _x && outline.get(i).y == _y) {
 				return outline.get(i);
 			}
 		}
 		return null;
-	}
-	
-	protected void addPixelToOutline(PixelDataVO _pixel) {
-		if (isDuplicatePixel(_pixel) == false) {
-			outline.add(_pixel);
-		}
-	}
-	
-	protected boolean isDuplicatePixel(PixelDataVO _pixel) {
-		 for (int i = 0; i < outline.size(); i++) {
-			 if (outline.get(i).x == _pixel.x && outline.get(i).y == _pixel.y) {
-				 return true;
-			 }
-		 }
-		 return false;
 	}
 	
 	protected void constructLinkedNodes() {
@@ -87,13 +76,13 @@ public class TracingDebugView extends AbstractView
 		
 		LogRepository.getInstance().getJonsLogger().info("ORIGINAL PIXELS " + outline.size());
 		
-		PixelDataVO startPixel = outline.get(0);
+		PixelVO startPixel = outline.get(0);
 		startPixel.id = pid;
 		pid++;
 		startingNode = startPixel;
 		int[] pixels = __debugImage.pixels;
-		PixelDataVO currentPixel;
-		PixelDataVO checkPixel;
+		PixelVO currentPixel;
+		PixelVO checkPixel;
 		int index;
 		int count = 0;
 		
@@ -400,291 +389,196 @@ public class TracingDebugView extends AbstractView
 	{
 		super.initialize(app);
 		
-
-//	    __originalImage = app.loadImage("TestPerson_png.png");
-//	    __originalImage.loadPixels();
-//	    __debugImage = app.loadImage("TestPerson_png.png");
-//	    __debugImage.loadPixels();
-//		__linkedImage = app.loadImage("TestPerson_png.png");
-//	    __linkedImage.loadPixels();
+		String t1 = "TestPerson_png.png";
+		String t2 = "Cube.png";
+		String p1 = "RealPerson_1.png";
+		String p2 = "RealPerson_2.png";
+		String p3 = "RealPerson_3.png";
+		String p4 = "RealPerson_4.png";
+		String p5 = "RealPerson_5.png";
 		
-//		__originalImage = app.loadImage("Cube.png");
-//	    __originalImage.loadPixels();
-//	    __debugImage = app.loadImage("Cube.png");
-//	    __debugImage.loadPixels();
-//		__linkedImage = app.loadImage("Cube.png");
-//	    __linkedImage.loadPixels();
-	    
-	    __originalImage = app.loadImage("RealPerson_1.png");
-	    __originalImage.loadPixels();
-	    __debugImage = app.loadImage("RealPerson_1.png");
-	    __debugImage.loadPixels();
-		__linkedImage = app.loadImage("RealPerson_1.png");
-	    __linkedImage.loadPixels();
-	    
-//	    __originalImage = app.loadImage("RealPerson_2.png");
-//	    __originalImage.loadPixels();
-//	    __debugImage = app.loadImage("RealPerson_2.png");
-//	    __debugImage.loadPixels();
-//		__linkedImage = app.loadImage("RealPerson_2.png");
-//	    __linkedImage.loadPixels();
-	    
-//	    __originalImage = app.loadImage("RealPerson_3.png");
-//	    __originalImage.loadPixels();
-//	    __debugImage = app.loadImage("RealPerson_3.png");
-//	    __debugImage.loadPixels();
-//		__linkedImage = app.loadImage("RealPerson_3.png");
-//	    __linkedImage.loadPixels();
-	    
-//	    __originalImage = app.loadImage("RealPerson_4.png");
-//	    __originalImage.loadPixels();
-//	    __debugImage = app.loadImage("RealPerson_4.png");
-//	    __debugImage.loadPixels();
-//		__linkedImage = app.loadImage("RealPerson_4.png");
-//	    __linkedImage.loadPixels();
-	    
-//	    __originalImage = app.loadImage("RealPerson_5.png");
-//	    __originalImage.loadPixels();
-//	    __debugImage = app.loadImage("RealPerson_5.png");
-//	    __debugImage.loadPixels();
-//	    __linkedImage = app.loadImage("RealPerson_5.png");
-//	    __linkedImage.loadPixels();
-	    
-	    int totalPixels = (__originalImage.width*__originalImage.height);
-	    int index;
-	    boolean negativeSpace = true;
-	    
-	    outline = new ArrayList<PixelDataVO>();
-	    PixelDataVO vo;
-	    
-	    for (int y=0; y<__originalImage.height; y++) {
-	    	negativeSpace = true;
-	    	for (int x=0; x<__originalImage.width; x++) {
-	    		index = y*__originalImage.width + x;
-	    		//get the pixel
-	    		int pixel = __originalImage.pixels[index];
-	    		//If the alpha is real
-	    		if (app.alpha(pixel) > 0xEE) {
-	    			if (negativeSpace == true) {
-	    				negativeSpace = false;
-	    				__debugImage.pixels[y*__originalImage.width + x] = 0xFFFF0000;
-	    	    		vo = new PixelDataVO(x, y, index);
-	    	    		addPixelToOutline(vo);
-	    			}
-	    		}
-	    		else {
-	    			if (negativeSpace == false) {
-	    				negativeSpace = true;
-	    				__debugImage.pixels[y*__originalImage.width + x] = 0xFFFF0000;
-	    	    		vo = new PixelDataVO(x, y, index);
-	    	    		addPixelToOutline(vo);
-	    			}
-	    		}
-	    	}
-	    }
-	    
-	    for (int x=0; x<__originalImage.width; x++) {
-	    	negativeSpace = true;
-	    	for (int y=0; y<__originalImage.height; y++) {
-	    		index = y*__originalImage.width + x;
-	    		//get the pixel
-	    		int pixel = __originalImage.pixels[index];
-	    		//If the alpha is real
-	    		if (app.alpha(pixel) > 0xEE) {
-	    			if (negativeSpace == true) {
-	    				negativeSpace = false;
-	    				__debugImage.pixels[y*__originalImage.width + x] = 0xFFFF0000;
-	    	    		vo = new PixelDataVO(x, y, index);
-	    	    		addPixelToOutline(vo);
-	    			}
-	    		}
-	    		else {
-	    			if (negativeSpace == false) {
-	    				negativeSpace = true;
-	    				__debugImage.pixels[y*__originalImage.width + x] = 0xFFFF0000;
-	    	    		vo = new PixelDataVO(x, y, index);
-	    	    		addPixelToOutline(vo);
-	    			}
-	    		}
-	    	}
-	    }
-	    
-	    
-	    constructLinkedNodes();
+		__imageAnalysis = new ImageAnalysis(app);
+		__imageAnalysis.analyzeImage(p2);
+		
 	    
 	    
 	    
-	    __debugImage.updatePixels();
-	    LogRepository.getInstance().getJonsLogger().info("Outline Size " + outline.size());
-	   //LogRepository.getInstance().getJonsLogger().info("Trying to find top, left, right and bottom most pixels");
-	   
-	   pTop = outline.get(0);
-	   pBottom = outline.get(0);
-	   pLeft = outline.get(0);
-	   pRight = outline.get(0);
-	   PixelDataVO pTest;
-	   
-	   app.ellipseMode(PApplet.CENTER);
-	   
-	   int xAggregate = 0;
-	   int yAggregate = 0;
-	   
-	   for (int i = 1; i < outline.size(); i++) {
-		   pTest = outline.get(i);
-		   xAggregate += pTest.x;
-		   yAggregate += pTest.y;
-		   if (pTest.y < pTop.y) {
-			   pTop = pTest;
-		   }
-		   if (pTest.y > pBottom.y) {
-			   pBottom = pTest;
-		   }
-		   if (pTest.x < pLeft.x) {
-			   pLeft = pTest;
-		   }
-		   if (pTest.x > pRight.x) {
-			   pRight = pTest;
-		   }
-	   }
-	   
-	   preciseCenter = new PixelDataVO(xAggregate/outline.size(), yAggregate/outline.size(), -1);
-	   
-	   //LogRepository.getInstance().getJonsLogger().info("TOP PIXEL " + pTop.x + " " + pTop.y);
-	   //LogRepository.getInstance().getJonsLogger().info("BOTTOM PIXEL " + pBottom.x + " " + pBottom.y);
-	   //LogRepository.getInstance().getJonsLogger().info("RIGHT PIXEL " + pRight.x + " " + pRight.y);
-	  // LogRepository.getInstance().getJonsLogger().info("LEFT PIXEL " + pLeft.x + " " + pLeft.y);
-	   
-	   //LogRepository.getInstance().getJonsLogger().info("PRECISE CENTER " + preciseCenter.x + " " + preciseCenter.y);
-	   
-	   PVector line;
-	   PVector plane = new PVector(0, 0 - preciseCenter.y);
-	   //Now lets radially figure out this distance from the center
-	   for (int i = 0; i < outline.size(); i++) {
-		   pTest = outline.get(i);
-		   pTest.distanceFromPreciseCenter = Math.sqrt(Math.pow((pTest.x - preciseCenter.x), 2) + Math.pow((pTest.y - preciseCenter.y), 2));
-		   line = new PVector(pTest.x - preciseCenter.x, pTest.y - preciseCenter.y);
-		   pTest.angle = PApplet.degrees(PVector.angleBetween(line, plane));
-		   if (pTest.x < preciseCenter.x) {
-			   pTest.angle = 360 - pTest.angle;
-		   }
-		   //LogRepository.getInstance().getJonsLogger().info(pTest.angle);
-	   }
-	   
-	   farPixels = new ArrayList<PixelDataVO>();
-	   nearPixels = new ArrayList<PixelDataVO>();
-	   
-	   //Find the farthest pixel from the center
-	   farthestPixel = outline.get(0);
-	   nearestPixel = outline.get(0);
-	   //LogRepository.getInstance().getJonsLogger().info("Nearest Pixel " + nearestPixel.distanceFromPreciseCenter + " " + nearestPixel.x + " " + nearestPixel.y);
-	   for (int i = 1; i < outline.size(); i++) {
-		   pTest = outline.get(i);
-		   if (pTest.distanceFromPreciseCenter > farthestPixel.distanceFromPreciseCenter) {
-			   farthestPixel = pTest;
-		   }
-		   if (pTest.distanceFromPreciseCenter < nearestPixel.distanceFromPreciseCenter) {
-			   nearestPixel = pTest;
-			   //LogRepository.getInstance().getJonsLogger().info("Nearest Pixel Candidate " + nearestPixel.distanceFromPreciseCenter);
-		   }
-	   }
-	   
-	   farPixels.add(farthestPixel);
-	   nearPixels.add(nearestPixel);
-	   //LogRepository.getInstance().getJonsLogger().info("Nearest Pixel Set " + nearestPixel.distanceFromPreciseCenter);
-	   
-	   
-	   double upperBoundsFar;
-	   double lowerBoundsFar;
-	   double upperBoundsNear;
-	   double lowerBoundsNear;
-	   
-	   
-	   
-	   //Want to get 4 other extremities
-	   for (int j = 0; j < 4; j++) {
-		   //last added pixel is the farthest pixel
-		   tempPixelFar = farthestPixel;
-		   tempPixelNear = nearestPixel;
-//		   LogRepository.getInstance().getJonsLogger().info("Current Angle " + tempPixel.angle);
-		   //generate upper and lower bounds to search in
-		   upperBoundsFar = tempPixelFar.angle + 90;
-		   lowerBoundsFar = tempPixelFar.angle + 18;
-		   upperBoundsNear = tempPixelNear.angle + 90;
-		   lowerBoundsNear = tempPixelNear.angle + 18;
-//		   LogRepository.getInstance().getJonsLogger().info("UpperBounds " + upperBounds);
-//		   LogRepository.getInstance().getJonsLogger().info("LowerBounds " + lowerBounds);
-		   //validate bounds
-		   if (upperBoundsFar > 360) {
-			   upperBoundsFar -= 360;
-		   }
-		   if (lowerBoundsFar < 0) {
-			   lowerBoundsFar = 360 - lowerBoundsFar;
-		   }
-		   if (upperBoundsNear > 360) {
-			   upperBoundsNear -= 360;
-		   }
-		   if (lowerBoundsNear < 0) {
-			   lowerBoundsNear = 360 - lowerBoundsNear;
-		   }
-//		   LogRepository.getInstance().getJonsLogger().info("Validated UpperBounds " + upperBounds);
-//		   LogRepository.getInstance().getJonsLogger().info("Validated LowerBounds " + lowerBounds);
-		   //start at the beginning of the list
-		   farthestPixel = outline.get(0);
-		   nearestPixel = outline.get(0);
-		   for (int i = 1; i < outline.size(); i++) {
-			   pTest = outline.get(i);
-			   
-			   //difference = Math.abs(pTest.angle - tempPixel.angle);
-			   boolean inRangeFar = false;
-			   boolean inRangeNear = false;
-			   
-			   if (lowerBoundsFar > upperBoundsFar) {
-				   if ((pTest.angle >= lowerBoundsFar && pTest.angle <= 360) || (pTest.angle <= upperBoundsFar && pTest.angle >= 0)) {
-					   inRangeFar = true;
-//					   LogRepository.getInstance().getJonsLogger().info("Overlap in Range " + pTest.angle);
-				   }
-			   }
-			   else if (pTest.angle >= lowerBoundsFar && pTest.angle <= upperBoundsFar){
-				   inRangeFar = true;
-//				   LogRepository.getInstance().getJonsLogger().info("Regualr in Range " + pTest.angle);
-			   }
-			   
-			   if (lowerBoundsNear > upperBoundsNear) {
-				   if ((pTest.angle >= lowerBoundsNear && pTest.angle <= 360) || (pTest.angle <= upperBoundsNear && pTest.angle >= 0)) {
-					   inRangeNear = true;
-					   //LogRepository.getInstance().getJonsLogger().info("Overlap in Range " + pTest.angle);
-				   }
-			   }
-			   else if (pTest.angle >= lowerBoundsNear && pTest.angle <= upperBoundsNear){
-				   inRangeNear = true;
-				   //LogRepository.getInstance().getJonsLogger().info("Regualr in Range " + pTest.angle);
-			   }
-			   
-			   if (inRangeFar) {
-				   if (pTest.distanceFromPreciseCenter > farthestPixel.distanceFromPreciseCenter) {
-					   farthestPixel = pTest;
+	    
+//	    constructLinkedNodes();
+	    
+	    
+	    
+//	    __debugImage.updatePixels();
+//	    LogRepository.getInstance().getJonsLogger().info("Outline Size " + outline.size());
+//	   //LogRepository.getInstance().getJonsLogger().info("Trying to find top, left, right and bottom most pixels");
+//	   
+//	   pTop = outline.get(0);
+//	   pBottom = outline.get(0);
+//	   pLeft = outline.get(0);
+//	   pRight = outline.get(0);
+//	   PixelVO pTest;
+//	   
+//	   app.ellipseMode(PApplet.CENTER);
+//	   
+//	   int xAggregate = 0;
+//	   int yAggregate = 0;
+//	   
+//	   for (int i = 1; i < outline.size(); i++) {
+//		   pTest = outline.get(i);
+//		   xAggregate += pTest.x;
+//		   yAggregate += pTest.y;
+//		   if (pTest.y < pTop.y) {
+//			   pTop = pTest;
+//		   }
+//		   if (pTest.y > pBottom.y) {
+//			   pBottom = pTest;
+//		   }
+//		   if (pTest.x < pLeft.x) {
+//			   pLeft = pTest;
+//		   }
+//		   if (pTest.x > pRight.x) {
+//			   pRight = pTest;
+//		   }
+//	   }
+//	   
+//	   preciseCenter = new PixelVO(xAggregate/outline.size(), yAggregate/outline.size(), -1);
+//	   
+//	   //LogRepository.getInstance().getJonsLogger().info("TOP PIXEL " + pTop.x + " " + pTop.y);
+//	   //LogRepository.getInstance().getJonsLogger().info("BOTTOM PIXEL " + pBottom.x + " " + pBottom.y);
+//	   //LogRepository.getInstance().getJonsLogger().info("RIGHT PIXEL " + pRight.x + " " + pRight.y);
+//	  // LogRepository.getInstance().getJonsLogger().info("LEFT PIXEL " + pLeft.x + " " + pLeft.y);
+//	   
+//	   //LogRepository.getInstance().getJonsLogger().info("PRECISE CENTER " + preciseCenter.x + " " + preciseCenter.y);
+//	   
+//	   PVector line;
+//	   PVector plane = new PVector(0, 0 - preciseCenter.y);
+//	   //Now lets radially figure out this distance from the center
+//	   for (int i = 0; i < outline.size(); i++) {
+//		   pTest = outline.get(i);
+//		   pTest.distanceFromPreciseCenter = Math.sqrt(Math.pow((pTest.x - preciseCenter.x), 2) + Math.pow((pTest.y - preciseCenter.y), 2));
+//		   line = new PVector(pTest.x - preciseCenter.x, pTest.y - preciseCenter.y);
+//		   pTest.angle = PApplet.degrees(PVector.angleBetween(line, plane));
+//		   if (pTest.x < preciseCenter.x) {
+//			   pTest.angle = 360 - pTest.angle;
+//		   }
+//		   //LogRepository.getInstance().getJonsLogger().info(pTest.angle);
+//	   }
+//	   
+//	   farPixels = new ArrayList<PixelVO>();
+//	   nearPixels = new ArrayList<PixelVO>();
+//	   
+//	   //Find the farthest pixel from the center
+//	   farthestPixel = outline.get(0);
+//	   nearestPixel = outline.get(0);
+//	   //LogRepository.getInstance().getJonsLogger().info("Nearest Pixel " + nearestPixel.distanceFromPreciseCenter + " " + nearestPixel.x + " " + nearestPixel.y);
+//	   for (int i = 1; i < outline.size(); i++) {
+//		   pTest = outline.get(i);
+//		   if (pTest.distanceFromPreciseCenter > farthestPixel.distanceFromPreciseCenter) {
+//			   farthestPixel = pTest;
+//		   }
+//		   if (pTest.distanceFromPreciseCenter < nearestPixel.distanceFromPreciseCenter) {
+//			   nearestPixel = pTest;
+//			   //LogRepository.getInstance().getJonsLogger().info("Nearest Pixel Candidate " + nearestPixel.distanceFromPreciseCenter);
+//		   }
+//	   }
+//	   
+//	   farPixels.add(farthestPixel);
+//	   nearPixels.add(nearestPixel);
+//	   //LogRepository.getInstance().getJonsLogger().info("Nearest Pixel Set " + nearestPixel.distanceFromPreciseCenter);
+//	   
+//	   
+//	   double upperBoundsFar;
+//	   double lowerBoundsFar;
+//	   double upperBoundsNear;
+//	   double lowerBoundsNear;
+//	   
+//	   
+//	   
+//	   //Want to get 4 other extremities
+//	   for (int j = 0; j < 4; j++) {
+//		   //last added pixel is the farthest pixel
+//		   tempPixelFar = farthestPixel;
+//		   tempPixelNear = nearestPixel;
+////		   LogRepository.getInstance().getJonsLogger().info("Current Angle " + tempPixel.angle);
+//		   //generate upper and lower bounds to search in
+//		   upperBoundsFar = tempPixelFar.angle + 90;
+//		   lowerBoundsFar = tempPixelFar.angle + 18;
+//		   upperBoundsNear = tempPixelNear.angle + 90;
+//		   lowerBoundsNear = tempPixelNear.angle + 18;
+////		   LogRepository.getInstance().getJonsLogger().info("UpperBounds " + upperBounds);
+////		   LogRepository.getInstance().getJonsLogger().info("LowerBounds " + lowerBounds);
+//		   //validate bounds
+//		   if (upperBoundsFar > 360) {
+//			   upperBoundsFar -= 360;
+//		   }
+//		   if (lowerBoundsFar < 0) {
+//			   lowerBoundsFar = 360 - lowerBoundsFar;
+//		   }
+//		   if (upperBoundsNear > 360) {
+//			   upperBoundsNear -= 360;
+//		   }
+//		   if (lowerBoundsNear < 0) {
+//			   lowerBoundsNear = 360 - lowerBoundsNear;
+//		   }
+////		   LogRepository.getInstance().getJonsLogger().info("Validated UpperBounds " + upperBounds);
+////		   LogRepository.getInstance().getJonsLogger().info("Validated LowerBounds " + lowerBounds);
+//		   //start at the beginning of the list
+//		   farthestPixel = outline.get(0);
+//		   nearestPixel = outline.get(0);
+//		   for (int i = 1; i < outline.size(); i++) {
+//			   pTest = outline.get(i);
+//			   
+//			   //difference = Math.abs(pTest.angle - tempPixel.angle);
+//			   boolean inRangeFar = false;
+//			   boolean inRangeNear = false;
+//			   
+//			   if (lowerBoundsFar > upperBoundsFar) {
+//				   if ((pTest.angle >= lowerBoundsFar && pTest.angle <= 360) || (pTest.angle <= upperBoundsFar && pTest.angle >= 0)) {
+//					   inRangeFar = true;
+////					   LogRepository.getInstance().getJonsLogger().info("Overlap in Range " + pTest.angle);
+//				   }
+//			   }
+//			   else if (pTest.angle >= lowerBoundsFar && pTest.angle <= upperBoundsFar){
+//				   inRangeFar = true;
+////				   LogRepository.getInstance().getJonsLogger().info("Regualr in Range " + pTest.angle);
+//			   }
+//			   
+//			   if (lowerBoundsNear > upperBoundsNear) {
+//				   if ((pTest.angle >= lowerBoundsNear && pTest.angle <= 360) || (pTest.angle <= upperBoundsNear && pTest.angle >= 0)) {
+//					   inRangeNear = true;
+//					   //LogRepository.getInstance().getJonsLogger().info("Overlap in Range " + pTest.angle);
+//				   }
+//			   }
+//			   else if (pTest.angle >= lowerBoundsNear && pTest.angle <= upperBoundsNear){
+//				   inRangeNear = true;
+//				   //LogRepository.getInstance().getJonsLogger().info("Regualr in Range " + pTest.angle);
+//			   }
+//			   
+//			   if (inRangeFar) {
+//				   if (pTest.distanceFromPreciseCenter > farthestPixel.distanceFromPreciseCenter) {
+//					   farthestPixel = pTest;
+////					   //LogRepository.getInstance().getJonsLogger().info("CHOSEN " + pTest.angle);
+//				   }
+//			   }
+//			   if (inRangeNear) {
+//				   if (pTest.distanceFromPreciseCenter < nearestPixel.distanceFromPreciseCenter) {
+//					   nearestPixel = pTest;
 //					   //LogRepository.getInstance().getJonsLogger().info("CHOSEN " + pTest.angle);
-				   }
-			   }
-			   if (inRangeNear) {
-				   if (pTest.distanceFromPreciseCenter < nearestPixel.distanceFromPreciseCenter) {
-					   nearestPixel = pTest;
-					   //LogRepository.getInstance().getJonsLogger().info("CHOSEN " + pTest.angle);
-				   }
-			   }
-		   }
-		   //LogRepository.getInstance().getJonsLogger().info("ACTUAL " + nearestPixel.angle);
-		   farPixels.add(farthestPixel);
-		   nearPixels.add(nearestPixel);
-	   }
-	   
-	   
-	   
-	   
-	   
-	   pCenter = new PixelDataVO((pRight.x + pLeft.x + pTop.x + pBottom.x)/4, (pRight.y + pLeft.y + pTop.y + pBottom.y)/4, -1);
-	   
-	   LogRepository.getInstance().getJonsLogger().info("CENTER PIXEL " + pCenter.x + " " + pCenter.y);
+//				   }
+//			   }
+//		   }
+//		   //LogRepository.getInstance().getJonsLogger().info("ACTUAL " + nearestPixel.angle);
+//		   farPixels.add(farthestPixel);
+//		   nearPixels.add(nearestPixel);
+//	   }
+//	   
+//	   
+//	   
+//	   
+//	   
+//	   pCenter = new PixelVO((pRight.x + pLeft.x + pTop.x + pBottom.x)/4, (pRight.y + pLeft.y + pTop.y + pBottom.y)/4, -1);
+//	   
+//	   LogRepository.getInstance().getJonsLogger().info("CENTER PIXEL " + pCenter.x + " " + pCenter.y);
 	   
 	   
 		
@@ -693,12 +587,13 @@ public class TracingDebugView extends AbstractView
 	
 	@Override
 	public void draw() {
-		PApplet app = getApp();
-		app.background(255);
-		app.image(__originalImage, 0, 0);
-		app.image(__debugImage, __originalImage.width, 0);
-		app.image(__linkedImage, __originalImage.width * 2, 0);
-		app.noStroke();
+		__imageAnalysis.draw();
+//		PApplet app = getApp();
+//		app.background(255);
+//		app.image(__originalImage, 0, 0);
+//		app.image(__debugImage, __originalImage.width, 0);
+//		app.image(__linkedImage, __originalImage.width * 2, 0);
+//		app.noStroke();
 //		app.fill(255, 255, 0);
 //		app.ellipse(pTop.x + __originalImage.width, pTop.y, 20, 20);
 //		app.ellipse(pBottom.x + __originalImage.width, pBottom.y, 20, 20);
@@ -708,11 +603,11 @@ public class TracingDebugView extends AbstractView
 //		app.fill(0, 255, 0);
 //		app.ellipse(pCenter.x + __originalImage.width, pCenter.y, 20, 20);
 		
-		app.fill(0, 0, 255);
-		app.ellipse(preciseCenter.x + __originalImage.width, preciseCenter.y, 20, 20);
+//		app.fill(0, 0, 255);
+//		app.ellipse(preciseCenter.x + __originalImage.width, preciseCenter.y, 20, 20);
 		//app.ellipse(farthestPixel.x + __originalImage.width, farthestPixel.y, 20, 20);
 		
-		app.noFill();
+//		app.noFill();
 		
 //		app.stroke(255, 0, 0);
 //		app.rect(pLeft.x + __originalImage.width, pTop.y, pRight.x - pLeft.x, pBottom.y - pTop.y);
@@ -730,10 +625,10 @@ public class TracingDebugView extends AbstractView
 //			app.line(preciseCenter.x + __originalImage.width, preciseCenter.y, nearPixels.get(i).x + __originalImage.width, nearPixels.get(i).y);
 //		}
 		
-		app.stroke(255, 0, 255);
-		for (int i = 0; i < edges.size(); i++) {
-			app.line(edges.get(i).p1.x, edges.get(i).p1.y, edges.get(i).p2.x, edges.get(i).p2.y);
-		}
+//		app.stroke(255, 0, 255);
+//		for (int i = 0; i < edges.size(); i++) {
+//			app.line(edges.get(i).p1.x, edges.get(i).p1.y, edges.get(i).p2.x, edges.get(i).p2.y);
+//		}
 		
 //		LogRepository.getInstance().getJonsLogger().info("RenderCount " + renderCount);
 
