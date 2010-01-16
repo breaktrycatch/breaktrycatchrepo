@@ -5,12 +5,12 @@ import processing.core.PVector;
 
 public class EdgeVO {
 	
-	public PixelDataVO p1;
-	public PixelDataVO p2;
+	public PixelVO p1;
+	public PixelVO p2;
 	
 	public double length;
 	
-	public EdgeVO(PixelDataVO _p1, PixelDataVO _p2) {
+	public EdgeVO(PixelVO _p1, PixelVO _p2) {
 		p1 = _p1;
 		p2 = _p2;
 		//PApplet.println("New EDGE " + p1.x + " " + p1.y + " p2 " + p2.x + " " + p2.y);
