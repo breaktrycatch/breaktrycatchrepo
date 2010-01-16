@@ -13,7 +13,7 @@ public class EdgeVO {
 	public EdgeVO(PixelDataVO _p1, PixelDataVO _p2) {
 		p1 = _p1;
 		p2 = _p2;
-		
+		//PApplet.println("New EDGE " + p1.x + " " + p1.y + " p2 " + p2.x + " " + p2.y);
 		updateLength();
 	}
 	

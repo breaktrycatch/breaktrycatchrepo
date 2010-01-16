@@ -23,7 +23,7 @@ public class NeedMoreHumansCore extends Stage
 		app.size(1300, 800, PApplet.P2D);
 		
 		_mainViewManager = new ViewManager(app);
-		_mainViewManager.changeView(ViewManager.CAPTURE_VIEW);
+		_mainViewManager.changeView(ViewManager.TRACING_VIEW);
 		add(_mainViewManager);
 
 		add(FPS.register(app));
