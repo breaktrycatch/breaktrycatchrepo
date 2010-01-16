@@ -3,16 +3,16 @@ package com.breaktrycatch.needmorehumans.control.webcam;
 import processing.core.PApplet;
 import processing.core.PImage;
 
+import com.breaktrycatch.needmorehumans.utils.ImageUtils;
+
 public class ImageSubstractionController
 {
 	private PApplet _app;
 	private PImage _backgroundImage;
 	private int _activityLevel = 0;
 
-	private int _differenceThreshold = 60;
-	private int _blurAmount = 4;
-	private float _downresFactor = 2f;
-	private final int _gapFillSize = (int) (_blurAmount) * 3;
+	private int _differenceThreshold = 65;
+	private float _downresFactor = 1f;
 
 	public ImageSubstractionController(PApplet app)
 	{
@@ -25,28 +25,11 @@ public class ImageSubstractionController
 		setBackgroundImage(background);
 	}
 
-	public int getBlurAmount()
-	{
-		return _blurAmount;
-	}
-
-	/**
-	 * Sets the blur amount. This is useful for reducing video noise in the
-	 * image. If you increase the blur amount, you may also need to increase the
-	 * gapFillSize to compensate for where areas of different colors meet.
-	 * 
-	 * @param blur
-	 */
-	public void setBlurAmount(int blur)
-	{
-		_blurAmount = blur;
-	}
-
 	public int getDifferenceThreshold()
 	{
 		return _differenceThreshold;
 	}
-
+	
 	/**
 	 * Sets the difference threshold for background detection. Any pixels with a
 	 * color difference over this value will be marked as the foreground.
@@ -58,6 +41,40 @@ public class ImageSubstractionController
 		_differenceThreshold = diff;
 	}
 
+
+	/*
+	 * Plan of attack: Create background model: - queue of N (5-10?) background
+	 * images used to create an average background distribution (histogram) -
+	 * Smooth the histogram using the mean shift vector. + mean(of point x) =
+	 * (sum->(i=1 to n) pt[i]*g((x - x[i]/h)^2) / sum->(i=1 to n) g((x -
+	 * x[i]/h)^2)) - x; + where: x = point to test h = analysis bandwidth
+	 * (positive const?)
+	 * 
+	 * g(u) = first derivative of a bounded support function called k(u). k(u) =
+	 * kernel profile (Epanechnicov kernel). * - find items that lie outside
+	 * this distribution?
+	 */
+	// private void computePixel(ArrayList<PImage> backgrounds, PImage target,
+	// int pixel)
+	// {
+	// int x = backgrounds.get(0).pixels[pixel];
+	// int kernelRadius = 3; // TODO: Create a kernel for g()
+	//
+	// int size = backgrounds.size();
+	// for (int i = 1; i < size; i++)
+	// {
+	// PImage img = backgrounds.get(i);
+	// int xi = img.pixels[pixel];
+	// float gReduced = g(PApplet.pow((x - xi / kernelRadius), 2));
+	// float mx = ((xi * gReduced) / gReduced) - x;
+	// }
+	// }
+
+	// private float g(float val)
+	// {
+	// return val;
+	//
+	// }
 	/**
 	 * Sets the background image. Use this if the static background changes and
 	 * you need to reset.
@@ -67,9 +84,13 @@ public class ImageSubstractionController
 	 */
 	public void setBackgroundImage(PImage background)
 	{
-		_backgroundImage = background;
+		_backgroundImage = ImageUtils.cloneImage(background);
 		_backgroundImage.resize((int) (_backgroundImage.width / _downresFactor), (int) (_backgroundImage.height / _downresFactor));
-		_backgroundImage.filter(PApplet.BLUR, _blurAmount);
+	}
+
+	public PImage getBackgroundImage()
+	{
+		return _backgroundImage;
 	}
 
 	/**
@@ -95,14 +116,15 @@ public class ImageSubstractionController
 	 */
 	public PImage calculateImageDifference(PImage foreground)
 	{
-		foreground.resize((int) (foreground.width / _downresFactor), (int) (foreground.height / _downresFactor));
-
+		if (_downresFactor != 1)
+		{
+			foreground.resize((int) (foreground.width / _downresFactor), (int) (foreground.height / _downresFactor));
+		}
+		
 		if (!verifyIdenticalSize(foreground, _backgroundImage))
 		{
 			throw new Error("Foreground and Background images must be the same size!");
 		}
-
-		foreground.filter(PApplet.BLUR, _blurAmount);
 
 		PImage diffed = _app.createImage(foreground.width, foreground.height, PApplet.ARGB);
 
@@ -110,18 +132,28 @@ public class ImageSubstractionController
 		int imageSize = foreground.pixels.length;
 		for (int i = imageSize - 1; i > -1; i--)
 		{
-			int diff = getDiff(foreground, _backgroundImage, i);
-			if (diff > _differenceThreshold)
+			int currColor = foreground.pixels[i];
+			int backgroundColor = _backgroundImage.pixels[i];
+
+			int currR = (currColor >> 16) & 0xFF;
+			int currG = (currColor >> 8) & 0xFF;
+			int currB = currColor & 0xFF;
+
+			// Extract the red, green, and blue components of the background
+			// pixelÕs color
+			int bkgdR = (backgroundColor >> 16) & 0xFF;
+			int bkgdG = (backgroundColor >> 8) & 0xFF;
+			int bkgdB = backgroundColor & 0xFF;
+
+			// Compute the difference of the red, green, and blue values
+			int diffR = PApplet.abs(currR - bkgdR);
+			int diffG = PApplet.abs(currG - bkgdG);
+			int diffB = PApplet.abs(currB - bkgdB);
+
+			int diff = (diffR + diffG + diffB);
+			if (diffR >= _differenceThreshold || diffG >= _differenceThreshold || diffB >= _differenceThreshold)
 			{
-				int baseAlpha = 123;
-				int maxAlpha = 122;
-				float perc = (diff / 765f); // multiply by max val for 3 chans.
-				int alpha = baseAlpha + (int) (maxAlpha * perc);
-				if (alpha > baseAlpha + 5)
-				{
-					// PImage mask function uses blue channel
-					diffed.pixels[i] = (255 << 24 | 0 << 16 | 0 << 8 | 255);
-				}
+				diffed.pixels[i] = (255 << 24 | 0 << 16 | 0 << 8 | 255);
 			}
 
 			// sub the cumulative differences in the image to get a general idea
@@ -134,135 +166,48 @@ public class ImageSubstractionController
 
 	/**
 	 * Based on the background image and the supplied foreground image,
-	 * calculates a new image based on the foreground that has been masked to
-	 * include only the parts of the image that have changed significantly.
+	 * calculates a new image that can be used to mask off the image to show
+	 * only foreground elements.
+	 * 
+	 * @param foreground
+	 * @return A mask
+	 */
+	public PImage createDifferenceMask(PImage foreground)
+	{
+		PImage mask = calculateImageDifference(foreground);
+		mask.resize(foreground.width, foreground.height);
+		return mask;
+	}
+
+	/**
+	 * Creates a difference mask and applies it to a copy of the supplied image.
 	 * 
 	 * @param foreground
 	 * @return
 	 */
-	public PImage createDifferenceMask(PImage foreground)
+	public PImage createAndApplyDifferenceMask(PImage foreground)
 	{
-		PImage foregroundCopy = null;
-		try
+		PImage foregroundCopy = ImageUtils.cloneImage(foreground);
+		PImage mask = createDifferenceMask(foregroundCopy);
+		return applyDifferenceMask(foregroundCopy, mask);
+	}
+
+	/**
+	 * Applies a difference mask to the supplied target image.
+	 * 
+	 * @param target
+	 * @param mask
+	 * @return
+	 */
+	public PImage applyDifferenceMask(PImage target, PImage mask)
+	{
+		if (!verifyIdenticalSize(target, mask))
 		{
-			foregroundCopy = (PImage) foreground.clone();
-		} catch (CloneNotSupportedException e)
-		{
-			e.printStackTrace();
+			mask.resize(target.width, target.height);
 		}
-		PImage mask = calculateImageDifference(foreground);
-		fillGaps(mask);
-		mask.resize(foregroundCopy.width, foregroundCopy.height);
-		// return mask;
 
-		foregroundCopy.mask(mask);
-		return foregroundCopy;
-	}
-
-	private void fillGaps(PImage image)
-	{
-		fillHorizontalGaps(image);
-		fillVerticalGaps(image);
-	}
-
-	private void fillVerticalGaps(PImage image)
-	{
-		int i = 0;
-		for (int x = 0; x < image.width; x++)
-		{
-			int startY = -1;
-			int possibleFillStart = -1;
-			for (int y = 0; y < image.height; y++)
-			{
-				i = y * image.width + x;
-				float alpha = _app.blue(image.pixels[i]);
-
-				if (startY != -1)
-				{
-					if (possibleFillStart != -1 && alpha != 0)
-					{
-						int gapSize = possibleFillStart - startY;
-						if (gapSize < _gapFillSize)
-						{
-							for (int k = 0; k <= gapSize; k++)
-							{
-								int pos = x + (startY + k) * image.width;
-								image.pixels[pos] = (255 << 24 | 0 << 16 | 255 << 8 | 255);
-							}
-						}
-						startY = -1;
-						possibleFillStart = -1;
-					}
-
-					if (alpha == 0)
-					{
-						possibleFillStart = y;
-					}
-				}
-
-				if (alpha > 0)
-				{
-					startY = y;
-				}
-			}
-		}
-	}
-
-	private void fillHorizontalGaps(PImage image)
-	{
-		int i = 0;
-		for (int y = 0; y < image.height; y++)
-		{
-			int startX = -1;
-			int possibleFillStart = -1;
-			for (int x = 0; x < image.width; x++)
-			{
-				float alpha = _app.blue(image.pixels[i]);
-
-				if (startX != -1)
-				{
-					if (possibleFillStart != -1 && alpha != 0)
-					{
-						int gapSize = possibleFillStart - startX;
-						if (gapSize < _gapFillSize)
-						{
-							for (int k = 0; k <= gapSize; k++)
-							{
-								int pos = y * image.width + startX + k;
-								image.pixels[pos] = (255 << 24 | 255 << 16 | 0 << 8 | 255);
-							}
-						}
-						startX = -1;
-						possibleFillStart = -1;
-					}
-
-					if (alpha == 0)
-					{
-						possibleFillStart = x;
-					}
-				}
-
-				if (alpha > 0)
-				{
-					startX = x;
-				}
-
-				i++;
-			}
-		}
-	}
-
-	private int getDiff(PImage img1, PImage img2, int index)
-	{
-		float r1 = _app.red(img1.pixels[index]);
-		float g1 = _app.green(img1.pixels[index]);
-		float b1 = _app.blue(img1.pixels[index]);
-
-		float r2 = _app.red(img2.pixels[index]);
-		float g2 = _app.green(img2.pixels[index]);
-		float b2 = _app.blue(img2.pixels[index]);
-
-		return (int) PApplet.abs((r1 - r2) + (g1 - g2) + (b1 - b2));
+		target.mask(mask);
+		return target;
 	}
 
 	private boolean verifyIdenticalSize(PImage foreground, PImage image)

@@ -19,15 +19,15 @@ public class AbstractViewManager extends DisplayObject
 	{
 		super(app);
 	}
-	
+
 	public void changeView(String view)
-	{	
+	{
 		// don't change if the view is already up.
-		if(_currentViewName == view)
+		if (_currentViewName == view)
 		{
 			return;
 		}
-		
+
 		AbstractView instance = null;
 		try
 		{
@@ -44,15 +44,14 @@ public class AbstractViewManager extends DisplayObject
 		{
 			PApplet.println("Couldn't access class: " + view);
 		}
-		
-		if(_currentView != null)
+
+		if (_currentView != null)
 		{
 			remove(_currentView);
 		}
-		
+
 		_currentViewName = view;
 		_currentView = instance;
 		add(_currentView);
 	}
-
 }

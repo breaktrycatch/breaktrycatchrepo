@@ -1,7 +1,6 @@
 package com.breaktrycatch.lib.display;
 
 import java.util.ArrayList;
-import java.util.Collection;
 
 import processing.core.PApplet;
 
