@@ -38,7 +38,31 @@ public class HumanCaptureView extends AbstractView
 	public HumanCaptureView()
 	{
 	}
+    private static String dllpathx32 = "C://Program Files//Code Laboratories//CL-Eye Platform SDK//Bin//CLEyeMulticam.dll";
+    private static String dllpathx64 = "C://Program Files (x86)//Code Laboratories//CL-Eye Platform SDK//Bin//CLEyeMulticam.dll";
 
+    // static methods
+//    static
+//    {
+//        try
+//        {
+//            System.load(dllpathx32);
+//            System.out.println("CLEyeMulticam.dll loaded");
+//        }
+//        catch(UnsatisfiedLinkError e1)
+//        {
+//            System.out.println("(1) Could not find the CLEyeMulticam.dll");
+//            try
+//            {
+//                System.load(dllpathx64);
+//                System.out.println("CLEyeMulticam.dll loaded");
+//            }
+//            catch(UnsatisfiedLinkError e2)
+//            {
+//                System.out.println("(2) Could not find the CLEyeMulticam.dll");
+//            }
+//        }
+//    }
 	@SuppressWarnings("unchecked")
 	@Override
 	public void initialize(PApplet app)
@@ -49,14 +73,14 @@ public class HumanCaptureView extends AbstractView
 		
 		app.background(0);
 
-		_background = app.loadImage("sunset-beach.jpg");
+		_background = app.loadImage("../data/subtraction/sunset-beach.jpg");
 		_background.resize(app.width, app.height);
 		_subtractor = new ImageSubstractionController(app, app.createImage(_background.width, _background.height, PApplet.ARGB));
 
-		// _opencv = new OpenCVCapture(getApp());
-		// _opencv.initVideo("", app.width, app.height, 30);
-		// LibCompVis vis = new LibCompVis(getApp(), _opencv);
-		LibCompVis vis = null;
+		 _opencv = new OpenCVCapture(getApp());
+		 _opencv.initVideo("", app.width, app.height, 30);
+		 LibCompVis vis = new LibCompVis(getApp(), _opencv);
+//		LibCompVis vis = null;
 
 		_debugDrawer = new TileImageDrawer(app, .5f);
 
@@ -65,6 +89,8 @@ public class HumanCaptureView extends AbstractView
 		_pipeline = new ProcessorPipeline(vis);
 		_pipeline.setDebugDrawer(_debugDrawer);
 
+		_opencv.toString();
+		
 		// HashMap<String, Comparable<?>> adaptiveThreshold = new
 		// HashMap<String, Comparable<?>>();
 		// adaptiveThreshold.put(AdaptiveThresholdPlugin.FILTER_CONSTANT, 3);
@@ -202,8 +228,9 @@ public class HumanCaptureView extends AbstractView
 
 		// PApplet app = getApp();
 		//
-		// _opencv.read();
-		//
+		 _opencv.read();
+		getApp().image(_opencv.getFrame(), 0, 0);
+		 //
 		// if (app.key == ' ')
 		// {
 		// _opencv.blur(3);
