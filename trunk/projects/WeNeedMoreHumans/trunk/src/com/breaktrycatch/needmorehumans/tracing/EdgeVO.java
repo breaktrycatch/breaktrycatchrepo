@@ -10,9 +10,12 @@ public class EdgeVO {
 	
 	public double length;
 	
+	public boolean markForCulling;
+	
 	public EdgeVO(PixelVO _p1, PixelVO _p2) {
 		p1 = _p1;
 		p2 = _p2;
+		markForCulling = false;
 		//PApplet.println("New EDGE " + p1.x + " " + p1.y + " p2 " + p2.x + " " + p2.y);
 		updateLength();
 	}

@@ -2,10 +2,12 @@ package com.breaktrycatch.needmorehumans.tracing;
 
 import java.util.ArrayList;
 
+import com.breaktrycatch.needmorehumans.tracing.algorithms.BetterRelevancy;
 import com.breaktrycatch.needmorehumans.utils.LogRepository;
 
 import processing.core.PApplet;
 import processing.core.PImage;
+import processing.core.PVector;
 
 public class ImageAnalysis {
 	
@@ -19,6 +21,7 @@ public class ImageAnalysis {
 	private ArrayList<PixelVO> culledSimplePixelOutline;
 	
 	private ArrayList<EdgeVO> edges;
+	private ArrayList<EdgeVO> culledEdges;
 	
 	private final int START_FOUND = 0;
 	private final int PIXEL_VALID = 1;
@@ -62,6 +65,13 @@ public class ImageAnalysis {
 		for (int i = 0; i < edges.size(); i++) {
 			app.line(edges.get(i).p1.x + offset, edges.get(i).p1.y, edges.get(i).p2.x + offset, edges.get(i).p2.y);
 		}
+		
+		//Draw the culled edges
+		app.stroke(0, 255, 255);
+		offset = __originalImage.width * 5;
+		for (int i = 0; i < culledEdges.size(); i++) {
+			app.line(culledEdges.get(i).p1.x + offset, culledEdges.get(i).p1.y, culledEdges.get(i).p2.x + offset, culledEdges.get(i).p2.y);
+		}
 	}
 	
 	public void analyzeImage(String _path) {
@@ -77,6 +87,8 @@ public class ImageAnalysis {
 			LogRepository.getInstance().getJonsLogger().info("NUMBER OF PIXELS IN CULLED ORDERED OUTLINE " + culledSimplePixelOutline.size());
 		constructEdges();
 			LogRepository.getInstance().getJonsLogger().info("NUMBER OF EDGES " + edges.size());
+		cullEdges();
+			LogRepository.getInstance().getJonsLogger().info("NUMBER OF CULLED EDGES " + culledEdges.size());
 	}
 	
 	private void determinePixelOutline() {
@@ -242,6 +254,48 @@ public class ImageAnalysis {
 		}
 	}
 	
+	private void cullEdges() {
+		
+		culledEdges = new ArrayList<EdgeVO>();
+		
+		EdgeVO nextEdge;
+		EdgeVO currentEdge;
+		EdgeVO linkedEdge = null;
+		EdgeVO addedEdge;
+		int index = 0;
+		
+		for (int i = 0; i < edges.size(); i++) {
+			currentEdge = edges.get(i);
+			index = i+1;
+			if (index >= edges.size()) {
+				index = 0;
+			}
+			nextEdge = edges.get(index);
+			
+			double relevancy = BetterRelevancy.calculate(currentEdge, nextEdge);
+			
+			if (relevancy < 50) {
+				currentEdge.markForCulling = true;
+			}
+		}
+		
+		for (int i = 0; i < edges.size(); i++) {
+			currentEdge = edges.get(i);
+			if (currentEdge.markForCulling == false) {
+				addedEdge = new EdgeVO(currentEdge.p1, currentEdge.p2);
+				culledEdges.add(addedEdge);
+				if (linkedEdge == null) {
+					linkedEdge = addedEdge;
+				}
+				else {
+					linkedEdge.p2 = addedEdge.p1;
+					addedEdge.p1 = linkedEdge.p2;
+					linkedEdge = addedEdge;
+				}
+			}
+		}
+	
+	}
 	//HELPERS
 	
 	private PixelVO getPixelByXY(ArrayList<PixelVO> _list, int _x, int _y) {
