@@ -76,7 +76,7 @@ public class JointUtils
 		RevoluteJointDef jd = new RevoluteJointDef();
 		jd.body1 = a;
 		jd.body2 = b;
-
+		
 		jd.localAnchor1 = a.getLocalPoint(worldCenter);
 		jd.localAnchor2 = b.getLocalPoint(worldCenter);
 

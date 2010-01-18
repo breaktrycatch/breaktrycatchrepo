@@ -9,6 +9,7 @@ import com.breaktrycatch.lib.display.DisplayObject;
  * fpscounter taken from http://processinghacks.com/hacks:fpscounter
  * 
  * @author mflux
+ * @author mbaker - Modified
  */
 
 // The framerate counter
@@ -85,7 +86,7 @@ public class FPS extends DisplayObject
 		app.noStroke();
 		app.fill(0);
 		app.textFont(font, 12);
-		app.text("frames per second: " + frameRate(), 6, 14);
+		app.text("FPS: " + frameRate(), 16, 24);
 	}
 
 }
