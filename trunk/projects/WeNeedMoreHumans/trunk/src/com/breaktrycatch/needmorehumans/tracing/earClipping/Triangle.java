@@ -27,15 +27,15 @@ public class Triangle {
 	  }
 	  
 	  public void draw(){
-	    draw(color(150,150,150),color(255,0,0));
+	    //draw(color(150,150,150),color(255,0,0));
 	  }
 	    
 	  public void draw(int fll, int strk){
-	    fill(fll);
-	//	    stroke(strk);
-	    noStroke();
-	    if (isInside(mouseX,mouseY)) fill(0,255,0);
-	    triangle(x[0],y[0],x[1],y[1],x[2],y[2]);
+//	    fill(fll);
+//	//	    stroke(strk);
+//	    noStroke();
+//	    if (isInside(mouseX,mouseY)) fill(0,255,0);
+//	    triangle(x[0],y[0],x[1],y[1],x[2],y[2]);
 	  }
 	  
 	  public boolean isInside(float _x, float _y){

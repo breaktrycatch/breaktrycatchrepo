@@ -127,18 +127,18 @@ public class Polygon {
 	  }
 	  
 	  public void draw(){
-	    draw(color(150,150,150),color(255,0,0));
+	    //draw(color(150,150,150),color(255,0,0));
 	  }
 	    
 	  public void draw(int fll, int strk){
-//	    fill(fll);
-	    noFill();
-	    stroke(strk);
-	    beginShape(POLYGON);
-	    for (int i=0; i<x.length; i++){
-	      vertex(x[i],y[i]);
-	    }
-	    endShape();
+////	    fill(fll);
+//	    noFill();
+//	    stroke(strk);
+//	    beginShape(POLYGON);
+//	    for (int i=0; i<x.length; i++){
+//	      vertex(x[i],y[i]);
+//	    }
+//	    endShape();
 	  }
 
 }

@@ -1,5 +1,7 @@
 package com.breaktrycatch.needmorehumans.tracing.earClipping;
 
+import processing.core.PApplet;
+
 public class Triangulation {
 	/*
 	 * Triangulates a polygon using simple O(N^2) ear-clipping algorithm
@@ -10,9 +12,17 @@ public class Triangulation {
 	 * self-intersection, and if it doesn't, it should at least check
 	 * that the return value is non-null before using.  You're warned!
 	 */
+	
+	
+	
+	public Triangulation() {
+		// TODO Auto-generated constructor stub
+	}
 
-	Triangle[] triangulatePolygon(float[] xv, float[] yv, int vNum){
-	  if (vNum < 3) return null;
+	public Triangle[] triangulatePolygon(float[] xv, float[] yv, int vNum){
+	  if (vNum < 3){
+		  return null;
+	  }
 	  
 	  Triangle[] buffer = new Triangle[vNum];
 	  int bufferSize = 0;
@@ -38,7 +48,9 @@ public class Triangulation {
 	    //This will probably crash their program, since
 	    //they won't bother to check the return value.
 	    //At this we shall laugh, heartily and with great gusto.
-	    if (earIndex == -1) return null;
+	    if (earIndex == -1) {
+	    	return null;
+	    }
 	    
 	    
 	    //Clip off the ear:
@@ -81,7 +93,7 @@ public class Triangulation {
 	  return res;
 	}
 
-	Polygon[] polygonizeTriangles(Triangle[] triangulated){
+	public Polygon[] polygonizeTriangles(Triangle[] triangulated){
 	  Polygon[] polys;
 	  int polyIndex = 0;
 	  
@@ -130,7 +142,7 @@ public class Triangulation {
 	}
 
 	//Checks if vertex i is the tip of an ear
-	boolean isEar(int i, float[] xv, float[] yv){
+	public boolean isEar(int i, float[] xv, float[] yv){
 	  float dx0,dy0,dx1,dy1;
 	  dx0=dy0=dx1=dy1=0;
 	  if (i >= xv.length || i < 0 || xv.length < 3){

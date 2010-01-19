@@ -2,12 +2,14 @@ package com.breaktrycatch.needmorehumans.tracing;
 
 import java.util.ArrayList;
 
-import com.breaktrycatch.needmorehumans.tracing.algorithms.BetterRelevancy;
-import com.breaktrycatch.needmorehumans.utils.LogRepository;
-
 import processing.core.PApplet;
 import processing.core.PImage;
-import processing.core.PVector;
+
+import com.breaktrycatch.needmorehumans.tracing.algorithms.BetterRelevancy;
+import com.breaktrycatch.needmorehumans.tracing.earClipping.EarClipping;
+import com.breaktrycatch.needmorehumans.tracing.earClipping.Polygon;
+import com.breaktrycatch.needmorehumans.tracing.earClipping.Triangle;
+import com.breaktrycatch.needmorehumans.utils.LogRepository;
 
 public class ImageAnalysis {
 	
@@ -22,6 +24,9 @@ public class ImageAnalysis {
 	
 	private ArrayList<EdgeVO> edges;
 	private ArrayList<EdgeVO> culledEdges;
+	
+	private ArrayList<Triangle> triangles;
+	private ArrayList<Polygon> polygons;
 	
 	private final int START_FOUND = 0;
 	private final int PIXEL_VALID = 1;
@@ -89,6 +94,9 @@ public class ImageAnalysis {
 			LogRepository.getInstance().getJonsLogger().info("NUMBER OF EDGES " + edges.size());
 		cullEdges();
 			LogRepository.getInstance().getJonsLogger().info("NUMBER OF CULLED EDGES " + culledEdges.size());
+		convertToPolys();
+			LogRepository.getInstance().getJonsLogger().info("TRIANGLES CREATED " + triangles.size());
+			LogRepository.getInstance().getJonsLogger().info("POLYGONS CREATED " + polygons.size());
 	}
 	
 	private void determinePixelOutline() {
@@ -296,6 +304,47 @@ public class ImageAnalysis {
 		}
 	
 	}
+	
+	private void convertToPolys() {
+		EarClipping earClipping = new EarClipping();
+		float x[] = new float[culledEdges.size()];
+		float y[] = new float[culledEdges.size()];
+		for (int i = culledEdges.size() - 1; i >= 0; i--) {
+			x[i] = culledEdges.get(i).p1.x;
+			y[i] = culledEdges.get(i).p1.y;
+		}
+		
+		Triangle[] tArray = earClipping.createTriangles(x, y, culledEdges.size());
+		
+		
+		if (tArray != null) {
+			triangles = new ArrayList<Triangle>();
+			for (int i = 0; i < tArray.length; i++) {
+				triangles.add(tArray[i]);
+			}
+			
+			
+			Polygon[] pArray = earClipping.createPolys(tArray);
+			
+			if (pArray != null) {
+				polygons = new ArrayList<Polygon>();
+				for (int i = 0; i < pArray.length; i++) {
+					polygons.add(pArray[i]);
+				}
+			}
+			else {
+				LogRepository.getInstance().getJonsLogger().info("PARRAY IS NULL!");
+			}
+			
+		}
+		else {
+			LogRepository.getInstance().getJonsLogger().info("TARRAY IS NULL!");
+		}
+		
+		
+		
+	}
+	
 	//HELPERS
 	
 	private PixelVO getPixelByXY(ArrayList<PixelVO> _list, int _x, int _y) {

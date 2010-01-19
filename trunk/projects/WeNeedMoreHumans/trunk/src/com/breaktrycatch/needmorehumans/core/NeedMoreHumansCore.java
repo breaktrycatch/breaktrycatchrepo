@@ -20,10 +20,10 @@ public class NeedMoreHumansCore extends Stage
 		super(app);
 
 		app.frameRate(60);
-		app.size(640, 480, PApplet.P2D);
+		app.size(1650, 1080, PApplet.P2D);
 		
 		_mainViewManager = new ViewManager(app);
-		_mainViewManager.changeView(ViewManager.PHYSICS_VIEW);
+		_mainViewManager.changeView(ViewManager.TRACING_VIEW);
 		add(_mainViewManager);
 
 		add(FPS.register(app));
