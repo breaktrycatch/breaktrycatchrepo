@@ -58,7 +58,7 @@ public class TracingDebugView extends AbstractView
 		// all PApplet related commands should be made in setup().
 	}
 	
-	protected PixelVO getPixelByXY(int _x, int _y) {
+	protected PixelVO getPixelByXY(float _x, float _y) {
 		for (int i = 0; i < outline.size(); i++) {
 			if (outline.get(i).x == _x && outline.get(i).y == _y) {
 				return outline.get(i);
@@ -95,7 +95,7 @@ public class TracingDebugView extends AbstractView
 		
 			//RIGHT
 			//Look to the Right first
-			index = (currentPixel.y)*__debugImage.width + (currentPixel.x + 1);
+			index = (int) ((currentPixel.y)*__debugImage.width + (currentPixel.x + 1));
 			//If it's a red pixel...
 			if (pixels[index] == 0xFFFF0000) {
 				//LogRepository.getInstance().getJonsLogger().info("Found red to the right");
@@ -105,7 +105,7 @@ public class TracingDebugView extends AbstractView
 					currentPixel.next = checkPixel;
 					checkPixel.prev = currentPixel;
 					currentPixel = checkPixel;
-					__linkedImage.pixels[checkPixel.y*__debugImage.width + checkPixel.x] = 0xFF00FF00;
+					__linkedImage.pixels[(int) (checkPixel.y*__debugImage.width + checkPixel.x)] = 0xFF00FF00;
 					count++;
 					if (currentPixel.x == startPixel.x && currentPixel.y == startPixel.y) {
 						//LogRepository.getInstance().getJonsLogger().info("FOUND START RIGHT");
@@ -117,7 +117,7 @@ public class TracingDebugView extends AbstractView
 			}
 			//DOWN
 			//Look to the Down Next
-			index = (currentPixel.y + 1)*__debugImage.width + (currentPixel.x);
+			index = (int) ((currentPixel.y + 1)*__debugImage.width + (currentPixel.x));
 			//If it's a red pixel...
 			if (pixels[index] == 0xFFFF0000) {
 				//LogRepository.getInstance().getJonsLogger().info("Found red to the down");
@@ -127,7 +127,7 @@ public class TracingDebugView extends AbstractView
 					currentPixel.next = checkPixel;
 					checkPixel.prev = currentPixel;
 					currentPixel = checkPixel;
-					__linkedImage.pixels[checkPixel.y*__debugImage.width + checkPixel.x] = 0xFF00FF00;
+					__linkedImage.pixels[(int) (checkPixel.y*__debugImage.width + checkPixel.x)] = 0xFF00FF00;
 					count++;
 					if (currentPixel.x == startPixel.x && currentPixel.y == startPixel.y) {
 						//LogRepository.getInstance().getJonsLogger().info("FOUND START DOWN");
@@ -139,7 +139,7 @@ public class TracingDebugView extends AbstractView
 			}
 			//DOWN RIGHT
 			//Look to the Down Right Next
-			index = (currentPixel.y + 1)*__debugImage.width + (currentPixel.x + 1);
+			index = (int) ((currentPixel.y + 1)*__debugImage.width + (currentPixel.x + 1));
 			//If it's a red pixel...
 			if (pixels[index] == 0xFFFF0000) {
 				//LogRepository.getInstance().getJonsLogger().info("Found red to the down right");
@@ -149,7 +149,7 @@ public class TracingDebugView extends AbstractView
 					currentPixel.next = checkPixel;
 					checkPixel.prev = currentPixel;
 					currentPixel = checkPixel;
-					__linkedImage.pixels[checkPixel.y*__debugImage.width + checkPixel.x] = 0xFF00FF00;
+					__linkedImage.pixels[(int) (checkPixel.y*__debugImage.width + checkPixel.x)] = 0xFF00FF00;
 					count++;
 					if (currentPixel.x == startPixel.x && currentPixel.y == startPixel.y) {
 						//LogRepository.getInstance().getJonsLogger().info("FOUND START DOWN RIGHT");
@@ -161,7 +161,7 @@ public class TracingDebugView extends AbstractView
 			}
 			//LEFT
 			//Look to the Left Next
-			index = (currentPixel.y)*__debugImage.width + (currentPixel.x - 1);
+			index = (int) ((currentPixel.y)*__debugImage.width + (currentPixel.x - 1));
 			//If it's a red pixel...
 			if (pixels[index] == 0xFFFF0000) {
 				//LogRepository.getInstance().getJonsLogger().info("Found red to the left");
@@ -171,7 +171,7 @@ public class TracingDebugView extends AbstractView
 					currentPixel.next = checkPixel;
 					checkPixel.prev = currentPixel;
 					currentPixel = checkPixel;
-					__linkedImage.pixels[checkPixel.y*__debugImage.width + checkPixel.x] = 0xFF00FF00;
+					__linkedImage.pixels[(int) (checkPixel.y*__debugImage.width + checkPixel.x)] = 0xFF00FF00;
 					count++;
 					if (currentPixel.x == startPixel.x && currentPixel.y == startPixel.y) {
 						//LogRepository.getInstance().getJonsLogger().info("FOUND START LEFT");
@@ -183,7 +183,7 @@ public class TracingDebugView extends AbstractView
 			}
 			//DOWN LEFT
 			//Look to the Down Left Next
-			index = (currentPixel.y + 1)*__debugImage.width + (currentPixel.x - 1);
+			index = (int) ((currentPixel.y + 1)*__debugImage.width + (currentPixel.x - 1));
 			//If it's a red pixel...
 			if (pixels[index] == 0xFFFF0000) {
 				//LogRepository.getInstance().getJonsLogger().info("Found red to the down left");
@@ -193,7 +193,7 @@ public class TracingDebugView extends AbstractView
 					currentPixel.next = checkPixel;
 					checkPixel.prev = currentPixel;
 					currentPixel = checkPixel;
-					__linkedImage.pixels[checkPixel.y*__debugImage.width + checkPixel.x] = 0xFF00FF00;
+					__linkedImage.pixels[(int) (checkPixel.y*__debugImage.width + checkPixel.x)] = 0xFF00FF00;
 					count++;
 					if (currentPixel.x == startPixel.x && currentPixel.y == startPixel.y) {
 						//LogRepository.getInstance().getJonsLogger().info("FOUND START DOWN LEFT");
@@ -205,7 +205,7 @@ public class TracingDebugView extends AbstractView
 			}
 			//UP
 			//Look to the up left Next
-			index = (currentPixel.y - 1)*__debugImage.width + (currentPixel.x);
+			index = (int) ((currentPixel.y - 1)*__debugImage.width + (currentPixel.x));
 			//If it's a red pixel...
 			if (pixels[index] == 0xFFFF0000) {
 				//LogRepository.getInstance().getJonsLogger().info("Found red to the up");
@@ -215,7 +215,7 @@ public class TracingDebugView extends AbstractView
 					currentPixel.next = checkPixel;
 					checkPixel.prev = currentPixel;
 					currentPixel = checkPixel;
-					__linkedImage.pixels[checkPixel.y*__debugImage.width + checkPixel.x] = 0xFF00FF00;
+					__linkedImage.pixels[(int) (checkPixel.y*__debugImage.width + checkPixel.x)] = 0xFF00FF00;
 					count++;
 					if (currentPixel.x == startPixel.x && currentPixel.y == startPixel.y) {
 						//LogRepository.getInstance().getJonsLogger().info("FOUND START UP");
@@ -227,7 +227,7 @@ public class TracingDebugView extends AbstractView
 			}
 			//UP LEFT
 			//Look to the up left Next
-			index = (currentPixel.y - 1)*__debugImage.width + (currentPixel.x - 1);
+			index = (int) ((currentPixel.y - 1)*__debugImage.width + (currentPixel.x - 1));
 			//If it's a red pixel...
 			if (pixels[index] == 0xFFFF0000) {
 				//LogRepository.getInstance().getJonsLogger().info("Found red to the up left");
@@ -237,7 +237,7 @@ public class TracingDebugView extends AbstractView
 					currentPixel.next = checkPixel;
 					checkPixel.prev = currentPixel;
 					currentPixel = checkPixel;
-					__linkedImage.pixels[checkPixel.y*__debugImage.width + checkPixel.x] = 0xFF00FF00;
+					__linkedImage.pixels[(int) (checkPixel.y*__debugImage.width + checkPixel.x)] = 0xFF00FF00;
 					count++;
 					if (currentPixel.x == startPixel.x && currentPixel.y == startPixel.y) {
 						//LogRepository.getInstance().getJonsLogger().info("FOUND START UP LEFT");
@@ -249,7 +249,7 @@ public class TracingDebugView extends AbstractView
 			}
 			//UP RIGHT
 			//Look to the up right Next
-			index = (currentPixel.y - 1)*__debugImage.width + (currentPixel.x + 1);
+			index = (int) ((currentPixel.y - 1)*__debugImage.width + (currentPixel.x + 1));
 			//If it's a red pixel...
 			if (pixels[index] == 0xFFFF0000) {
 				//LogRepository.getInstance().getJonsLogger().info("Found red to the up right");
@@ -259,7 +259,7 @@ public class TracingDebugView extends AbstractView
 					currentPixel.next = checkPixel;
 					checkPixel.prev = currentPixel;
 					currentPixel = checkPixel;
-					__linkedImage.pixels[checkPixel.y*__debugImage.width + checkPixel.x] = 0xFF00FF00;
+					__linkedImage.pixels[(int) (checkPixel.y*__debugImage.width + checkPixel.x)] = 0xFF00FF00;
 					count++;
 					if (currentPixel.x == startPixel.x && currentPixel.y == startPixel.y) {
 						//LogRepository.getInstance().getJonsLogger().info("FOUND START UP RIGHT");
