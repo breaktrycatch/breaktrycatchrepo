@@ -4,8 +4,8 @@ public class PixelVO {
 	
 	public int id;
 	
-	public int x;
-	public int y;
+	public float x;
+	public float y;
 	
 	public int index;
 	
@@ -18,7 +18,7 @@ public class PixelVO {
 	public boolean rendered;
 	public boolean saveFromSimpleCulling;
 	
-	public PixelVO(int _x, int _y, int _index) {
+	public PixelVO(float _x, float _y, int _index) {
 		x = _x;
 		y = _y;
 		index = _index;

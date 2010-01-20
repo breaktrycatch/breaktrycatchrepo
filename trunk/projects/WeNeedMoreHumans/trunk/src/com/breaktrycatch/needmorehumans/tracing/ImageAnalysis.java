@@ -347,7 +347,7 @@ public class ImageAnalysis {
 	
 	//HELPERS
 	
-	private PixelVO getPixelByXY(ArrayList<PixelVO> _list, int _x, int _y) {
+	private PixelVO getPixelByXY(ArrayList<PixelVO> _list, float _x, float _y) {
 		for (int i = 0; i < _list.size(); i++) {
 			if (_list.get(i).x == _x && _list.get(i).y == _y) {
 				return _list.get(i);
