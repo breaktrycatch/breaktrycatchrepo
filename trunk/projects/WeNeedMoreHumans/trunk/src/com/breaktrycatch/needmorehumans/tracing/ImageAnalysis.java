@@ -2,13 +2,18 @@ package com.breaktrycatch.needmorehumans.tracing;
 
 import java.util.ArrayList;
 
+import org.jbox2d.collision.PolygonDef;
+import org.jbox2d.common.Vec2;
+import org.jbox2d.dynamics.Body;
+import org.jbox2d.dynamics.BodyDef;
+
 import processing.core.PApplet;
 import processing.core.PImage;
 
 import com.breaktrycatch.needmorehumans.tracing.algorithms.BetterRelevancy;
-import com.breaktrycatch.needmorehumans.tracing.earClipping.EarClipping;
 import com.breaktrycatch.needmorehumans.tracing.earClipping.Polygon;
 import com.breaktrycatch.needmorehumans.tracing.earClipping.Triangle;
+import com.breaktrycatch.needmorehumans.tracing.polyTool.PolyTool;
 import com.breaktrycatch.needmorehumans.utils.LogRepository;
 
 public class ImageAnalysis {
@@ -25,8 +30,16 @@ public class ImageAnalysis {
 	private ArrayList<EdgeVO> edges;
 	private ArrayList<EdgeVO> culledEdges;
 	
+	private ArrayList<PixelVO> culledPoints;
+	
 	private ArrayList<Triangle> triangles;
 	private ArrayList<Polygon> polygons;
+	
+	ArrayList<ArrayList<PixelVO>> finalPoints;
+	
+	private PolyTool polyTool;
+	
+	private int bodyCount;
 	
 	private final int START_FOUND = 0;
 	private final int PIXEL_VALID = 1;
@@ -36,6 +49,8 @@ public class ImageAnalysis {
 	public ImageAnalysis(PApplet _app) {
 		// TODO Auto-generated constructor stub
 		app = _app;
+		
+		bodyCount = 0;
 	}
 	
 	public void draw() {
@@ -77,6 +92,19 @@ public class ImageAnalysis {
 		for (int i = 0; i < culledEdges.size(); i++) {
 			app.line(culledEdges.get(i).p1.x + offset, culledEdges.get(i).p1.y, culledEdges.get(i).p2.x + offset, culledEdges.get(i).p2.y);
 		}
+		
+		//Draw the final Points as polygons
+		app.stroke(66, 0, 255);
+		offset = __originalImage.width * 6;
+		for (int i = 0; i < finalPoints.size(); i++) {
+			for (int j = 0; j < finalPoints.get(i).size(); j++) {
+				int index = j+1;
+				if (j+1 >= finalPoints.get(i).size()) {
+					index = 0;
+				}
+				app.line(finalPoints.get(i).get(j).x + offset, finalPoints.get(i).get(j).y, finalPoints.get(i).get(index).x + offset, finalPoints.get(i).get(index).y);
+			}
+		}
 	}
 	
 	public void analyzeImage(String _path) {
@@ -94,9 +122,11 @@ public class ImageAnalysis {
 			LogRepository.getInstance().getJonsLogger().info("NUMBER OF EDGES " + edges.size());
 		cullEdges();
 			LogRepository.getInstance().getJonsLogger().info("NUMBER OF CULLED EDGES " + culledEdges.size());
+		convertToPoints();
+			LogRepository.getInstance().getJonsLogger().info("NUMBER OF CULLED POINTS " + culledPoints.size());
 		convertToPolys();
-			LogRepository.getInstance().getJonsLogger().info("TRIANGLES CREATED " + triangles.size());
-			LogRepository.getInstance().getJonsLogger().info("POLYGONS CREATED " + polygons.size());
+			LogRepository.getInstance().getJonsLogger().info("BODIES CREATED " + bodyCount);
+			//LogRepository.getInstance().getJonsLogger().info("POLYGONS CREATED " + polygons.size());
 	}
 	
 	private void determinePixelOutline() {
@@ -305,47 +335,113 @@ public class ImageAnalysis {
 	
 	}
 	
+	private void convertToPoints() {
+		culledPoints = new ArrayList<PixelVO>();
+		for (int i = 0; i < culledEdges.size(); i++) {
+			culledPoints.add(culledEdges.get(i).p1);
+		}
+	}
+	
 	private void convertToPolys() {
-		EarClipping earClipping = new EarClipping();
-		float x[] = new float[culledEdges.size()];
-		float y[] = new float[culledEdges.size()];
-		for (int i = culledEdges.size() - 1; i >= 0; i--) {
-			x[i] = culledEdges.get(i).p1.x;
-			y[i] = culledEdges.get(i).p1.y;
+		polyTool = new PolyTool();
+		
+		if (culledPoints.size() > 8) {
+			
+			Body body;
+			BodyDef bodyDef;
+			
+			bodyDef = new BodyDef();
+			
+			makeComplexBody(null, culledPoints);
+			
+			
 		}
 		
-		Triangle[] tArray = earClipping.createTriangles(x, y, culledEdges.size());
 		
-		
-		if (tArray != null) {
-			triangles = new ArrayList<Triangle>();
-			for (int i = 0; i < tArray.length; i++) {
-				triangles.add(tArray[i]);
-			}
-			
-			
-			Polygon[] pArray = earClipping.createPolys(tArray);
-			
-			if (pArray != null) {
-				polygons = new ArrayList<Polygon>();
-				for (int i = 0; i < pArray.length; i++) {
-					polygons.add(pArray[i]);
-				}
-			}
-			else {
-				LogRepository.getInstance().getJonsLogger().info("PARRAY IS NULL!");
-			}
-			
-		}
-		else {
-			LogRepository.getInstance().getJonsLogger().info("TARRAY IS NULL!");
-		}
+//		EarClipping earClipping = new EarClipping();
+//		float x[] = new float[culledEdges.size()];
+//		float y[] = new float[culledEdges.size()];
+//		for (int i = culledEdges.size() - 1; i >= 0; i--) {
+//			x[i] = culledEdges.get(i).p1.x;
+//			y[i] = culledEdges.get(i).p1.y;
+//		}
+//		
+//		Triangle[] tArray = earClipping.createTriangles(x, y, culledEdges.size());
+//		
+//		
+//		if (tArray != null) {
+//			triangles = new ArrayList<Triangle>();
+//			for (int i = 0; i < tArray.length; i++) {
+//				triangles.add(tArray[i]);
+//			}
+//			
+//			
+//			Polygon[] pArray = earClipping.createPolys(tArray);
+//			
+//			if (pArray != null) {
+//				polygons = new ArrayList<Polygon>();
+//				for (int i = 0; i < pArray.length; i++) {
+//					polygons.add(pArray[i]);
+//				}
+//			}
+//			else {
+//				LogRepository.getInstance().getJonsLogger().info("PARRAY IS NULL!");
+//			}
+//			
+//		}
+//		else {
+//			LogRepository.getInstance().getJonsLogger().info("TARRAY IS NULL!");
+//		}
 		
 		
 		
 	}
 	
 	//HELPERS
+	
+	private void makeComplexBody(Body p_body, ArrayList<PixelVO> p_vertices)
+	{
+		ArrayList<PixelVO> vertArray = (ArrayList<PixelVO>) p_vertices.clone();
+		if(!polyTool.isPolyClockwise(vertArray)) {
+			vertArray = polyTool.reverseArrayList(vertArray);
+		}
+		ArrayList<ArrayList<PixelVO>> polys = polyTool.earClip(vertArray);
+		
+		if(polys != null) {
+			
+			finalPoints = polys;
+			
+			for(int i = 0; i < polys.size(); i++) {
+				if(polys.get(i) != null) {
+					
+					PolygonDef polyDef;
+					polyDef = new PolygonDef();
+					polyDef.friction = (float) 0.5;
+					polyDef.restitution = (float) 0.7;
+					
+//					if(p_static)
+//						polyDef.density = 0.0;
+//					else
+//						polyDef.density = 1.0;
+					
+					//Might not need?
+					//polyDef.vertexCount = polys.get(i).size();
+					
+					for (int j = 0; j < polys.get(i).size(); j++) {
+						polyDef.vertices.add(j, new Vec2(polys.get(i).get(j).x/30, polys.get(i).get(j).y/30));
+					}
+					
+					//p_body.createShape(polyDef);
+				}
+			}
+			
+			//p_body.setMassFromShapes();
+			bodyCount++;
+			
+		} else {
+			makeComplexBody(p_body, polyTool.getConvexPoly(p_vertices));
+		}
+	}
 	
 	private PixelVO getPixelByXY(ArrayList<PixelVO> _list, float _x, float _y) {
 		for (int i = 0; i < _list.size(); i++) {

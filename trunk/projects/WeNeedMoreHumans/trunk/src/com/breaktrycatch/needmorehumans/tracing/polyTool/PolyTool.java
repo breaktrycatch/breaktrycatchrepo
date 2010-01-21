@@ -17,7 +17,7 @@ public class PolyTool {
 		int j;
 		int k;
 		
-		int flag;
+		int flag = -1;
 		
 		float z;
 		
@@ -51,13 +51,13 @@ public class PolyTool {
 	}
 	
 	// Determine if an arbitrary polygon is winded clockwise
-	public boolean PixelVOPolyClockwise(ArrayList<PixelVO> p_vertices)
+	public boolean isPolyClockwise(ArrayList<PixelVO> p_vertices)
 	{
 		int i;
 		int j;
 		int k;
 		
-		int count;
+		int count = 0;
 		float z;
 		
 		if (p_vertices.size() < 3) {
@@ -90,7 +90,7 @@ public class PolyTool {
 	public ArrayList<PixelVO> getConvexPoly(ArrayList<PixelVO> p_vertices)
 	{
 		GrahamScan grahamScan = new GrahamScan();
-		return grahamScan.convexHull((ArrayList<PixelVO>) p_vertices.subList(0, 1));
+		return grahamScan.convexHull((ArrayList<PixelVO>)p_vertices.clone());
 	}
 	
 	//SHOULD RETURN : Array<Array<Dynamic>>
@@ -110,7 +110,7 @@ public class PolyTool {
 			for(int i = 0; i < polys.size() - 1; i++) { // The last poly seem to always be a copy of the next last one for some reason.
 				ArrayList<PixelVO> poly = new ArrayList<PixelVO>();
 				if(polys.get(i) != null) {
-					for (int j = 0; j < polys.get(i).x.size(); i++) {
+					for (int j = 0; j < polys.get(i).x.size(); j++) {
 						poly.add(new PixelVO(polys.get(i).x.get(j), polys.get(i).y.get(j), -1));
 					}
 				}
@@ -132,12 +132,12 @@ public class PolyTool {
 		PixelVO C = new PixelVO(0, 0, -1);
 		
 		// We don't want to modify the original array, so let's make a copy of the array and it's values
-		ArrayList<PixelVO> pa = p_pa.slice(0);
+		ArrayList<PixelVO> pa = (ArrayList<PixelVO>) p_pa.clone();
 		
-		pa.push(pa[0]);
-		int n = pa.length-1;
+		pa.add(pa.get(0));
+		int n = pa.size()-1;
 		while(n > -1){
-			C = pa[n];
+			C = pa.get(n);
 			if(n > 0){
 				cx+=C.x;
 				cy+=C.y;
@@ -145,7 +145,7 @@ public class PolyTool {
 			n--;
 		}
 		
-		return (new PixelVO(cx/(pa.size()-1), cy/(pa.size()-1, -1)); // Calculate the centroid
+		return (new PixelVO(cx/(pa.size()-1), cy/(pa.size()-1), -1)); // Calculate the centroid
 	}
 	
 	
@@ -166,11 +166,18 @@ public class PolyTool {
 	{
 		ArrayList<PixelVO> translatedPoly = new ArrayList<PixelVO>();
 		for(int i = 0; i < p_poly.size(); i++) {
-			translatedPoly.add(new PixelVO(p_poly.get(i).x + p_vector.x, p_poly.get(i).y + p_vector.y, -1);
+			translatedPoly.add(new PixelVO(p_poly.get(i).x + p_vector.x, p_poly.get(i).y + p_vector.y, -1));
 		}
 		return translatedPoly;
 	}
 	
+	public ArrayList<PixelVO> reverseArrayList(ArrayList<PixelVO> _array) {
+		ArrayList<PixelVO> newArray = new ArrayList<PixelVO>();
+		for (int i = _array.size() - 1; i>=0; i--) {
+			newArray.add(_array.get(i));
+		}
+		return newArray;
+	}
 	
 	/**
 	* Cut out a piece of a polygon and return the remain piece.
@@ -184,8 +191,8 @@ public class PolyTool {
 		ArrayList<PixelVO> resultingPoly = new ArrayList<PixelVO>();
 		
 		// Copy the original polygons so they don't get modified.
-		ArrayList<PixelVO> subjectPolyCopy = p_subjectPoly.slice(0);
-		ArrayList<PixelVO> cuttingPolyCopy = p_cuttingPoly.slice(0);
+		ArrayList<PixelVO> subjectPolyCopy = (ArrayList<PixelVO>) p_subjectPoly.clone();
+		ArrayList<PixelVO> cuttingPolyCopy = (ArrayList<PixelVO>) p_cuttingPoly.clone();
 			
 		// Add the first vertex at the end of the polygon.
 		subjectPolyCopy.add(subjectPolyCopy.get(0));
@@ -196,24 +203,24 @@ public class PolyTool {
 		
 		// First we need to make sure that vertex 0 of the cutting polygon is not inside the subject polygon
 		// We'll do that by shifting the vertices until it is outside
-		var vert0Check:Dynamic = lineIntersectPoly(cuttingPolyCopy[0], cuttingPolyCopy[1], subjectPolyCopy);
+		DObject vert0Check = lineIntersectPoly(cuttingPolyCopy.get(0), cuttingPolyCopy.get(1), subjectPolyCopy);
 		while(vert0Check.start_inside || vert0Check.Intersects) {
-			cuttingPolyCopy.insert(0,cuttingPolyCopy.pop());
-			vert0Check = lineIntersectPoly(cuttingPolyCopy[0], cuttingPolyCopy[1], subjectPolyCopy);
+			cuttingPolyCopy.add(0,cuttingPolyCopy.remove(cuttingPolyCopy.size() - 1));
+			vert0Check = lineIntersectPoly(cuttingPolyCopy.get(0), cuttingPolyCopy.get(1), subjectPolyCopy);
 		}
 		
 		// And then the same thing goes for the subject poly
-		var vert0Check:Dynamic = lineIntersectPoly(subjectPolyCopy[0], subjectPolyCopy[1], cuttingPolyCopy);
+		vert0Check = lineIntersectPoly(subjectPolyCopy.get(0), subjectPolyCopy.get(1), cuttingPolyCopy);
 		while(vert0Check.start_inside || vert0Check.Intersects) {
-			subjectPolyCopy.insert(0,subjectPolyCopy.pop());
-			vert0Check = lineIntersectPoly(subjectPolyCopy[0], subjectPolyCopy[1], cuttingPolyCopy);
+			subjectPolyCopy.add(0,subjectPolyCopy.remove(subjectPolyCopy.size() - 1));
+			vert0Check = lineIntersectPoly(subjectPolyCopy.get(0), subjectPolyCopy.get(1), cuttingPolyCopy);
 		}
 		
 		// We want our polys to in oposite vertex order
 		if(isPolyClockwise(subjectPolyCopy))
-			subjectPolyCopy.reverse();
+			subjectPolyCopy = reverseArrayList(subjectPolyCopy);
 		if(!isPolyClockwise(cuttingPolyCopy))
-			cuttingPolyCopy.reverse();
+			cuttingPolyCopy = reverseArrayList(cuttingPolyCopy);
 		
 		/* trace(isPolyClockwise(subjectPolyCopy));
 		trace(isPolyClockwise(cuttingPolyCopy));
@@ -250,11 +257,11 @@ public class PolyTool {
 		
 		// Check the subject poly for intersections with the cutting poly.
 		// Add all vertices that are outside and the intersection points.
-		for(i in 0...subjectPolyCopy.length) {
+		for(int i=0; i < subjectPolyCopy.size(); i++) {
 			if(i > 0) {
-				var lip:Dynamic = lineIntersectPoly(subjectPolyCopy[i-1], subjectPolyCopy[i], cuttingPolyCopy);
+				DObject lip = lineIntersectPoly(subjectPolyCopy.get(i-1), subjectPolyCopy.get(i), cuttingPolyCopy);
 				
-				if(p_dbgDraw!=null) {
+				//if(p_dbgDraw!=null) {
 					
 					// Determine if the current vertex is inside or outside of the cuting poly
 					if(!lip.start_inside && !lip.end_inside) isInside = false;
@@ -264,38 +271,38 @@ public class PolyTool {
 					
 					// if this is the first vertex outside, we'll add the intersection vertex before this vertex
 					if(!isInside && lip.start_inside)
-						resultingPoly.push(lip.Intersections[0]);
+						resultingPoly.add(lip.Intersections.get(0));
 					
 					// Add vertices that are outside
 					if(!isInside && !(lip.Intersects && !lip.start_inside && !lip.end_inside))
-						resultingPoly.push(subjectPolyCopy[i]);
+						resultingPoly.add(subjectPolyCopy.get(i));
 					
 					// If this is the first vertex inside, add the intersection vertex,
 					// and then the vertices from the cutting poly that is inside the subject
 					if((isInside && !lip.start_inside) || (lip.Intersects && !lip.start_inside && !lip.end_inside)) {
 						if(!(lip.Intersects && !lip.start_inside && !lip.end_inside))
-							resultingPoly.push(lip.Intersections[0]);
+							resultingPoly.add(lip.Intersections.get(0));
 						else
-							resultingPoly.push(lip.Intersections[1]);
+							resultingPoly.add(lip.Intersections.get(1));
 						
 						if(!innerVerticesAdded) {
 							// Check intersections for the cutting poly, and add the vertices that are inside the subject
-							var isInside2:Bool = false;
-							for(j in 0...cuttingPolyCopy.length) {
+							boolean isInside2 = false;
+							for(int j = 0; j < cuttingPolyCopy.size(); j++) {
 								if(j > 0) {
-									var lip2:Dynamic = lineIntersectPoly(cuttingPolyCopy[j-1], cuttingPolyCopy[j], subjectPolyCopy);
+									DObject lip2 = lineIntersectPoly(cuttingPolyCopy.get(j-1), cuttingPolyCopy.get(j), subjectPolyCopy);
 									if(!lip2.start_inside && !lip2.end_inside) isInside2 = false;
 									else if(!lip2.start_inside && lip2.end_inside) isInside2 = true;
 									else if(lip2.start_inside && lip2.end_inside) isInside2 = true;
 									else if(lip2.start_inside && !lip2.end_inside) isInside2 = false;
 									// Add vertices that are inside
 									if(isInside2)
-										resultingPoly.push(cuttingPolyCopy[j]);
+										resultingPoly.add(cuttingPolyCopy.get(j));
 								}
 							}
 							
 							if((lip.Intersects && !lip.start_inside && !lip.end_inside)) {
-								resultingPoly.push(lip.Intersections[0]);
+								resultingPoly.add(lip.Intersections.get(0));
 							}
 							
 							innerVerticesAdded = true;
@@ -303,10 +310,10 @@ public class PolyTool {
 					}
 					
 					if((lip.Intersects && !lip.start_inside && !lip.end_inside))
-						resultingPoly.push(subjectPolyCopy[i]);
+						resultingPoly.add(subjectPolyCopy.get(i));
 					
 				}
-			}
+			//}
 		}
 		
 		return resultingPoly;
@@ -320,15 +327,15 @@ public class PolyTool {
 	//Return Intersection of Segment "AB" and Segment "EF" as a Dynamic
 	//Return null if there is no Intersection
 	//---------------------------------------------------------------
-	public function lineIntersectLine(A:Dynamic,B:Dynamic,E:Dynamic,F:Dynamic,as_seg:Bool=true) : Dynamic
+	public PixelVO lineIntersectLine(PixelVO A,PixelVO B, PixelVO E, PixelVO F, boolean as_seg)
 	{
-		var ip:Dynamic;
-		var a1:Float;
-		var a2:Float;
-		var b1:Float;
-		var b2:Float;
-		var c1:Float;
-		var c2:Float;
+		PixelVO ip;
+		float a1;
+		float a2;
+		float b1;
+		float b2;
+		float c1;
+		float c2;
 		
 		a1= B.y-A.y;
 		b1= A.x-B.x;
@@ -337,21 +344,18 @@ public class PolyTool {
 		b2= E.x-F.x;
 		c2= F.x*E.y - E.x*F.y;
 		
-		var denom:Float=a1*b2 - a2*b1;
+		float denom = a1*b2 - a2*b1;
 		if(denom == 0){
 			return null;
 		}
-		ip = {
-			x : (b1*c2 - b2*c1)/denom,
-			y : (a2*c1 - a1*c2)/denom
-		};
+		ip = new PixelVO((b1*c2 - b2*c1)/denom,(a2*c1 - a1*c2)/denom, -1);
 	 
 		//---------------------------------------------------
 		//Do checks to see if Intersection to endpoints
 		//distance is longer than actual Segments.
 		//Return null if it is with any.
 		//---------------------------------------------------
-		if(as_seg){
+		if(as_seg == true){
 			if(lengthOfLine(ip, B) > lengthOfLine(A, B)){
 				return null;
 			}
@@ -380,36 +384,36 @@ public class PolyTool {
 	 
 	"pa" is an Array of Points.
 	----------------------------------------------------------------------------*/
-	public function lineIntersectPoly(A : Dynamic, B : Dynamic, p_pa:Array<Dynamic>):Dynamic
+	public DObject lineIntersectPoly(PixelVO A, PixelVO B, ArrayList<PixelVO> p_pa)
 	{
-		var An:Int=1;
-		var Bn:Int=1;
-		var C:Dynamic;
-		var D:Dynamic;
-		var i:Dynamic;
-		var cx:Float=0;
-		var cy:Float=0;
+		int An = 1;
+		int Bn = 1;
+		PixelVO C;
+		PixelVO D;
+		PixelVO i;
+		float cx = 0;
+		float cy = 0;
 		
 		// We don't want to modify the original array, so let's make a copy of the array and it's values
-		var pa = p_pa.slice(0);
+		ArrayList<PixelVO> pa = (ArrayList<PixelVO>) p_pa.clone();
 		
-		var result:Dynamic = {Intersects:false, Intersections:[], start_inside:false, end_inside:false};
+		DObject result = new DObject(false, new ArrayList<PixelVO>(), false, false);
 		//pa.push(pa[0]);
-		var n:Int=pa.length-1;
+		int n = pa.size()-1;
 		while(n > -1){
-			C = pa[n];
+			C = pa.get(n);
 			if(n > 0){
 				cx+=C.x;
 				cy+=C.y;
-				D = ( pa[n-1] ? pa[n-1] : pa[0] );
-				i=lineIntersectLine(A,B,C,D);
+				D = ( (pa.get(n-1) != null) ? pa.get(n-1) : pa.get(0) );
+				i=lineIntersectLine(A,B,C,D, true);
 				if(i != null){
-					result.Intersections.push(i);
+					result.Intersections.add(i);
 				}
-				if(lineIntersectLine(A,{x:C.x+D.x, y:A.y},C,D) != null){
+				if(lineIntersectLine(A, new PixelVO(C.x+D.x, A.y, -1),C,D, true) != null){
 					An++;
 				}
-				if(lineIntersectLine(B,{x:C.x+D.x, y:B.y},C,D) != null){
+				if(lineIntersectLine(B,new PixelVO(C.x+D.x, B.y, -1),C,D, true) != null){
 					Bn++;
 				}
 			}
@@ -421,8 +425,8 @@ public class PolyTool {
 		if(Bn % 2 == 0){
 			result.end_inside=true;
 		}
-		result.centroid={x:cx/(pa.length-1), y:cy/(pa.length-1)};
-		result.Intersects = result.Intersections.length > 0;
+		result.centroid= new PixelVO(cx/(pa.size()-1), cy/(pa.size()-1), -1);
+		result.Intersects = result.Intersections.size() > 0;
 		return result;
 	}
 }
