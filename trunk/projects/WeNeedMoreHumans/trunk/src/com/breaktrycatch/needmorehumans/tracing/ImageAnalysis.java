@@ -4,8 +4,7 @@ import java.util.ArrayList;
 
 import org.jbox2d.collision.PolygonDef;
 import org.jbox2d.common.Vec2;
-import org.jbox2d.dynamics.Body;
-import org.jbox2d.dynamics.BodyDef;
+import org.jbox2d.p5.Physics;
 
 import processing.core.PApplet;
 import processing.core.PImage;
@@ -46,12 +45,13 @@ public class ImageAnalysis {
 	private final int START_FOUND = 0;
 	private final int PIXEL_VALID = 1;
 	private final int PIXEL_INVALID = 2;
+	private Physics __physWorld;
 	
 	
-	public ImageAnalysis(PApplet _app) {
+	public ImageAnalysis(PApplet _app, Physics _physWorld) {
 		// TODO Auto-generated constructor stub
 		app = _app;
-		
+		__physWorld = _physWorld;
 		bodyCount = 0;
 	}
 	
@@ -413,9 +413,9 @@ public class ImageAnalysis {
 					
 					PolygonDef polyDef;
 					polyDef = new PolygonDef();
-					polyDef.friction = (float) 0.5;
-					polyDef.restitution = (float) 0.7;
-					
+					polyDef.friction = 0.1f;
+					polyDef.restitution = 0.1f;
+					polyDef.density = 1.0f;
 //					if(p_static)
 //						polyDef.density = 0.0;
 //					else
@@ -424,8 +424,19 @@ public class ImageAnalysis {
 					//Might not need?
 					//polyDef.vertexCount = polys.get(i).size();
 					
-					for (int j = 0; j < polys.get(i).size(); j++) {
-						polyDef.vertices.add(j, new Vec2(polys.get(i).get(j).x/30, polys.get(i).get(j).y/30));
+					Vec2 v;
+//					for (int j = 0; j < polys.get(i).size(); j++) {
+					LogRepository.getInstance().getJonsLogger().info("POLYS SIZE: " + polys.get(i).size());
+					for (int j = polys.get(i).size()-1; j >= 0; j--) {
+						//polyDef.vertices.add(j, new Vec2(polys.get(i).get(j).x/30, polys.get(i).get(j).y/30));
+						v = new Vec2(polys.get(i).get(j).x, polys.get(i).get(j).y);
+						
+						if(__physWorld != null)
+						{
+							v = __physWorld.screenToWorld(v);
+						}
+						
+						polyDef.vertices.add(v);
 					}
 					
 					polyDefs.add(polyDef);

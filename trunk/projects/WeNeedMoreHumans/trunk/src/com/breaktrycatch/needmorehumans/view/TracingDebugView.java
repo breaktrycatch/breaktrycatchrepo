@@ -71,7 +71,7 @@ public class TracingDebugView extends AbstractView
 		String p4 = "../data/tracing/RealPerson_4.png";
 		String p5 = "../data/tracing/RealPerson_5.png";
 		
-		__imageAnalysis = new ImageAnalysis(app);
+		__imageAnalysis = new ImageAnalysis(app, null);
 		__imageAnalysis.analyzeImage(p2);
 		
 	}

@@ -1,20 +1,29 @@
 package com.breaktrycatch.needmorehumans.view;
 
+import java.util.ArrayList;
+
+import org.jbox2d.collision.PolygonDef;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
+import org.jbox2d.dynamics.BodyDef;
 import org.jbox2d.dynamics.joints.PrismaticJoint;
 import org.jbox2d.dynamics.joints.PrismaticJointDef;
 import org.jbox2d.p5.Physics;
-import org.jbox2d.p5.PhysicsUtils;
 
 import processing.core.PApplet;
 
 import com.breaktrycatch.lib.view.AbstractView;
+import com.breaktrycatch.needmorehumans.tracing.ImageAnalysis;
+import com.breaktrycatch.needmorehumans.utils.LogRepository;
 
 public class PhysicsView extends AbstractView {
 
 	Physics physWorld;
 	boolean doSquare = false;
+	private ImageAnalysis __imageAnalysis;
+	private ArrayList<PolygonDef> _polyHumanDef;
+	private float spawn = 0.0f;
+	
 	
 	public PhysicsView() {
 		
@@ -25,6 +34,9 @@ public class PhysicsView extends AbstractView {
 		super.initialize(app);
 		
 		initPhysics();
+		
+		
+		
 	}
 	
 	@Override
@@ -34,24 +46,40 @@ public class PhysicsView extends AbstractView {
 		
 		if(app.mousePressed)
 		{
-			doSquare = !doSquare;
-			Body shape;
+//			doSquare = !doSquare;
+//			Body shape;
+//			
+//			if(doSquare)
+//			{
+//				//float[] coords = {mouseX, mouseY, mouseX - 15.0f, mouseY + 15.0f, mouseX + 15.0f, mouseY + 15.0f};
+//				
+//				shape = physWorld.createRect(app.mouseX - 10, app.mouseY - 10, app.mouseX + 10, app.mouseY + 10);
+//				shape.setAngle(45.0f);
+//			}
+//			else
+//			{
+//				shape = physWorld.createCircle(app.mouseX, app.mouseY, 10.0f);
+//			}
 			
-			if(doSquare)
-			{
-				//float[] coords = {mouseX, mouseY, mouseX - 15.0f, mouseY + 15.0f, mouseX + 15.0f, mouseY + 15.0f};
-				
-				shape = physWorld.createRect(app.mouseX - 10, app.mouseY - 10, app.mouseX + 10, app.mouseY + 10);
-				shape.setAngle(45.0f);
-			}
-			else
-			{
-				shape = physWorld.createCircle(app.mouseX, app.mouseY, 10.0f);
-			}
+			
 			
 			//createHuman();
 			
+			createPolyHuman(app);
 		}
+	}
+	
+	private void createPolyHuman(PApplet app)
+	{
+		Body bd = physWorld.getWorld().createBody(new BodyDef());
+		
+		for (int i = 0; i < _polyHumanDef.size(); i++) {
+			bd.createShape(_polyHumanDef.get(i));
+		}
+		
+		spawn += 200.0f;
+		bd.setMassFromShapes();
+		bd.setXForm(physWorld.screenToWorld(new Vec2(spawn%app.width, 50)), (float)Math.PI);
 	}
 	
 	private void initPhysics() {
@@ -60,7 +88,11 @@ public class PhysicsView extends AbstractView {
 		physWorld = new Physics(app, app.width, app.height);
 		physWorld.setDensity(1.0f);
 		
+		__imageAnalysis = new ImageAnalysis(app, physWorld);
+		_polyHumanDef = __imageAnalysis.analyzeImage("../data/tracing/RealPerson_2.png");
+		
 		createLift(app);
+//		createPolyHuman(app);
 	}
 	
 	private void createLift(PApplet app)
