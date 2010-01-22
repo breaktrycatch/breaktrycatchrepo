@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+<properties>
+	<variables>
+		<variable name="my.path" value="/home/foo/data"/>
+	</variables>
+
+	<section name="capture">
+		<entry key="exposure" value=".5" />
+		<entry key="gain" value="1" />
+		<entry key="captureThreshold" value="10" />
+		<entry key="subtractionScale" value="1" />
+		<entry key="shadowThreshold" value="1" />
+		<entry key="maxBackgrounds" value="16" />
+		
+		<entry key="redBalance" value=".5" />
+		<entry key="greenBalance" value=".6" />
+		<entry key="blueBalance" value=".5" />
+		
+		<entry key="cameraWidth" value="320" />
+		<entry key="cameraHeight" value="240" />
+		<entry key="cameraFPS" value="30" />
+		
+	</section>
+	
+	<section name="tracing">
+	</section>
+	
+	<section name="physics">
+	</section>
+	
+</properties>

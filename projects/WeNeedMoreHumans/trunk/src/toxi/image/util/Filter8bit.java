@@ -20,6 +20,7 @@
 
 package toxi.image.util;
 
+import processing.core.PApplet;
 import processing.core.PImage;
 
 /**
@@ -167,6 +168,7 @@ public class Filter8bit
 			else if (result < 0)
 				result = 0;
 			dest[i] = 0xff000000 | result;
+			
 		}
 		return dest;
 	}

@@ -85,4 +85,27 @@ public class OpenCVCapture implements SimpleCapture
 		_opencv.contrast(amt);
 	}
 
+	@Override
+	public void setExposure(float f)
+	{
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public void setGain(float i)
+	{
+		// TODO Auto-generated method stub
+	}
+	
+	@Override
+	public void setColorBalance(float r, float g, float b)
+	{
+		// TODO Auto-generated method stub
+	}
+
+	public OpenCV opencv()
+	{
+		return _opencv;
+	}
+
 }
