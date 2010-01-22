@@ -37,6 +37,8 @@ public class ImageAnalysis {
 	
 	ArrayList<ArrayList<PixelVO>> finalPoints;
 	
+	ArrayList<PolygonDef> polyDefs;
+	
 	private PolyTool polyTool;
 	
 	private int bodyCount;
@@ -107,7 +109,7 @@ public class ImageAnalysis {
 		}
 	}
 	
-	public void analyzeImage(String _path) {
+	public ArrayList<PolygonDef> analyzeImage(String _path) {
 		
 		__originalImage = app.loadImage(_path);
 		__originalImage.loadPixels();
@@ -126,7 +128,9 @@ public class ImageAnalysis {
 			LogRepository.getInstance().getJonsLogger().info("NUMBER OF CULLED POINTS " + culledPoints.size());
 		convertToPolys();
 			LogRepository.getInstance().getJonsLogger().info("BODIES CREATED " + bodyCount);
-			//LogRepository.getInstance().getJonsLogger().info("POLYGONS CREATED " + polygons.size());
+			LogRepository.getInstance().getJonsLogger().info("POLYGONS CREATED " + polyDefs.size());
+			
+		return polyDefs;
 	}
 	
 	private void determinePixelOutline() {
@@ -343,19 +347,12 @@ public class ImageAnalysis {
 	}
 	
 	private void convertToPolys() {
+		polyDefs = new ArrayList<PolygonDef>();
 		polyTool = new PolyTool();
 		
-		if (culledPoints.size() > 8) {
-			
-			Body body;
-			BodyDef bodyDef;
-			
-			bodyDef = new BodyDef();
-			
-			makeComplexBody(null, culledPoints);
-			
-			
-		}
+		//if (culledPoints.size() > 8) {
+			makeComplexBody(culledPoints);
+		//}
 		
 		
 //		EarClipping earClipping = new EarClipping();
@@ -399,7 +396,7 @@ public class ImageAnalysis {
 	
 	//HELPERS
 	
-	private void makeComplexBody(Body p_body, ArrayList<PixelVO> p_vertices)
+	private void makeComplexBody(ArrayList<PixelVO> p_vertices)
 	{
 		ArrayList<PixelVO> vertArray = (ArrayList<PixelVO>) p_vertices.clone();
 		if(!polyTool.isPolyClockwise(vertArray)) {
@@ -431,6 +428,8 @@ public class ImageAnalysis {
 						polyDef.vertices.add(j, new Vec2(polys.get(i).get(j).x/30, polys.get(i).get(j).y/30));
 					}
 					
+					polyDefs.add(polyDef);
+					
 					//p_body.createShape(polyDef);
 				}
 			}
@@ -439,7 +438,7 @@ public class ImageAnalysis {
 			bodyCount++;
 			
 		} else {
-			makeComplexBody(p_body, polyTool.getConvexPoly(p_vertices));
+			makeComplexBody(polyTool.getConvexPoly(p_vertices));
 		}
 	}
 	
