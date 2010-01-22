@@ -11,6 +11,7 @@ import org.jbox2d.dynamics.joints.PrismaticJointDef;
 import org.jbox2d.p5.Physics;
 
 import processing.core.PApplet;
+import processing.core.PImage;
 
 import com.breaktrycatch.lib.view.AbstractView;
 import com.breaktrycatch.needmorehumans.tracing.ImageAnalysis;
@@ -85,11 +86,22 @@ public class PhysicsView extends AbstractView {
 	private void initPhysics() {
 		PApplet app = getApp();
 		
+		String t1 = "../data/tracing/TestPerson_png.png";
+		String t2 = "../data/tracing/Cube.png";
+		String p1 = "../data/tracing/RealPerson_1.png";
+		String p2 = "../data/tracing/RealPerson_2.png";
+		String p3 = "../data/tracing/RealPerson_3.png";
+		String p4 = "../data/tracing/RealPerson_4.png";
+		String p5 = "../data/tracing/RealPerson_5.png";
+		
+		PImage p = app.loadImage(p2);
+		p.loadPixels();
+		
 		physWorld = new Physics(app, app.width, app.height);
 		physWorld.setDensity(1.0f);
 		
 		__imageAnalysis = new ImageAnalysis(app, physWorld);
-		_polyHumanDef = __imageAnalysis.analyzeImage("../data/tracing/RealPerson_2.png");
+		_polyHumanDef = __imageAnalysis.analyzeImage(p);
 		
 		createLift(app);
 //		createPolyHuman(app);

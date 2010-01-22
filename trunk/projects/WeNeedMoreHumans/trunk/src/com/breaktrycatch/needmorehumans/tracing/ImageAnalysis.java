@@ -8,6 +8,7 @@ import org.jbox2d.p5.Physics;
 
 import processing.core.PApplet;
 import processing.core.PImage;
+import processing.core.PVector;
 
 import com.breaktrycatch.needmorehumans.tracing.algorithms.BetterRelevancy;
 import com.breaktrycatch.needmorehumans.tracing.earClipping.Polygon;
@@ -28,6 +29,7 @@ public class ImageAnalysis {
 	
 	private ArrayList<EdgeVO> edges;
 	private ArrayList<EdgeVO> culledEdges;
+	private ArrayList<EdgeVO> innerCulledEdges;
 	
 	private ArrayList<PixelVO> culledPoints;
 	
@@ -89,9 +91,21 @@ public class ImageAnalysis {
 		}
 		
 		//Draw the culled edges
-		app.stroke(0, 255, 255);
+		//app.stroke(0, 255, 255);
 		offset = __originalImage.width * 5;
+
 		for (int i = 0; i < culledEdges.size(); i++) {
+			
+			if (i%2 == 0) {
+				app.stroke(0, 0, 255);
+			}
+			else {
+				app.stroke(255, 0, 0);
+			}
+			if (culledEdges.get(i).holdBecauseOfAngle == true) {
+				//LogRepository.getInstance().getJonsLogger().info("BLACK");
+				app.stroke(0, 0, 0);
+			}
 			app.line(culledEdges.get(i).p1.x + offset, culledEdges.get(i).p1.y, culledEdges.get(i).p2.x + offset, culledEdges.get(i).p2.y);
 		}
 		
@@ -109,21 +123,49 @@ public class ImageAnalysis {
 		}
 	}
 	
-	public ArrayList<PolygonDef> analyzeImage(String _path) {
+	public ArrayList<PolygonDef> analyzeImage(PImage _image) {
 		
-		__originalImage = app.loadImage(_path);
-		__originalImage.loadPixels();
+		__originalImage = _image;
 		
 		determinePixelOutline();
 			LogRepository.getInstance().getJonsLogger().info("NUMBER OF PIXELS IN OUTLINE " + pixelOutline.size());
-		orderPixels();
+		orderPixels(0);
+		
+		//Bug CHECK - If we have less than 90% of the points, something went wrong
+		if (orderedPixelOutline.size() < (pixelOutline.size() - (pixelOutline.size() * 0.1))) {
+			for (int i = 0; i < pixelOutline.size(); i++) {
+				pixelOutline.get(i).marked = false;
+				pixelOutline.get(i).rendered = false;
+				pixelOutline.get(i).saveFromSimpleCulling = false;
+				pixelOutline.get(i).next = null;
+				pixelOutline.get(i).prev = null;
+			}
+			
+			LogRepository.getInstance().getJonsLogger().info("LESS THAN 90%  Starting with " + (pixelOutline.size()/2));
+			orderPixels(pixelOutline.size()/2);
+		}
+		
 			LogRepository.getInstance().getJonsLogger().info("NUMBER OF PIXELS IN ORDERED OUTLINE " + orderedPixelOutline.size());
 		cullSimple();
 			LogRepository.getInstance().getJonsLogger().info("NUMBER OF PIXELS IN CULLED ORDERED OUTLINE " + culledSimplePixelOutline.size());
 		constructEdges();
 			LogRepository.getInstance().getJonsLogger().info("NUMBER OF EDGES " + edges.size());
-		cullEdges();
-			LogRepository.getInstance().getJonsLogger().info("NUMBER OF CULLED EDGES " + culledEdges.size());
+		culledEdges = new ArrayList<EdgeVO>();
+		//Do Relevancy Check
+		cullEdges(edges, false, true);
+			LogRepository.getInstance().getJonsLogger().info("NUMBER OF CULLED EDGES RELEVANCY " + culledEdges.size());
+		innerCulledEdges = (ArrayList<EdgeVO>) culledEdges.clone();
+		culledEdges = new ArrayList<EdgeVO>();
+		//Do Length Check
+		cullEdges(innerCulledEdges, true, false);
+			LogRepository.getInstance().getJonsLogger().info("NUMBER OF CULLED EDGES LENGTH " + culledEdges.size());
+			
+//		for (int i=1; i<3; i++) {
+//			innerCulledEdges = (ArrayList<EdgeVO>) culledEdges.clone();
+//			culledEdges = new ArrayList<EdgeVO>();
+//			cullEdges(innerCulledEdges, true);
+//			LogRepository.getInstance().getJonsLogger().info("NUMBER OF CULLED EDGES " + i + " " + culledEdges.size());
+//		}
 		convertToPoints();
 			LogRepository.getInstance().getJonsLogger().info("NUMBER OF CULLED POINTS " + culledPoints.size());
 		convertToPolys();
@@ -188,8 +230,8 @@ public class ImageAnalysis {
 	}
 	
 	//TODO: Rare case where we have only 3 pixels. p1
-	private void orderPixels() {
-		PixelVO startPixel = pixelOutline.get(0);
+	private void orderPixels(int _startPixelIndex) {
+		PixelVO startPixel = pixelOutline.get(_startPixelIndex);
 		PixelVO currentPixel = startPixel;
 		PixelVO checkPixel;
 		
@@ -296,9 +338,7 @@ public class ImageAnalysis {
 		}
 	}
 	
-	private void cullEdges() {
-		
-		culledEdges = new ArrayList<EdgeVO>();
+	private void cullEdges(ArrayList<EdgeVO> _from, boolean _lengthCheck, boolean _relevancyCheck) {
 		
 		EdgeVO nextEdge;
 		EdgeVO currentEdge;
@@ -306,25 +346,76 @@ public class ImageAnalysis {
 		EdgeVO addedEdge;
 		int index = 0;
 		
-		for (int i = 0; i < edges.size(); i++) {
-			currentEdge = edges.get(i);
+		for (int i = 0; i < _from.size(); i++) {
+			currentEdge = _from.get(i);
 			index = i+1;
-			if (index >= edges.size()) {
+			if (index >= _from.size()) {
 				index = 0;
 			}
-			nextEdge = edges.get(index);
+			nextEdge = _from.get(index);
 			
-			double relevancy = BetterRelevancy.calculate(currentEdge, nextEdge);
+			//We want to hold edges that are vertical or horizontal and larger than 7 pixels
 			
-			if (relevancy < 50) {
-				currentEdge.markForCulling = true;
+			PVector horizontalVector = new PVector(1, 0);
+			
+			PVector edgeVector = new PVector(currentEdge.p2.x - currentEdge.p1.x, currentEdge.p2.y - currentEdge.p1.y);
+			
+			float angle = PApplet.degrees(PVector.angleBetween(horizontalVector, edgeVector));
+			float epsilon = 5;
+			
+			currentEdge.updateLength();
+			
+			//Vertical Line
+//			if (angle < (90+epsilon) && (angle > (90-epsilon))) {
+//				//LogRepository.getInstance().getJonsLogger().info("V ANGLE 90 " + angle);
+//				currentEdge.holdBecauseOfAngle = true;
+//			}
+//			if (angle < (270+epsilon) && (angle > (270-epsilon))) {
+//				//LogRepository.getInstance().getJonsLogger().info("V ANGLE 270 " + angle);
+//				currentEdge.holdBecauseOfAngle = true;
+//			}
+			if (angle < (0+epsilon) && (angle > (0-epsilon))) {
+				//LogRepository.getInstance().getJonsLogger().info("H ANGLE 0 " + angle);
+				currentEdge.holdBecauseOfAngle = true;
 			}
+			if (angle < (180+epsilon) && (angle > (180-epsilon))) {
+				//LogRepository.getInstance().getJonsLogger().info("H ANGLE 180 " + angle);
+				currentEdge.holdBecauseOfAngle = true;
+			}
+			
+			//LogRepository.getInstance().getJonsLogger().info("ANGLE " + angle);
+			
+			
+			if (_relevancyCheck) {
+				double relevancy = BetterRelevancy.calculate(currentEdge, nextEdge);
+		
+				if (relevancy < 30) {
+					if (currentEdge.holdBecauseOfAngle == false) {
+						currentEdge.markForCulling = true;
+					}
+				}
+			}
+			
+			if (_lengthCheck){
+				
+				//LogRepository.getInstance().getJonsLogger().info("LENGTH: " + currentEdge.length);
+				
+				if (currentEdge.length < 10) {
+					if (currentEdge.holdBecauseOfAngle == false) {
+						currentEdge.markForCulling = true;
+					}
+				}
+			}
+			
 		}
 		
-		for (int i = 0; i < edges.size(); i++) {
-			currentEdge = edges.get(i);
+		
+		
+		for (int i = 0; i < _from.size(); i++) {
+			currentEdge = _from.get(i);
 			if (currentEdge.markForCulling == false) {
 				addedEdge = new EdgeVO(currentEdge.p1, currentEdge.p2);
+				addedEdge.holdBecauseOfAngle = currentEdge.holdBecauseOfAngle;
 				culledEdges.add(addedEdge);
 				if (linkedEdge == null) {
 					linkedEdge = addedEdge;
@@ -336,7 +427,6 @@ public class ImageAnalysis {
 				}
 			}
 		}
-	
 	}
 	
 	private void convertToPoints() {
@@ -426,7 +516,7 @@ public class ImageAnalysis {
 					
 					Vec2 v;
 //					for (int j = 0; j < polys.get(i).size(); j++) {
-					LogRepository.getInstance().getJonsLogger().info("POLYS SIZE: " + polys.get(i).size());
+					
 					for (int j = polys.get(i).size()-1; j >= 0; j--) {
 						//polyDef.vertices.add(j, new Vec2(polys.get(i).get(j).x/30, polys.get(i).get(j).y/30));
 						v = new Vec2(polys.get(i).get(j).x, polys.get(i).get(j).y);
