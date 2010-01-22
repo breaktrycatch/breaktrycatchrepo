@@ -1,14 +1,16 @@
 package com.breaktrycatch.needmorehumans.core;
 
+import java.awt.Dimension;
+import java.awt.Toolkit;
+
 import processing.core.PApplet;
 
 import com.breaktrycatch.lib.display.Stage;
-import com.breaktrycatch.needmorehumans.view.ViewManager;
 import com.breaktrycatch.needmorehumans.utils.FPS;
+import com.breaktrycatch.needmorehumans.view.ViewManager;
 
 public class NeedMoreHumansCore extends Stage
 {
-
 	/**
 	 * 
 	 */
@@ -19,9 +21,14 @@ public class NeedMoreHumansCore extends Stage
 	{
 		super(app);
 
+		Toolkit toolkit = Toolkit.getDefaultToolkit();
+
+		// Get the current screen size
+		Dimension scrnsize = toolkit.getScreenSize();
+
 		app.frameRate(60);
-		app.size(1650, 1080, PApplet.P2D);
-		
+		app.size(scrnsize.width, scrnsize.height - 120, PApplet.P2D);
+
 		_mainViewManager = new ViewManager(app);
 		_mainViewManager.changeView(ViewManager.TRACING_VIEW);
 		add(_mainViewManager);

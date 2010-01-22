@@ -20,6 +20,7 @@
 
 package toxi.video.capture;
 
+import processing.core.PApplet;
 import processing.core.PImage;
 
 /**
@@ -35,7 +36,8 @@ import processing.core.PImage;
  * 
  * @author Karsten Schmidt < i n f o [ a t ] t o x i . co . u k >
  */
-public interface SimpleCapture {
+public interface SimpleCapture
+{
 
 	/**
 	 * Initializes video capture for the given device.
@@ -52,8 +54,7 @@ public interface SimpleCapture {
 	 * @return False, if the device could not be initialized. The exact reason
 	 *         can be found out via {@link JMFSimpleCapture#getError()}.
 	 */
-	public boolean initVideo(String deviceID, int width, int height,
-			int fps);
+	public boolean initVideo(String deviceID, int width, int height, int fps);
 
 	/**
 	 * Handles freeing up any resources used by the SimpleCapture instance
@@ -62,10 +63,11 @@ public interface SimpleCapture {
 
 	/**
 	 * Returns the name of the currently used capture device.
+	 * 
 	 * @return device name
 	 */
 	public String getDeviceName();
-	
+
 	/**
 	 * Reads the current frame from the internal video capture and converts it
 	 * into a PImage object
@@ -76,10 +78,11 @@ public interface SimpleCapture {
 
 	/**
 	 * Indicates if a new frame is available from the capture device.
+	 * 
 	 * @return true, if new frame is available
 	 */
 	public boolean isNewFrameAvailable();
-	
+
 	/**
 	 * Retrieves the pixel width of the capture instance
 	 * 
@@ -100,4 +103,12 @@ public interface SimpleCapture {
 	 * @return string or null if all is ok
 	 */
 	public String getError();
+
+	public void setExposure(float f);
+
+	public void setGain(float i);
+
+	public void read();
+
+	public void setColorBalance(float r, float g, float b);
 }

@@ -18,6 +18,8 @@ public class TileImageDrawer extends DisplayObject
 	private int _yJump;
 	private float _scale = 1;
 
+	private boolean _enabled = true;
+
 	public TileImageDrawer(PApplet app)
 	{
 		super(app);
@@ -28,22 +30,32 @@ public class TileImageDrawer extends DisplayObject
 		this(app);
 		_scale = scale;
 	}
-	
+
 	public void drawImage(int[] image, int w, int h)
 	{
+		if (!_enabled)
+		{
+			return;
+		}
+		
 		PImage img = getApp().createImage(w, h, PApplet.ARGB);
 		img.pixels = image;
 		drawImage(img);
 	}
-	
+
 	public void drawImage(PImage image)
 	{
-		if(_scale != 1)
+		if (!_enabled)
+		{
+			return;
+		}
+
+		if (_scale != 1)
 		{
 			image = ImageUtils.cloneImage(image);
-			image.resize((int)(image.width * _scale),(int)(image.height * _scale));
+			image.resize((int) (image.width * _scale), (int) (image.height * _scale));
 		}
-		
+
 		if (image.height > _yJump)
 		{
 			_yJump = image.height;
@@ -66,6 +78,15 @@ public class TileImageDrawer extends DisplayObject
 		_dX = 0;
 		_dY = 0;
 		_yJump = 0;
-
+	}
+	
+	public void setEnabled(boolean enabled)
+	{
+		_enabled = enabled;
+	}
+	
+	public boolean getEnabled()
+	{
+		return _enabled;
 	}
 }

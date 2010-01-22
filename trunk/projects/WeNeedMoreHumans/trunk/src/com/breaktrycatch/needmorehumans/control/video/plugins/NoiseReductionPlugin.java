@@ -2,8 +2,6 @@ package com.breaktrycatch.needmorehumans.control.video.plugins;
 
 import java.util.HashMap;
 
-import com.breaktrycatch.needmorehumans.utils.LogRepository;
-
 import toxi.video.capture.ProcessorPipeline;
 import toxi.video.capture.plugins.ProcessorPlugin;
 

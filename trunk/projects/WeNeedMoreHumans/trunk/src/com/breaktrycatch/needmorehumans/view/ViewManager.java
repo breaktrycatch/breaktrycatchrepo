@@ -17,7 +17,7 @@ public class ViewManager extends AbstractViewManager
 		super(app);
 	}
 
-	public static final String CAPTURE_VIEW = com.breaktrycatch.needmorehumans.view.HumanCaptureView.class.getName();
+	public static final String CAPTURE_VIEW = com.breaktrycatch.needmorehumans.view.CaptureView.class.getName();
 	public static final String TRACING_VIEW = com.breaktrycatch.needmorehumans.view.TracingDebugView.class.getName();
 	public static final String PHYSICS_VIEW = com.breaktrycatch.needmorehumans.view.PhysicsView.class.getName();
 }
