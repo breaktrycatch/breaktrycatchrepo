@@ -1,5 +1,9 @@
 package com.breaktrycatch.needmorehumans.view;
 
+import java.util.ArrayList;
+
+import org.jbox2d.collision.PolygonDef;
+
 import processing.core.PApplet;
 import processing.core.PImage;
 import toxi.video.capture.SimpleCapture;
@@ -7,6 +11,7 @@ import toxi.video.capture.SimpleCapture;
 import com.breaktrycatch.lib.view.AbstractView;
 import com.breaktrycatch.needmorehumans.control.video.PS3EyeCapture;
 import com.breaktrycatch.needmorehumans.control.webcam.HumanProcessorControl;
+import com.breaktrycatch.needmorehumans.tracing.ImageAnalysis;
 import com.breaktrycatch.needmorehumans.utils.ConfigTools;
 import com.breaktrycatch.needmorehumans.utils.ImageUtils;
 import com.breaktrycatch.needmorehumans.utils.TileImageDrawer;
@@ -23,13 +28,16 @@ public class CaptureView extends AbstractView
 	private int _maxBackgrounds = 16;
 
 	private PImage _background;
+	private PImage _foreground;
+
 	private SimpleCapture _capture;
 	private HumanProcessorControl _processor;
-
-	private PImage _foreground;
+	private PhysicsView _physicsSim;
 	private TileImageDrawer _debugDrawer;
+	private ImageAnalysis _imageAnalysis;
 
 	private boolean _debugMode = false;
+	private boolean _imageCaptured = false;
 
 	private static final String CAPTURE = "capture";
 
@@ -47,17 +55,24 @@ public class CaptureView extends AbstractView
 		_cameraWidth = ConfigTools.getInt(CAPTURE, "cameraWidth");
 		_cameraHeight = ConfigTools.getInt(CAPTURE, "cameraHeight");
 		_maxBackgrounds = ConfigTools.getInt(CAPTURE, "maxBackgrounds");
-		
+
 		_background = app.loadImage("../data/subtraction/sunset-beach.jpg");
 		_background.resize(_cameraWidth, _cameraHeight);
-		
+
+		_debugDrawer = new TileImageDrawer(app, .7f);
+		_debugDrawer.setEnabled(true);
+
 		_capture = new PS3EyeCapture(app);
 		_capture.initVideo("", _cameraWidth, _cameraHeight, ConfigTools.getInt(CAPTURE, "cameraFPS"));
 		_capture.setExposure(ConfigTools.getFloat(CAPTURE, "exposure"));
 		_capture.setGain(ConfigTools.getFloat(CAPTURE, "gain"));
 
 		_processor = new HumanProcessorControl(getApp(), _capture);
-		_processor.debugMode(true);
+		_processor.setDebugDrawer(_debugDrawer);
+
+		_physicsSim = new PhysicsView();
+		_physicsSim.initialize(app);
+		add(_physicsSim);
 		// debug();
 	}
 
@@ -109,10 +124,9 @@ public class CaptureView extends AbstractView
 			return;
 		}
 
+		_debugDrawer.reset();
 		PApplet app = getApp();
-		app.background(100);
-		
-		
+
 		if (app.key == ' ')
 		{
 			_processor.captureBackgrounds(_maxBackgrounds);
@@ -120,12 +134,36 @@ public class CaptureView extends AbstractView
 		}
 
 		_processor.update();
-		
-		// draw the background image.
-		app.image(_processor.getRawCameraImage(), getApp().width - _processor.getRawCameraImage().width * 2, getApp().height - _processor.getRawCameraImage().height);
-		
-		PImage masked = _processor.getProcessedImage();
-		app.image(_background, getApp().width - masked.width, getApp().height - masked.height);
-		app.image(masked, getApp().width - masked.width, getApp().height - masked.height);
+		if (!_imageCaptured)
+		{
+
+			// draw the background image.
+			app.image(_processor.getRawCameraImage(), getApp().width - _processor.getRawCameraImage().width * 2, getApp().height - _processor.getRawCameraImage().height);
+
+			PImage masked = _processor.getProcessedImage();
+			app.image(_background, getApp().width - masked.width, getApp().height - masked.height);
+			app.image(masked, getApp().width - masked.width, getApp().height - masked.height);
+			if (app.key == 'c' && !_processor.isCapturingBackgrounds())
+			{
+				analizeImage(masked);
+				_imageCaptured = true;
+				_processor.setProcessingEnabled(false);
+				app.key = 'q';
+			}
+
+		}
+
+		if (_imageAnalysis != null)
+		{
+			_imageAnalysis.draw();
+		}
+	}
+
+	private void analizeImage(PImage img)
+	{
+		_imageAnalysis = new ImageAnalysis(getApp(), _physicsSim.getPhysWorld());
+		_imageAnalysis.setDebugDrawer(_debugDrawer);
+		ArrayList<PolygonDef> polys = _imageAnalysis.analyzeImage(img);
+		_physicsSim.setHuman(polys);
 	}
 }

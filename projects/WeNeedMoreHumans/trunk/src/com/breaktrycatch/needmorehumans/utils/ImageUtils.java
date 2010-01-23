@@ -55,25 +55,25 @@ public class ImageUtils
 	public static double luminosityVariance(PImage target, Rectangle rect)
 	{
 		float sum = 0;
-		
+
 		double low = 1;
 		double high = 0;
-		
+
 		for (int y = rect.y; y < rect.y + rect.height; y++)
 		{
 			for (int x = rect.x; x < rect.x + rect.width; x++)
 			{
 				int col = target.pixels[y * target.width + x];
-				
+
 				float[] HSL = new float[3];
 				ImageUtils.RGBtoHSL((col >> 16) & 0xFF, (col >> 8) & 0xFF, col & 0xFF, HSL);
 				sum += Math.pow(HSL[2], 2);
-				
-				if(HSL[2] > high)
+
+				if (HSL[2] > high)
 				{
 					high = HSL[2];
 				}
-				if(HSL[2] < low)
+				if (HSL[2] < low)
 				{
 					low = HSL[2];
 				}
@@ -90,17 +90,17 @@ public class ImageUtils
 				int col = target.pixels[y * target.width + x];
 				float[] HSL = new float[3];
 				ImageUtils.RGBtoHSL((col >> 16) & 0xFF, (col >> 8) & 0xFF, col & 0xFF, HSL);
-				
+
 				varSum += Math.pow(HSL[2] - mean, 2);
 			}
 		}
-		
+
 		double variance = varSum / area;
-		
-//		PApplet.println("Variance: " + variance + " : DIFF: " + (high - low));
-		
-		
-		return variance;//high - low;
+
+		// PApplet.println("Variance: " + variance + " : DIFF: " + (high -
+		// low));
+
+		return variance;// high - low;
 	}
 
 	public static void averageImages(PImage target, ArrayList<PImage> images)
@@ -226,9 +226,31 @@ public class ImageUtils
 			if (H > 1)
 				H -= 1;
 		}
-		
+
 		hsl[0] = H;
 		hsl[1] = S;
 		hsl[2] = L;
+	}
+
+	public static void tint(PImage masked, int tint, float amt)
+	{
+		int rt = (tint >> 16) & 0xFF;
+		int gt = (tint >> 8) & 0xFF;
+		int bt = tint & 0xFF;
+		int numPixels = masked.pixels.length;
+		for (int i = 0; i < numPixels; i++)
+		{
+			int col = masked.pixels[i];
+			int a = (col >> 24) & 0xFF;
+			int r = (col >> 16) & 0xFF;
+			int g = (col >> 8) & 0xFF;
+			int b = col & 0xFF;
+			
+			r = (int)(r * (amt - 1) + rt * (amt));
+			g = (int)(g * (amt - 1) + gt * (amt));
+			b = (int)(b * (amt - 1) + bt * (amt));
+			
+			masked.pixels[i] = (a << 24 | r << 16 | g << 8 | b);
+		}
 	}
 }

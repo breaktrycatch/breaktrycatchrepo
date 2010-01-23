@@ -30,7 +30,7 @@ public class NeedMoreHumansCore extends Stage
 		app.size(scrnsize.width, scrnsize.height - 120, PApplet.P2D);
 
 		_mainViewManager = new ViewManager(app);
-		_mainViewManager.changeView(ViewManager.TRACING_VIEW);
+		_mainViewManager.changeView(ViewManager.CAPTURE_VIEW);
 		add(_mainViewManager);
 
 		add(FPS.register(app));
@@ -39,7 +39,9 @@ public class NeedMoreHumansCore extends Stage
 	@Override
 	public void draw()
 	{
+		getApp().background(100);
 		super.draw();
+
 
 		PApplet app = getApp();
 		if (app.key == '1')
