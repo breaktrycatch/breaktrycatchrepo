@@ -11,6 +11,7 @@ import com.breaktrycatch.needmorehumans.config.control.ColorController;
 import com.breaktrycatch.needmorehumans.control.video.PS3EyeCapture;
 import com.breaktrycatch.needmorehumans.control.webcam.HumanProcessorControl;
 import com.breaktrycatch.needmorehumans.utils.ConfigTools;
+import com.breaktrycatch.needmorehumans.utils.ImageUtils;
 
 import controlP5.CheckBox;
 import controlP5.ControlEvent;
@@ -60,7 +61,7 @@ public class NeedMoreHumansConfigCore extends Stage
 		_capture.setColorBalance(_colorRect.getRed(), _colorRect.getGreen(), _colorRect.getBlue());
 
 		_control = new HumanProcessorControl(app, _capture);
-		_control.setDifferenceThreshold((int)ConfigTools.getFloat(CAPTURE, "captureThreshold"));
+		_control.setDifferenceThreshold((int) ConfigTools.getFloat(CAPTURE, "captureThreshold"));
 		_control.setScale(ConfigTools.getFloat(CAPTURE, "subtractionScale"));
 		_control.setShadowThreshold(ConfigTools.getFloat(CAPTURE, "shadowThreshold"));
 		_control.setProcessingEnabled(false);
@@ -83,7 +84,10 @@ public class NeedMoreHumansConfigCore extends Stage
 
 		controlIndex++;
 		_controlP5.addSlider("Red Balance", 0f, 1f, ConfigTools.getFloat(CAPTURE, "redBalance"), _marginX, startY + (++controlIndex * yJump), 100, 14).setId(5);
-		_colorRect = new ColorController(getApp(), _marginX + 200, startY + controlIndex * yJump, 60, 60);
+
+		_colorRect = new ColorController(getApp(), getApp().width, startY + controlIndex * yJump, 60, 60);
+		_colorRect.slideTo(_marginX + 200, startY + controlIndex * yJump, 1f);
+
 		_controlP5.addSlider("Green Balance", 0f, 1f, ConfigTools.getFloat(CAPTURE, "greenBalance"), _marginX, startY + (++controlIndex * yJump), 100, 14).setId(6);
 		_controlP5.addSlider("Blue Blanace", 0f, 1f, ConfigTools.getFloat(CAPTURE, "blueBalance"), _marginX, startY + (++controlIndex * yJump), 100, 14).setId(7);
 
@@ -96,10 +100,11 @@ public class NeedMoreHumansConfigCore extends Stage
 		checkbox.addItem("Show Thresholds", 0).setState(false);
 
 		_controlP5.addButton("Capture BG", 1, _marginX + 120, startY + (++controlIndex * yJump), 120, 25).setId(9);
-		
+
 		_colorRect.setRed(ConfigTools.getFloat(CAPTURE, "redBalance"));
 		_colorRect.setGreen(ConfigTools.getFloat(CAPTURE, "greenBalance"));
 		_colorRect.setBlue(ConfigTools.getFloat(CAPTURE, "blueBalance"));
+
 	}
 
 	public void controlEvent(ControlEvent theEvent)
@@ -131,7 +136,7 @@ public class NeedMoreHumansConfigCore extends Stage
 				ConfigTools.setParameter(CAPTURE, "gain", String.valueOf(theEvent.controller().value()));
 				break;
 			case 3:
-				int threshold = (int)theEvent.controller().value();
+				int threshold = (int) theEvent.controller().value();
 				_control.setDifferenceThreshold(threshold);
 				ConfigTools.setParameter(CAPTURE, "captureThreshold", String.valueOf(threshold));
 				break;
@@ -159,7 +164,7 @@ public class NeedMoreHumansConfigCore extends Stage
 				break;
 
 			case 9:
-				if(_useSubtractor)
+				if (_useSubtractor)
 				{
 					_control.captureBackgrounds(ConfigTools.getInt(CAPTURE, "maxBackgrounds"));
 				}
@@ -179,7 +184,7 @@ public class NeedMoreHumansConfigCore extends Stage
 		{
 			control.draw(getApp());
 		}
-		
+
 		_controlP5.draw();
 		_colorRect.draw();
 		_capture.read();
@@ -193,13 +198,16 @@ public class NeedMoreHumansConfigCore extends Stage
 			if (!_control.isCapturingBackgrounds())
 			{
 				PImage masked = _control.getProcessedImage();
+				
+				ImageUtils.tint(masked, 0xff0000, 1);
+				
 
 				getApp().image(_control.getRawCameraImage(), (getApp().width - _cameraWidth) / 2, getApp().height - _cameraHeight - 20);
 				getApp().image(masked, (getApp().width - _cameraWidth) / 2, getApp().height - _cameraHeight - 20);
 			}
 		}
 	}
-	
+
 	@Override
 	public void dispose()
 	{

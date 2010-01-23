@@ -40,10 +40,14 @@ public class PhysicsView extends AbstractView {
 		
 	}
 	
+	public Physics getPhysWorld() {
+		return physWorld;
+	}
+	
 	@Override
 	public void draw() {
 		PApplet app = getApp();
-		app.background(0xFF0000);
+//		app.background(0xFF0000);
 		
 		if(app.mousePressed)
 		{
@@ -66,21 +70,8 @@ public class PhysicsView extends AbstractView {
 			
 			//createHuman();
 			
-			createPolyHuman(app);
+			createPolyHuman(_polyHumanDef);
 		}
-	}
-	
-	private void createPolyHuman(PApplet app)
-	{
-		Body bd = physWorld.getWorld().createBody(new BodyDef());
-		
-		for (int i = 0; i < _polyHumanDef.size(); i++) {
-			bd.createShape(_polyHumanDef.get(i));
-		}
-		
-		spawn += 200.0f;
-		bd.setMassFromShapes();
-		bd.setXForm(physWorld.screenToWorld(new Vec2(spawn%app.width, 50)), (float)Math.PI);
 	}
 	
 	private void initPhysics() {
@@ -103,17 +94,34 @@ public class PhysicsView extends AbstractView {
 		__imageAnalysis = new ImageAnalysis(app, physWorld);
 		_polyHumanDef = __imageAnalysis.analyzeImage(p);
 		
-		createLift(app);
+//		createLift();
 //		createPolyHuman(app);
 	}
 	
-	private void createLift(PApplet app)
+	public void setHuman(ArrayList<PolygonDef> polyDefs){
+		_polyHumanDef = polyDefs;
+	}
+	
+	public void createPolyHuman(ArrayList<PolygonDef> polyDefs)
+	{
+		Body bd = physWorld.getWorld().createBody(new BodyDef());
+		
+		for (int i = 0; i < polyDefs.size(); i++) {
+			bd.createShape(polyDefs.get(i));
+		}
+		
+		spawn += 200.0f;
+		bd.setMassFromShapes();
+		bd.setXForm(physWorld.screenToWorld(new Vec2(spawn%getApp().width, 50)), (float)Math.PI);
+	}
+	
+	private void createLift()
 	{
 		Body mount, platform;
 		
 		float centerX, centerY;
-		centerX = app.width/2;
-		centerY = app.height/2;
+		centerX = getApp().width/2;
+		centerY = getApp().height/2;
 		
 		physWorld.setDensity(0.0f);
 		mount = physWorld.createRect(centerX-5, centerY-5, centerX+5, centerY+5);

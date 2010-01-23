@@ -45,7 +45,7 @@ public class FPS extends DisplayObject
 		if (instance == null)
 		{
 			instance = new FPS(p);
-			font = p.createFont("Arial-Bold", 12);
+			font = p.createFont("Arial-Bold", 50);
 			FPS.p = p;
 			p.registerPost(instance);
 		}
@@ -84,9 +84,9 @@ public class FPS extends DisplayObject
 
 		// draw the fps counter
 		app.noStroke();
-		app.fill(0);
-		app.textFont(font, 12);
-		app.text("FPS: " + frameRate(), 16, 24);
+		app.fill(0xffff00ff);
+		app.textFont(font, 22);
+		app.text("FPS: " + frameRate(), 8, 24);
 	}
 
 }

@@ -14,7 +14,6 @@ import toxi.video.capture.plugins.ProcessorPlugin;
 import com.breaktrycatch.needmorehumans.control.video.plugins.ChannelThresholdPlugin;
 import com.breaktrycatch.needmorehumans.control.video.plugins.ContrastPlugin;
 import com.breaktrycatch.needmorehumans.control.video.plugins.GapFillPlugin;
-import com.breaktrycatch.needmorehumans.utils.ConfigTools;
 import com.breaktrycatch.needmorehumans.utils.ImageUtils;
 import com.breaktrycatch.needmorehumans.utils.TileImageDrawer;
 
@@ -32,47 +31,44 @@ public class HumanProcessorControl
 	private PImage _processedImage;
 	private PImage _rawFrame;
 	private boolean _processingEnabled;
+	private boolean _debugMode = false;
 
 	public HumanProcessorControl(PApplet app, SimpleCapture capture)
 	{
 		_app = app;
 		_capture = capture;
 		_processingEnabled = true;
-		
-		_subtractor = new ImageSubstractionController(app, app.createImage(capture.getWidth(), capture.getHeight(), PApplet.ARGB));
 
-		_debugDrawer = new TileImageDrawer(app, .4f);
+		_subtractor = new ImageSubstractionController(app, app.createImage(capture.getWidth(), capture.getHeight(), PApplet.ARGB));
 		LibCompVis vis = new LibCompVis(app, _capture);
 
 		_prePipeline = new ProcessorPipeline(vis);
-		_prePipeline.setDebugDrawer(_debugDrawer);
-
 		_pipeline = new ProcessorPipeline(vis);
-		_pipeline.setDebugDrawer(_debugDrawer);
-
 		_postPipeline = new ProcessorPipeline(vis);
-		_postPipeline.setDebugDrawer(_debugDrawer);
 
 		configurePrePipeline();
 		configurePipeline();
 		configurePostPipeline();
-		debugMode(false);
 	}
-	
+
 	public void setProcessingEnabled(boolean enabled)
 	{
 		_processingEnabled = enabled;
 	}
-	
-	public void debugMode(boolean debug)
+
+	public void setDebugDrawer(TileImageDrawer debugDrawer)
 	{
-		_debugDrawer.setEnabled(debug);
+		_debugDrawer = debugDrawer;
+		_postPipeline.setDebugDrawer(_debugDrawer);
+		_pipeline.setDebugDrawer(_debugDrawer);
+		_prePipeline.setDebugDrawer(_debugDrawer);
+		_debugMode = true;
 	}
 
 	private void configurePrePipeline()
 	{
-		HashMap<String, Comparable<?>> contrastConfig = new HashMap<String, Comparable<?>>();
-		addPlugin(_prePipeline, ContrastPlugin.class, contrastConfig);
+//		HashMap<String, Comparable<?>> contrastConfig = new HashMap<String, Comparable<?>>();
+//		addPlugin(_prePipeline, ContrastPlugin.class, contrastConfig);
 	}
 
 	private void configurePostPipeline()
@@ -84,7 +80,7 @@ public class HumanProcessorControl
 
 		HashMap<String, Comparable<?>> contractBack = new HashMap<String, Comparable<?>>();
 		contractBack.put(ErosionPlugin.INVERTED, false);
-		contractBack.put(ErosionPlugin.NUM_PASSES, 1);
+		contractBack.put(ErosionPlugin.NUM_PASSES, 2);
 		addPlugin(_postPipeline, ErosionPlugin.class, contractBack);
 	}
 
@@ -123,7 +119,7 @@ public class HumanProcessorControl
 		// // shrink it down to normal.
 		HashMap<String, Comparable<?>> contractBack = new HashMap<String, Comparable<?>>();
 		contractBack.put(ErosionPlugin.INVERTED, false);
-		contractBack.put(ErosionPlugin.NUM_PASSES, 5);
+		contractBack.put(ErosionPlugin.NUM_PASSES, 3);
 		addPlugin(_pipeline, ErosionPlugin.class, contractBack);
 
 		// HashMap<String, Comparable<?>> noiseReduction = new HashMap<String,
@@ -151,6 +147,14 @@ public class HumanProcessorControl
 		}
 	}
 
+	private void debugDraw(PImage img)
+	{
+		if(_debugMode )
+		{
+			_debugDrawer.drawImage(img);
+		}
+	}
+	
 	public PImage createDiffedImage(PImage foreground)
 	{
 		// get the frame with the foreground object in it from the camera.
@@ -159,7 +163,7 @@ public class HumanProcessorControl
 		// create a simple difference mask from the frame.
 		PImage mask = _subtractor.createDifferenceMask(frame);
 
-		_debugDrawer.drawImage(mask);
+		debugDraw(mask);
 
 		// process the mask to remove noise and gaps.
 		mask.pixels = _pipeline.process(mask.pixels, mask.width, mask.height);
@@ -168,12 +172,11 @@ public class HumanProcessorControl
 		PImage maskedFrame = _subtractor.applyDifferenceMask(foreground, mask);
 
 		_subtractor.extractLargestBlob(maskedFrame);
-//		 _subtractor.removeShadows(maskedFrame);
-		
+		// _subtractor.removeShadows(maskedFrame);
+
 		// post process to clean up the image.
 		maskedFrame.pixels = _postPipeline.process(maskedFrame.pixels, maskedFrame.width, maskedFrame.height);
 
-		
 		return maskedFrame;
 	}
 
@@ -184,15 +187,14 @@ public class HumanProcessorControl
 
 	public void update()
 	{
-		_debugDrawer.reset();
 		_capture.read();
 		_rawFrame = _capture.getFrame();
-		_debugDrawer.drawImage(_rawFrame);
+		debugDraw(_rawFrame);
 		_rawFrame.pixels = _prePipeline.process(_rawFrame.pixels, _rawFrame.width, _rawFrame.height);
 
 		if (_captureBackgrounds)
 		{
-			_debugDrawer.drawImage(_rawFrame);
+			debugDraw(_rawFrame);
 			_subtractor.addBackgroundImage(ImageUtils.cloneImage(_rawFrame));
 
 			if (_subtractor.totalBackgrounds() > _numBackgrounds)
@@ -201,11 +203,11 @@ public class HumanProcessorControl
 				_captureBackgrounds = false;
 			}
 		}
-		
+
 		// we want this to follow through if we just average the backgrounds.
-		if(!_captureBackgrounds && _processingEnabled)
+		if (!_captureBackgrounds && _processingEnabled)
 		{
-			_debugDrawer.drawImage(_subtractor.getBackgroundImage());
+			debugDraw(_subtractor.getBackgroundImage());
 
 			PImage initialFrame = ImageUtils.cloneImage(_capture.getFrame());
 
@@ -230,7 +232,7 @@ public class HumanProcessorControl
 		_numBackgrounds = numBackgrounds;
 		_captureBackgrounds = true;
 	}
-	
+
 	public boolean isCapturingBackgrounds()
 	{
 		return _captureBackgrounds;

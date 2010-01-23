@@ -62,8 +62,8 @@ public class PS3EyeCapture implements SimpleCapture
 		PApplet.println("Found " + numCams + " cameras");
 		PApplet.println("Initializing camera with UUID " + CLCamera.cameraUUID(0));
 		_cam = new CLCamera(_app);
-
-		if (fps == 60)
+		
+		if (width == 640 && height == 480)
 		{
 			_cam.createCamera(0, CLCamera.CLEYE_COLOR, CLCamera.CLEYE_VGA, fps);
 		} else
@@ -78,6 +78,7 @@ public class PS3EyeCapture implements SimpleCapture
 		_cam.setCameraParam(CLCamera.CLEYE_AUTO_WHITEBALANCE, 0);
 		_cam.setCameraParam(CLCamera.CLEYE_AUTO_EXPOSURE, 0);
 		_cam.setCameraParam(CLCamera.CLEYE_AUTO_GAIN, 0);
+		_cam.setCameraParam(CLCamera.CLEYE_GRAYSCALE, 1);
 
 		PApplet.println("Cam: " + _cam.getCameraParam(CLCamera.CLEYE_AUTO_EXPOSURE));
 		PApplet.println("Cam: " + _cam.getCameraParam(CLCamera.CLEYE_AUTO_GAIN));

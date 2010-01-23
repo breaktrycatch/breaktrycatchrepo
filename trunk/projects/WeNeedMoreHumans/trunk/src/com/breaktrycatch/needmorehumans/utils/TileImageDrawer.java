@@ -20,6 +20,8 @@ public class TileImageDrawer extends DisplayObject
 
 	private boolean _enabled = true;
 
+	private int ctr;
+
 	public TileImageDrawer(PApplet app)
 	{
 		super(app);
@@ -45,6 +47,7 @@ public class TileImageDrawer extends DisplayObject
 
 	public void drawImage(PImage image)
 	{
+		ctr++;
 		if (!_enabled)
 		{
 			return;
@@ -78,6 +81,8 @@ public class TileImageDrawer extends DisplayObject
 		_dX = 0;
 		_dY = 0;
 		_yJump = 0;
+		
+		ctr = 0;
 	}
 	
 	public void setEnabled(boolean enabled)
