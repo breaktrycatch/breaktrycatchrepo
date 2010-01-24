@@ -558,10 +558,15 @@ public class ImageAnalysis
 			vertArray = polyTool.reverseArrayList(vertArray);
 		}
 		ArrayList<ArrayList<PixelVO>> polys = polyTool.earClip(vertArray);
-
-		if (polys != null)
-		{
-
+		
+		float maxX = -999.0f;
+		float maxY = -999.0f;
+		float minX = 999.0f;
+		float minY = 999.0f;
+		
+		
+		if(polys != null) {
+			
 			finalPoints = polys;
 
 			for (int i = 0; i < polys.size(); i++)
@@ -596,8 +601,30 @@ public class ImageAnalysis
 						{
 							v = __physWorld.screenToWorld(v);
 						}
-
-						polyDef.vertices.add(v);
+						polyDef.addVertex(v);
+						//polyDef.vertices.add(v);
+						
+						
+						//Record the extremes of the polygon collection
+						if(v.x > maxX)
+						{
+							maxX = v.x;
+						}
+						
+						if(v.x < minX)
+						{
+							minX = v.x;
+						}
+						
+						if(v.y > maxY)
+						{
+							maxY = v.y;
+						}
+						
+						if(v.y < minY)
+						{
+							minY = v.y;
+						}
 					}
 
 					polyDefs.add(polyDef);
@@ -605,8 +632,26 @@ public class ImageAnalysis
 					// p_body.createShape(polyDef);
 				}
 			}
-
-			// p_body.setMassFromShapes();
+			
+			LogRepository.getInstance().getMikesLogger().info("MIN X,Y: " + minX + ", " + minY);
+			LogRepository.getInstance().getMikesLogger().info("MAX X,Y: " + maxX + ", " + maxY);
+			
+			float shiftX = (maxX + ((minX-maxX)/2.0f));
+			float shiftY = (maxY + ((minY-maxY)/2.0f));
+			
+			for(int k = 0; k < polyDefs.size(); k++)
+			{
+				Vec2[] verticies = polyDefs.get(k).getVertexArray();
+				
+				for(int l = 0; l < verticies.length; l++)
+				{
+					verticies[l].x -= shiftX;
+					verticies[l].y -= shiftY;
+				}
+			}
+			
+			
+			//p_body.setMassFromShapes();
 			bodyCount++;
 
 		} else

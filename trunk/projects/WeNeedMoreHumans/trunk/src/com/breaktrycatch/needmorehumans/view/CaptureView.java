@@ -161,9 +161,11 @@ public class CaptureView extends AbstractView
 
 	private void analizeImage(PImage img)
 	{
-		_imageAnalysis = new ImageAnalysis(getApp(), _physicsSim.getPhysWorld());
-		_imageAnalysis.setDebugDrawer(_debugDrawer);
-		ArrayList<PolygonDef> polys = _imageAnalysis.analyzeImage(img);
-		_physicsSim.setHuman(polys);
+		//Physics View Handles this - Mike was here
+//		_imageAnalysis = new ImageAnalysis(getApp(), _physicsSim.getPhysWorld());
+//		_imageAnalysis.setDebugDrawer(_debugDrawer);
+//		ArrayList<PolygonDef> polys = _imageAnalysis.analyzeImage(img);
+		
+		_physicsSim.setSprite(img);
 	}
 }
