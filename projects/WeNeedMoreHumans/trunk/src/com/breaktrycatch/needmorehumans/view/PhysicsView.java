@@ -1,5 +1,6 @@
 package com.breaktrycatch.needmorehumans.view;
 
+import java.awt.Point;
 import java.util.ArrayList;
 
 import org.jbox2d.collision.PolygonDef;
@@ -19,11 +20,25 @@ import com.breaktrycatch.needmorehumans.utils.LogRepository;
 
 public class PhysicsView extends AbstractView {
 
-	Physics physWorld;
-	boolean doSquare = false;
-	private ImageAnalysis __imageAnalysis;
+	private static final char CHANGE_SPRITE_KEY = '9';
+	
+	private Physics _physWorld;
+	private boolean doSquare = false;
+	private ImageAnalysis _imageAnalysis;
 	private ArrayList<PolygonDef> _polyHumanDef;
-	private float spawn = 0.0f;
+	private String[] _spriteLookup  = new String[]
+	                                             {
+													"../data/tracing/TestPerson_png.png", 
+													"../data/tracing/Cube.png", 
+													"../data/tracing/RealPerson_1.png",
+													"../data/tracing/RealPerson_3.png",
+													"../data/tracing/RealPerson_4.png",
+													"../data/tracing/RealPerson_5.png"
+	                                             };
+	private int _currentSpriteIndex = -1;
+	private PImage _currentSprite;
+	private boolean _changeSpriteKeyDown = false;
+	private boolean _mouseDown = false;
 	
 	
 	public PhysicsView() {
@@ -35,22 +50,25 @@ public class PhysicsView extends AbstractView {
 		super.initialize(app);
 		
 		initPhysics();
-		
-		
-		
-	}
-	
-	public Physics getPhysWorld() {
-		return physWorld;
 	}
 	
 	@Override
 	public void draw() {
-		PApplet app = getApp();
-//		app.background(0xFF0000);
+		getApp().background(0xFF0000);
 		
-		if(app.mousePressed)
+		showPolyHumanTemplate();
+		
+		if(getApp().mousePressed)
 		{
+			if(!_mouseDown)
+			{
+				_mouseDown = true;
+				createPolyHuman(new Vec2(getApp().mouseX, getApp().mouseY));
+				//_physWorld.createRect(getApp().mouseX, getApp().mouseY, getApp().mouseX + 20, getApp().mouseY + 20);
+				//createHuman();
+			}
+			
+			
 //			doSquare = !doSquare;
 //			Body shape;
 //			
@@ -66,68 +84,130 @@ public class PhysicsView extends AbstractView {
 //				shape = physWorld.createCircle(app.mouseX, app.mouseY, 10.0f);
 //			}
 			
-			
-			
-			//createHuman();
-			
-			createPolyHuman(_polyHumanDef);
 		}
+		else
+		{
+			_mouseDown = false;
+		}
+		
+		super.draw();
+	}
+	
+	private void showPolyHumanTemplate()
+	{
+		///UGH wtf is wrong with this right now hit a different key..need to figure out mouseUpEvent
+		if(getApp().key == CHANGE_SPRITE_KEY)
+		{
+			if(!_changeSpriteKeyDown)
+			{
+				
+				setSprite((_currentSpriteIndex + 1)%_spriteLookup.length);				
+			}
+			
+			_changeSpriteKeyDown = true;
+			//getApp().key = 'q';
+		}
+		else
+		{
+			_changeSpriteKeyDown = false;
+		}
+		
+		Point centerSpawn = new Point(getApp().mouseX, getApp().mouseY);
+		
+		getApp().image(_currentSprite, centerSpawn.x - (_currentSprite.width/2), centerSpawn.y - (_currentSprite.height/2));
+	}
+	
+	private void createPolyHuman(Vec2 spawnPoint)
+	{
+		Body bd = _physWorld.getWorld().createBody(new BodyDef());
+		
+		for (int i = 0; i < _polyHumanDef.size(); i++) {
+			bd.createShape(_polyHumanDef.get(i));
+		}
+		
+		PolygonDef polyDef;
+		polyDef = new PolygonDef();
+		polyDef.friction = 0.1f;
+		polyDef.restitution = 0.1f;
+		polyDef.density = 1.0f;
+		
+		// TEST POLY
+//		polyDef.addVertex(new Vec2(0.0f, 0.0f));
+//		polyDef.addVertex(new Vec2(4.0f, 0.0f));
+//		polyDef.addVertex(new Vec2(4.0f, 2.0f));
+//		polyDef.addVertex(new Vec2(0.0f, 3.0f));
+//		bd.createShape(polyDef);
+		
+		bd.setMassFromShapes();
+		
+		spawnPoint = _physWorld.screenToWorld(spawnPoint);
+		bd.setXForm(spawnPoint, 0);
 	}
 	
 	private void initPhysics() {
-		PApplet app = getApp();
+//		_physWorld = new Physics(getApp(), getApp().width, getApp().height);
+		_physWorld = new Physics(getApp(), getApp().width, getApp().height, 0.0f, -10.0f, getApp().width * 1.2f, getApp().height * 1.2f, getApp().width, getApp().height, 100.0f);
+		_physWorld.setDensity(1.0f);
 		
-		String t1 = "../data/tracing/TestPerson_png.png";
-		String t2 = "../data/tracing/Cube.png";
-		String p1 = "../data/tracing/RealPerson_1.png";
-		String p2 = "../data/tracing/RealPerson_2.png";
-		String p3 = "../data/tracing/RealPerson_3.png";
-		String p4 = "../data/tracing/RealPerson_4.png";
-		String p5 = "../data/tracing/RealPerson_5.png";
+		_imageAnalysis = new ImageAnalysis(getApp(), _physWorld);
 		
-		PImage p = app.loadImage(p2);
-		p.loadPixels();
+		setSprite(0);
 		
-		physWorld = new Physics(app, app.width, app.height);
-		physWorld.setDensity(1.0f);
+		//createLift(getApp());
+		createPolyHuman(new Vec2( (getApp().width/2), getApp().height/2));
 		
-		__imageAnalysis = new ImageAnalysis(app, physWorld);
-		_polyHumanDef = __imageAnalysis.analyzeImage(p);
-		
-//		createLift();
-//		createPolyHuman(app);
 	}
 	
-	public void setHuman(ArrayList<PolygonDef> polyDefs){
-		_polyHumanDef = polyDefs;
-	}
-	
-	public void createPolyHuman(ArrayList<PolygonDef> polyDefs)
+	private void setSprite(int index)
 	{
-		Body bd = physWorld.getWorld().createBody(new BodyDef());
+		LogRepository.getInstance().getMikesLogger().info("Sprite to INDEX: " + index);
 		
-		for (int i = 0; i < polyDefs.size(); i++) {
-			bd.createShape(polyDefs.get(i));
+		
+		//I just wanna say...that this is the lamest hack ever...Taylor's was lame but..
+		try
+		{
+			setSprite(_spriteLookup[index]);
+		}
+		catch( Exception e )
+		{
+			LogRepository.getInstance().getMikesLogger().info("IMAGE ERROR - index: " + index);
+			setSprite((_currentSpriteIndex + 1)%_spriteLookup.length);
 		}
 		
-		spawn += 200.0f;
-		bd.setMassFromShapes();
-		bd.setXForm(physWorld.screenToWorld(new Vec2(spawn%getApp().width, 50)), (float)Math.PI);
+		_currentSpriteIndex = index;
 	}
 	
-	private void createLift()
+	public void setSprite(String path)
+	{
+		PImage img = getApp().loadImage(path);
+		img.loadPixels();
+		
+		setSprite(img);
+	}
+	
+	public void setSprite(PImage img)
+	{
+		_currentSpriteIndex = -1;
+		_currentSprite = img;
+		
+		_polyHumanDef = _imageAnalysis.analyzeImage(_currentSprite);
+	}
+	
+	
+	//*************** OLD **********************//
+	private void createLift(PApplet app)
 	{
 		Body mount, platform;
 		
 		float centerX, centerY;
-		centerX = getApp().width/2;
-		centerY = getApp().height/2;
+		centerX = app.width/2;
+		centerY = app.height/2;
 		
-		physWorld.setDensity(0.0f);
-		mount = physWorld.createRect(centerX-5, centerY-5, centerX+5, centerY+5);
+		_physWorld.setDensity(0.0f);
+		mount = _physWorld.createRect(centerX-5, centerY-5, centerX+5, centerY+5);
 		
-		physWorld.setDensity(1.0f);
-		platform = physWorld.createRect(centerX-25, centerY-25, centerX+25, centerY-20);
+		_physWorld.setDensity(1.0f);
+		platform = _physWorld.createRect(centerX-25, centerY-25, centerX+25, centerY-20);
 		
 		PrismaticJointDef jointDef = new PrismaticJointDef();
 		//physWorld.screenToWorld(new Vec2(100.0f,100.0f))
@@ -139,20 +219,20 @@ public class PhysicsView extends AbstractView {
 		jointDef.upperTranslation = 10.0f;
 		jointDef.enableLimit = true;
 		
-		PrismaticJoint joint = (PrismaticJoint)physWorld.getWorld().createJoint(jointDef);
+		PrismaticJoint joint = (PrismaticJoint)_physWorld.getWorld().createJoint(jointDef);
 	}
 	
-	private void createHuman()
+	private void createJointHuman()
 	{
 		Body shape1, shape2, shape3, shape4, shape5, shape6;
 
 //		DistanceJoint joint;
 //		
 //		//Arms
-		physWorld.setDensity(0.0f);
-		shape1 = physWorld.createRect(10, 10, 20, 20);
-		physWorld.setDensity(1.0f);
-		shape3 = physWorld.createRect(110, 10, 120, 20);
+		_physWorld.setDensity(0.0f);
+		shape1 = _physWorld.createRect(10, 10, 20, 20);
+		_physWorld.setDensity(1.0f);
+		shape3 = _physWorld.createRect(110, 10, 120, 20);
 		
 
 
@@ -178,5 +258,6 @@ public class PhysicsView extends AbstractView {
 //		joint = JointUtils.createDistanceJoint(shape4, shape6);
 //		joint.setFrequency(60.0f);
 	}
+	
 	
 }

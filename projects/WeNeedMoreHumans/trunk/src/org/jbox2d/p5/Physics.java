@@ -167,6 +167,7 @@ public class Physics {
 		m_world.setDrawDebugData(false);
 		m_settings = new TestSettings();
 		
+		m_settings.iterationCount = 10;
 		setDensity(0.0f);
 		setRestitution(0.1f);
 		setFriction(0.4f);
