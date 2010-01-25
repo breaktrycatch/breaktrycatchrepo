@@ -636,6 +636,8 @@ public class ImageAnalysis
 			LogRepository.getInstance().getMikesLogger().info("MIN X,Y: " + minX + ", " + minY);
 			LogRepository.getInstance().getMikesLogger().info("MAX X,Y: " + maxX + ", " + maxY);
 			
+			//TODO: JON - see if this can be done before points are placed? how does the image get reffed like this? 
+			//Shift the polygonal collection to be relative to a center reference
 			float shiftX = (maxX + ((minX-maxX)/2.0f));
 			float shiftY = (maxY + ((minY-maxY)/2.0f));
 			
