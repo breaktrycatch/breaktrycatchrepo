@@ -53,6 +53,9 @@ public class PhysicsView extends AbstractView {
 	public void initialize(PApplet app) {
 		super.initialize(app);
 		
+		setWidth(app.width);
+		setHeight(app.height);
+		
 		initPhysics();
 	}
 	
