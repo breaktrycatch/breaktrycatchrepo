@@ -12,7 +12,6 @@ import toxi.video.capture.plugins.ErosionPlugin;
 import toxi.video.capture.plugins.ProcessorPlugin;
 
 import com.breaktrycatch.needmorehumans.control.video.plugins.ChannelThresholdPlugin;
-import com.breaktrycatch.needmorehumans.control.video.plugins.ContrastPlugin;
 import com.breaktrycatch.needmorehumans.control.video.plugins.GapFillPlugin;
 import com.breaktrycatch.needmorehumans.utils.ImageUtils;
 import com.breaktrycatch.needmorehumans.utils.TileImageDrawer;
@@ -80,7 +79,7 @@ public class HumanProcessorControl
 
 		HashMap<String, Comparable<?>> contractBack = new HashMap<String, Comparable<?>>();
 		contractBack.put(ErosionPlugin.INVERTED, false);
-		contractBack.put(ErosionPlugin.NUM_PASSES, 2);
+		contractBack.put(ErosionPlugin.NUM_PASSES, 6);
 		addPlugin(_postPipeline, ErosionPlugin.class, contractBack);
 	}
 
