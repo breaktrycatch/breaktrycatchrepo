@@ -10,6 +10,11 @@ public class GameView extends AbstractView {
 	//private CaptureControl _capControl
 	
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	public GameView() {
 		// TODO Auto-generated constructor stub
 	}

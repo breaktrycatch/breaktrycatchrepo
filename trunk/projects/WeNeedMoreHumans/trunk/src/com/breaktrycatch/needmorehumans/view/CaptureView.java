@@ -1,8 +1,6 @@
 package com.breaktrycatch.needmorehumans.view;
 
-import java.util.ArrayList;
-
-import org.jbox2d.collision.PolygonDef;
+import java.util.Date;
 
 import processing.core.PApplet;
 import processing.core.PImage;
@@ -13,8 +11,8 @@ import com.breaktrycatch.needmorehumans.control.video.PS3EyeCapture;
 import com.breaktrycatch.needmorehumans.control.webcam.HumanProcessorControl;
 import com.breaktrycatch.needmorehumans.tracing.ImageAnalysis;
 import com.breaktrycatch.needmorehumans.utils.ConfigTools;
-import com.breaktrycatch.needmorehumans.utils.ImageUtils;
 import com.breaktrycatch.needmorehumans.utils.TileImageDrawer;
+import com.breaktrycatch.needmorehumans.utils.TwitterTools;
 
 public class CaptureView extends AbstractView
 {
@@ -28,7 +26,6 @@ public class CaptureView extends AbstractView
 	private int _maxBackgrounds = 16;
 
 	private PImage _background;
-	private PImage _foreground;
 
 	private SimpleCapture _capture;
 	private HumanProcessorControl _processor;
@@ -76,37 +73,6 @@ public class CaptureView extends AbstractView
 		// debug();
 	}
 
-	private void debug()
-	{
-		_background = getApp().loadImage("../data/subtraction/shadow-background.png");
-		_foreground = getApp().loadImage("../data/subtraction/shadow-foreground.png");
-		PImage original = ImageUtils.cloneImage(_foreground);
-
-		_processor.setBackgroundImage(_background);
-
-		// draw the background image.
-		// getApp().image(getApp().loadImage("sunset-beach.jpg"), 0, 0);
-
-		// overlay the mask.
-		PImage diffed = _processor.createDiffedImage(original);
-
-		_debugDrawer.drawImage(_background);
-		_debugDrawer.drawImage(_foreground);
-		_debugDrawer.drawImage(diffed);
-
-		// getApp().image(diffed, 0, 0);
-
-		// diffed.pixels = _pipeline.process(diffed.pixels, diffed.width,
-		// diffed.height);
-		// _background.pixels = _pipeline.process(_background.pixels,
-		// _background.width, _background.height);
-		// _subtractor.setBackgroundImage(_background);
-		// diffed = createDiffedImage(diffed);
-		// getApp().image(diffed, 0, 0);
-
-		_debugMode = true;
-	}
-
 	@Override
 	public void dispose()
 	{
@@ -148,7 +114,16 @@ public class CaptureView extends AbstractView
 				analizeImage(masked);
 				_imageCaptured = true;
 				_processor.setProcessingEnabled(false);
+				
+				
+
+				PApplet.println("Posting tweet...");
+				TwitterTools.postTweet("Just captured a skinny dude: ", masked);
+				
 				app.key = 'q';
+				
+
+				
 			}
 
 		}
@@ -161,11 +136,12 @@ public class CaptureView extends AbstractView
 
 	private void analizeImage(PImage img)
 	{
-		//Physics View Handles this - Mike was here
-//		_imageAnalysis = new ImageAnalysis(getApp(), _physicsSim.getPhysWorld());
-//		_imageAnalysis.setDebugDrawer(_debugDrawer);
-//		ArrayList<PolygonDef> polys = _imageAnalysis.analyzeImage(img);
-		
+		// Physics View Handles this - Mike was here
+		// _imageAnalysis = new ImageAnalysis(getApp(),
+		// _physicsSim.getPhysWorld());
+		// _imageAnalysis.setDebugDrawer(_debugDrawer);
+		// ArrayList<PolygonDef> polys = _imageAnalysis.analyzeImage(img);
+
 		_physicsSim.setSprite(img);
 	}
 }

@@ -3,7 +3,9 @@ package com.breaktrycatch.needmorehumans.view;
 import java.awt.Point;
 import java.util.ArrayList;
 
+import org.jbox2d.collision.AABB;
 import org.jbox2d.collision.PolygonDef;
+import org.jbox2d.collision.Shape;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.BodyDef;
@@ -54,7 +56,7 @@ public class PhysicsView extends AbstractView {
 	
 	@Override
 	public void draw() {
-		getApp().background(0xFF0000);
+//		getApp().background(0xFF0000);
 		
 		showPolyHumanTemplate();
 		
@@ -101,7 +103,8 @@ public class PhysicsView extends AbstractView {
 			if(!_changeSpriteKeyDown)
 			{
 				
-				setSprite((_currentSpriteIndex + 1)%_spriteLookup.length);				
+				setSprite((_currentSpriteIndex + 1)%_spriteLookup.length);	
+				
 			}
 			
 			_changeSpriteKeyDown = true;
@@ -142,6 +145,17 @@ public class PhysicsView extends AbstractView {
 		
 		spawnPoint = _physWorld.screenToWorld(spawnPoint);
 		bd.setXForm(spawnPoint, 0);
+		
+		AABB bounds = new AABB();
+		bounds.lowerBound = _physWorld.getWorld().getWorldAABB().lowerBound;
+		bounds.upperBound = _physWorld.getWorld().getWorldAABB().upperBound;
+		Shape[] query = _physWorld.getWorld().query(bounds, 100);
+		for(Shape s : query)
+		{
+			PApplet.println("Position: "+  s.m_body.getPosition());
+		}
+		
+		PApplet.println("UPPER BOUND Y: " + _physWorld.getWorld().getWorldAABB().upperBound.y);
 	}
 	
 	private void initPhysics() {
