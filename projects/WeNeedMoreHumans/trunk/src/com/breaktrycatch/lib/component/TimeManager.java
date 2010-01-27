@@ -2,7 +2,7 @@ package com.breaktrycatch.lib.component;
 
 import java.util.Date;
 
-public class TimeManager
+public class TimeManager implements IManager
 {
 	private static long _lastTime;
 	private static long _gameTimeDiff;
@@ -14,7 +14,7 @@ public class TimeManager
 		_time = new GameTime();
 	}
 
-	public static void update()
+	public void update()
 	{
 //		long frameInTime = System.nanoTime();
 //
