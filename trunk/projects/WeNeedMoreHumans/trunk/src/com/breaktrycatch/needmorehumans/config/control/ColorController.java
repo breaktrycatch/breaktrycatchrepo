@@ -10,20 +10,19 @@ public class ColorController extends DisplayObject
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	
+
 	private float red;
 	private float green;
 	private float blue;
 	private int col = 0;
-	private int w, h;
 
 	public ColorController(PApplet app, int x, int y, int w, int h)
 	{
 		super(app);
-		setX(x);
-		setY(y);
-		this.w = w;
-		this.h = h;
+		this.x = x;
+		this.y = y;
+		this.width = width;
+		this.height = height;
 	}
 
 	public void setRed(float r)
@@ -43,29 +42,27 @@ public class ColorController extends DisplayObject
 		blue = b;
 		updateColor();
 	}
-	
+
 	public float getRed()
 	{
 		return red;
 	}
-	
 
 	public float getGreen()
 	{
 		return green;
 	}
-	
+
 	public float getBlue()
 	{
 		return blue;
 	}
 
-
 	private void updateColor()
 	{
-		col = (255 << 24 | (int)(red * 255) << 16 | (int)(green * 255) << 8 | (int)(blue * 255));
+		col = (255 << 24 | (int) (red * 255) << 16 | (int) (green * 255) << 8 | (int) (blue * 255));
 	}
-	
+
 	@Override
 	public void draw()
 	{
@@ -73,7 +70,7 @@ public class ColorController extends DisplayObject
 
 		getApp().stroke(col);
 		getApp().fill(col);
-		getApp().rect(getX(), getY(), w, h);
+		getApp().rect(0, 0, width, height);
 	}
 
 }

@@ -41,6 +41,7 @@ public class CaptureControl extends DisplayObject
 		_cameraHeight = ConfigTools.getInt(CAPTURE, "cameraHeight");
 		_maxBackgrounds = ConfigTools.getInt(CAPTURE, "maxBackgrounds");
 
+		
 		_debugDrawer = new TileImageDrawer(app, .7f);
 		_debugDrawer.setEnabled(true);
 
@@ -85,8 +86,8 @@ public class CaptureControl extends DisplayObject
 		{
 			PImage masked = _processor.getProcessedImage();
 
-			float ratio = (float) getWidth() / (float) _cameraWidth;
-			app.image(masked, getX(), getY() + getHeight() - (_cameraHeight * ratio), _cameraWidth * ratio, _cameraHeight * ratio);
+			float ratio = (float) width / (float) _cameraWidth;
+			app.image(masked, 0, height - (_cameraHeight * ratio), _cameraWidth * ratio, _cameraHeight * ratio);
 
 			if (app.key == 'c' && !_processor.isCapturingBackgrounds())
 			{

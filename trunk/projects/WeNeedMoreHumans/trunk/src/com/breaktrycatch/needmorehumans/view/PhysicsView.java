@@ -3,9 +3,7 @@ package com.breaktrycatch.needmorehumans.view;
 import java.awt.Point;
 import java.util.ArrayList;
 
-import org.jbox2d.collision.AABB;
 import org.jbox2d.collision.PolygonDef;
-import org.jbox2d.collision.Shape;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.BodyDef;
@@ -53,8 +51,8 @@ public class PhysicsView extends AbstractView {
 	public void initialize(PApplet app) {
 		super.initialize(app);
 		
-		setWidth(app.width);
-		setHeight(app.height);
+		width = app.width;
+		height = app.height;
 		
 		initPhysics();
 	}
@@ -120,13 +118,13 @@ public class PhysicsView extends AbstractView {
 		
 		Point centerSpawn = new Point(getApp().mouseX, getApp().mouseY);
 		
+		
+		getApp().pushMatrix();
 
-		getApp().translate(getX() + centerSpawn.x + (_currentSprite.width/2), getY() +  centerSpawn.y + (_currentSprite.height/2));
+		getApp().translate(x + centerSpawn.x + (_currentSprite.width/2), y +  centerSpawn.y + (_currentSprite.height/2));
 		getApp().rotate((float)Math.PI);
-//		getApp().image(_currentSprite, getX() + centerSpawn.x - (_currentSprite.width/2), getY() +  centerSpawn.y - (_currentSprite.height/2));
 		getApp().image(_currentSprite,0.0f,0.0f);
-		getApp().rotate((float)Math.PI);
-		getApp().translate(-(getX() + centerSpawn.x + (_currentSprite.width/2)), -(getY() +  centerSpawn.y + (_currentSprite.height/2)));
+		getApp().popMatrix();
 	}
 	
 	private void drawAtRotation(float rotation, PImage obj)
@@ -173,13 +171,13 @@ public class PhysicsView extends AbstractView {
 	
 	private void initPhysics() {
 //		_physWorld = new Physics(getApp(), getApp().width, getApp().height);
-		_physWorld = new Physics(getApp(), getWidth(), getHeight(), 0.0f, -10.0f, getWidth() * 2.2f, getHeight() * 1.2f, getWidth(), getHeight(), 100.0f);
+		_physWorld = new Physics(getApp(), width, height, 0.0f, -10.0f, width * 2.2f, height * 1.2f, width, height, 100.0f);
 		_physWorld.setDensity(1.0f);
 		
 		_imageAnalysis = new ImageAnalysis(getApp(), _physWorld);
 		
 		setSprite(0);
-		createPolyHuman(new Vec2( getWidth()/2, getHeight()/2));
+		createPolyHuman(new Vec2( width/2, height/2));
 	}
 	
 	private void setSprite(int index)
