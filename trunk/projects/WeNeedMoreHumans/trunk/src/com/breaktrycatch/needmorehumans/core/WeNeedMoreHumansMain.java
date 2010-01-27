@@ -2,9 +2,12 @@ package com.breaktrycatch.needmorehumans.core;
 
 import processing.core.PApplet;
 
+import com.breaktrycatch.lib.component.KeyboardManager;
+import com.breaktrycatch.lib.component.TimeManager;
+import com.breaktrycatch.lib.core.AbstractMain;
 import com.breaktrycatch.lib.display.Stage;
 
-public class WeNeedMoreHumansMain extends PApplet
+public class WeNeedMoreHumansMain extends AbstractMain
 {
 	/**
 	 * Default serial version id to appease the Eclipse gods.
@@ -34,12 +37,15 @@ public class WeNeedMoreHumansMain extends PApplet
 	public void setup()
 	{
 		super.setup();
-
+		
+		addManager(new KeyboardManager(this));
+		addManager(new TimeManager());
 		_stage = new NeedMoreHumansCore(this);
 	}
 
 	public void draw()
 	{
+		super.draw();
 		_stage.draw();
 	}
 
