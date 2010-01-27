@@ -120,7 +120,17 @@ public class PhysicsView extends AbstractView {
 		
 		Point centerSpawn = new Point(getApp().mouseX, getApp().mouseY);
 		
-		getApp().image(_currentSprite, getX() + centerSpawn.x - (_currentSprite.width/2), getY() +  centerSpawn.y - (_currentSprite.height/2));
+
+		getApp().translate(getX() + centerSpawn.x + (_currentSprite.width/2), getY() +  centerSpawn.y + (_currentSprite.height/2));
+		getApp().rotate((float)Math.PI);
+//		getApp().image(_currentSprite, getX() + centerSpawn.x - (_currentSprite.width/2), getY() +  centerSpawn.y - (_currentSprite.height/2));
+		getApp().image(_currentSprite,0.0f,0.0f);
+		getApp().rotate((float)Math.PI);
+		getApp().translate(-(getX() + centerSpawn.x + (_currentSprite.width/2)), -(getY() +  centerSpawn.y + (_currentSprite.height/2)));
+	}
+	
+	private void drawAtRotation(float rotation, PImage obj)
+	{
 	}
 	
 	private void createPolyHuman(Vec2 spawnPoint)

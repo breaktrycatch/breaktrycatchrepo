@@ -576,8 +576,8 @@ public class ImageAnalysis
 
 					PolygonDef polyDef;
 					polyDef = new PolygonDef();
-					polyDef.friction = 0.1f;
-					polyDef.restitution = 0.1f;
+					polyDef.friction = 0.7f;
+					polyDef.restitution = 0.3f;
 					polyDef.density = 1.0f;
 					// if(p_static)
 					// polyDef.density = 0.0;

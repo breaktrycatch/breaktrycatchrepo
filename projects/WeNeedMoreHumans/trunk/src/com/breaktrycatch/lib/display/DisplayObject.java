@@ -1,5 +1,6 @@
 package com.breaktrycatch.lib.display;
 
+import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -19,7 +20,8 @@ public class DisplayObject extends ArrayList<DisplayObject>
 	private int _y;
 	private int _width;
 	private int _height;
-
+	private float _rotation;
+	
 	private PApplet _app;
 	private DisplayObject _parent;
 
@@ -41,6 +43,13 @@ public class DisplayObject extends ArrayList<DisplayObject>
 
 	public void draw()
 	{
+		//TODO: Test this shiz!
+//		float shiftX = getX() + (getWidth()/2);
+//		float shiftY = getY() + (getHeight()/2);
+		//Set rotation for drawing
+//		getApp().translate(shiftX, shiftY);
+//		getApp().rotate(_rotation);
+		
 		for (int i = _activeTweens.size() - 1; i >= 0; i--)
 		{
 			ITween tween = _activeTweens.get(i);
@@ -51,6 +60,11 @@ public class DisplayObject extends ArrayList<DisplayObject>
 				_activeTweens.remove(i);
 			}
 		}
+		
+		//Unset Rotation
+//		getApp().rotate(-_rotation);
+//		getApp().translate(-shiftX, -shiftY);
+		
 	}
 
 	public void drawChildren()
@@ -159,6 +173,11 @@ public class DisplayObject extends ArrayList<DisplayObject>
 			return _y;
 		}
 	}
+	
+	public float getRotation()
+	{
+		return _rotation;
+	}
 
 	public void setX(int x)
 	{
@@ -168,6 +187,11 @@ public class DisplayObject extends ArrayList<DisplayObject>
 	public void setY(int y)
 	{
 		this._y = _x;
+	}
+	
+	public void setRotation(float radians)
+	{
+		_rotation = radians;
 	}
 
 	public int getWidth()
