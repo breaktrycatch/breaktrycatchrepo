@@ -1,6 +1,5 @@
 package com.breaktrycatch.lib.display;
 
-import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -16,12 +15,12 @@ public class DisplayObject extends ArrayList<DisplayObject>
 	private static final long serialVersionUID = 1L;
 
 	private ArrayList<ITween> _activeTweens;
-	private int _x;
-	private int _y;
-	private int _width;
-	private int _height;
-	private float _rotation;
-	
+	public int x;
+	public int y;
+	public int width;
+	public int height;
+	public float rotation;
+
 	private PApplet _app;
 	private DisplayObject _parent;
 
@@ -41,15 +40,20 @@ public class DisplayObject extends ArrayList<DisplayObject>
 		_activeTweens.add(new SlideTo(getApp(), this, x, y, duration, shape));
 	}
 
+	public void preDraw()
+	{
+		getApp().pushMatrix();
+		getApp().rotate(rotation);
+		getApp().translate(x, y);
+	}
+
+	public void postDraw()
+	{
+		getApp().popMatrix();
+	}
+
 	public void draw()
 	{
-		//TODO: Test this shiz!
-//		float shiftX = getX() + (getWidth()/2);
-//		float shiftY = getY() + (getHeight()/2);
-		//Set rotation for drawing
-//		getApp().translate(shiftX, shiftY);
-//		getApp().rotate(_rotation);
-		
 		for (int i = _activeTweens.size() - 1; i >= 0; i--)
 		{
 			ITween tween = _activeTweens.get(i);
@@ -60,18 +64,16 @@ public class DisplayObject extends ArrayList<DisplayObject>
 				_activeTweens.remove(i);
 			}
 		}
-		
-		//Unset Rotation
-//		getApp().rotate(-_rotation);
-//		getApp().translate(-shiftX, -shiftY);
-		
 	}
 
 	public void drawChildren()
 	{
 		for (DisplayObject child : this)
 		{
+			child.preDraw();
 			child.draw();
+			child.postDraw();
+
 			child.drawChildren();
 		}
 	}
@@ -151,68 +153,6 @@ public class DisplayObject extends ArrayList<DisplayObject>
 	{
 		_parent = parent;
 	}
-
-	public int getX()
-	{
-		if (getParent() != null)
-		{
-			return getParent()._x + _x;
-		} else
-		{
-			return _x;
-		}
-	}
-
-	public int getY()
-	{
-		if (getParent() != null)
-		{
-			return getParent()._y + _y;
-		} else
-		{
-			return _y;
-		}
-	}
-	
-	public float getRotation()
-	{
-		return _rotation;
-	}
-
-	public void setX(int x)
-	{
-		this._x = x;
-	}
-
-	public void setY(int y)
-	{
-		this._y = _x;
-	}
-	
-	public void setRotation(float radians)
-	{
-		_rotation = radians;
-	}
-
-	public int getWidth()
-	{
-		return _width;
-	}
-
-	public int getHeight()
-	{
-		return _height;
-	}
-
-	public void setWidth(int width)
-	{
-		this._width = width;
-	}
-
-	public void setHeight(int height)
-	{
-		this._height = height;
-	}
 }
 
 interface ITween
@@ -235,8 +175,8 @@ class SlideTo implements ITween
 	{
 		_target = target;
 
-		_startX = target.getX();
-		_startY = target.getY();
+		_startX = target.x;
+		_startY = target.y;
 
 		_targetX = x;
 		_targetY = y;
@@ -260,8 +200,8 @@ class SlideTo implements ITween
 		{
 			float amt = _tween.time() * _tween.position();
 
-			_target.setX(_startX + (int) ((_targetX - _startX) * amt));
-			_target.setY(_startY + (int) ((_targetY - _startY) * amt));
+			_target.x = _startX + (int) ((_targetX - _startX) * amt);
+			_target.y = _startY + (int) ((_targetY - _startY) * amt);
 		}
 	}
 

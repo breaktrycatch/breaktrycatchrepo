@@ -7,10 +7,6 @@ import com.breaktrycatch.needmorehumans.control.webcam.CaptureControl;
 
 public class GameView extends AbstractView
 {
-
-	// private PhysicsControl _physControl
-	// private CaptureControl _capControl
-
 	/**
 	 * 
 	 */
@@ -29,16 +25,15 @@ public class GameView extends AbstractView
 		super.initialize(app);
 
 		_physicsControl = new PhysicsView();
-		_physicsControl.setWidth(app.width / 2);
-		_physicsControl.setHeight(app.height);
+		_physicsControl.width = (app.width / 2);
+		_physicsControl.height = (app.height);
 		_physicsControl.initialize(app);
 		add(_physicsControl);
 
 		_capControl = new CaptureControl(app);
-		_capControl.setX(app.width / 2);
-		_capControl.setWidth(app.width / 2);
-		_capControl.setHeight(app.height);
+		_capControl.x = (app.width / 2);
+		_capControl.width = (app.width / 2);
+		_capControl.height = (app.height);
 		add(_capControl);
 	}
-
 }

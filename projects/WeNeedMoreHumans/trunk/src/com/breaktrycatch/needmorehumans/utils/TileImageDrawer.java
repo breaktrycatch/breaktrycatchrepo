@@ -39,7 +39,7 @@ public class TileImageDrawer extends DisplayObject
 		{
 			return;
 		}
-		
+
 		PImage img = getApp().createImage(w, h, PApplet.ARGB);
 		img.pixels = image;
 		drawImage(img);
@@ -64,14 +64,14 @@ public class TileImageDrawer extends DisplayObject
 			_yJump = image.height;
 		}
 
-		if (image.width + _dX > getApp().width - getX())
+		if (image.width + _dX > getApp().width - x)
 		{
 			_dX = 0;
 			_dY += _yJump;
 			_yJump = 0;
 		}
 
-		getApp().image(image, getX() + _dX, getY() + _dY);
+		getApp().image(image, _dX, _dY);
 
 		_dX += image.width;
 	}
@@ -81,15 +81,15 @@ public class TileImageDrawer extends DisplayObject
 		_dX = 0;
 		_dY = 0;
 		_yJump = 0;
-		
+
 		ctr = 0;
 	}
-	
+
 	public void setEnabled(boolean enabled)
 	{
 		_enabled = enabled;
 	}
-	
+
 	public boolean getEnabled()
 	{
 		return _enabled;

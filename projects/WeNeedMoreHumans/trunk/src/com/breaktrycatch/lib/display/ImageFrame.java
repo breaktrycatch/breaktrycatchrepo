@@ -22,7 +22,7 @@ public class ImageFrame extends DisplayObject
 	{
 		super.draw();
 
-		getApp().image(_img, getX(), getY());
+		getApp().image(_img, 0, 0);
 	}
 
 }
