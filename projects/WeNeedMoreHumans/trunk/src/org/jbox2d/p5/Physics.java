@@ -164,7 +164,7 @@ public class Physics {
 		boolean doSleep = true;
 		m_world = new World(new AABB(minWorldAABB,maxWorldAABB),m_gravity,doSleep);
 		m_world.setDebugDraw(m_draw);
-		m_world.setDrawDebugData(false);
+		//m_world.setDrawDebugData(false);
 		m_settings = new TestSettings();
 		
 		m_settings.iterationCount = 10;
@@ -290,9 +290,9 @@ public class Physics {
 		if (m_settings.drawPairs) m_draw.appendFlags(DebugDraw.e_pairBit);
 		if (m_settings.drawCOMs) m_draw.appendFlags(DebugDraw.e_centerOfMassBit);
 
-		world.setDrawDebugData(true);
+		//world.setDrawDebugData(true);
 		world.drawDebugData();
-		world.setDrawDebugData(false);
+		//world.setDrawDebugData(false);
 	}
 	
 	/**
@@ -368,11 +368,11 @@ public class Physics {
 		//System.out.println("Screen: ("+cxs + ","+cys+")");
 		Vec2 center = m_draw.screenToWorld(cxs, cys);
 		//System.out.println("World: "+center);
-		float halfWidthWorld = .5f*m_draw.screenToWorld(wxs);
-		float halfHeightWorld = .5f*m_draw.screenToWorld(wys);
+		//float halfWidthWorld = .5f*m_draw.screenToWorld(wxs);
+		//float halfHeightWorld = .5f*m_draw.screenToWorld(wys);
 		//System.out.println("Half Width world: "+halfWidthWorld);
 		PolygonDef pd = new PolygonDef();
-		pd.setAsBox(halfWidthWorld, halfHeightWorld);
+		//pd.setAsBox(halfWidthWorld, halfHeightWorld);
 		setShapeDefProperties(pd);
 		
 		BodyDef bd = new BodyDef();
@@ -396,10 +396,10 @@ public class Physics {
 	 */
 	public Body createCircle(float x, float y, float r) {
 		Vec2 center = m_draw.screenToWorld(x,y);
-		float rad = m_draw.screenToWorld(r);
+		//float rad = m_draw.screenToWorld(r);
 		
 		CircleDef cd = new CircleDef();
-		cd.radius = rad;
+		//cd.radius = rad;
 		setShapeDefProperties(cd);
 		
 		BodyDef bd = new BodyDef();
@@ -791,7 +791,8 @@ public class Physics {
 	
 	/** World space to screen space conversion for length. */
 	public float worldToScreen(float length) {
-		return m_draw.worldToScreen(length);
+		return 0;
+		//return m_draw.worldToScreen(length);
 	}
 	
 	/** World space to screen space conversion for position. */
@@ -801,7 +802,8 @@ public class Physics {
 	
 	/** Screen space to world space conversion for length. */
 	public float screenToWorld(float length) {
-		return m_draw.screenToWorld(length);
+		return 0;
+		//return m_draw.screenToWorld(length);
 	}
 	
 }

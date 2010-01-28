@@ -14,7 +14,7 @@ public class GameView extends AbstractView
 	 */
 	private static final long serialVersionUID = 1L;
 	private CaptureControl _capControl;
-	private PhysicsView _physicsControl;
+	private PhysicsView _physControl;
 
 	public GameView()
 	{
@@ -26,24 +26,24 @@ public class GameView extends AbstractView
 	{
 		super.initialize(app);
 
-		_physicsControl = new PhysicsView();
-		_physicsControl.width = (app.width / 2);
-		_physicsControl.height = (app.height);
-		_physicsControl.initialize(app);
-		add(_physicsControl);
+		_physControl = new PhysicsView();
+		_physControl.width = (app.width / 2);
+		_physControl.height = (app.height);
+		_physControl.initialize(app);
+		add(_physControl);
 
-		_capControl = new CaptureControl(app, new ICaptureCallback()
-		{
-			public void execute(PImage img)
-			{
-				// whenever we've captured an image in the capture view, we set
-				// the sprite in PhysicsControl
-				_physicsControl.setSprite(img);
-			}
-		});
-		_capControl.x = (app.width / 2);
-		_capControl.width = (app.width / 2);
-		_capControl.height = (app.height);
-		add(_capControl);
+//		_capControl = new CaptureControl(app, new ICaptureCallback()
+//		{
+//			public void execute(PImage img)
+//			{
+//				// whenever we've captured an image in the capture view, we set
+//				// the sprite in PhysicsControl
+//				_physicsControl.setSprite(img);
+//			}
+//		});
+//		_capControl.x = (app.width / 2);
+//		_capControl.width = (app.width / 2);
+//		_capControl.height = (app.height);
+//		add(_capControl);
 	}
 }
