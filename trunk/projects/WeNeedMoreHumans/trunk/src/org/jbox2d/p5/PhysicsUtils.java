@@ -49,5 +49,16 @@ public class PhysicsUtils
 	{
 		return angle(new Vec2(1,0),a);
 	}
+	
+	
+	public static float radToDeg(float rad)
+	{
+		return (float)(rad * (180.0 / Math.PI));
+	}
+	
+	public static float degToRad(float deg)
+	{
+		return (float)(deg * ( Math.PI / 180.0));
+	}
 
 }
