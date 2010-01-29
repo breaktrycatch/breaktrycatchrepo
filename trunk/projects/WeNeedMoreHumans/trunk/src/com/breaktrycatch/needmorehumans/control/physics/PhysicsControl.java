@@ -1,13 +1,10 @@
 package com.breaktrycatch.needmorehumans.control.physics;
 
-import org.jbox2d.common.Vec2;
-import org.jbox2d.p5.Physics;
-
 import processing.core.PApplet;
 import processing.core.PImage;
 
 import com.breaktrycatch.lib.display.DisplayObject;
-import com.breaktrycatch.needmorehumans.tracing.ImageAnalysis;
+import com.breaktrycatch.needmorehumans.model.PhysicsShapeDefVO;
 
 public class PhysicsControl extends DisplayObject {
 
@@ -23,14 +20,20 @@ public class PhysicsControl extends DisplayObject {
 	 */
 	public void init()
 	{
-//		_physWorld = new Physics(getApp(), getApp().width, getApp().height);
-//		_physWorld = new Physics(getApp(), width, height, 0.0f, -10.0f, width * 2.2f, height * 1.2f, width, height, 100.0f);
-//		_physWorld.setDensity(1.0f);
-//		
-//		_imageAnalysis = new ImageAnalysis(getApp(), _physWorld);
-//		
-//		setSprite(0);
-//		createPolyHuman(new Vec2( width/2, height/2));
+		_physWorld = new PhysicsWorldWrapper((float)width, (float)height);
+		//_imageAnalysis = new ImageAnalysis(getApp(), _physWorld);
+//		_physWorld.enableDebugDraw(getApp());
+		//setSprite(0);
+		//createPolyHuman(new Vec2( width/2, height/2));
+		_physWorld.createRect(25, 25, 50, 50, new PhysicsShapeDefVO());
+	}
+	
+	@Override
+	public void draw() {
+		// TODO Auto-generated method stub
+		super.draw();
+		
+		_physWorld.step();
 	}
 	
 	public void setSprite(PImage img)
@@ -44,7 +47,7 @@ public class PhysicsControl extends DisplayObject {
 	@Override
 	public void dispose() {
 		
-		
+		_physWorld.destroy();
 		
 		super.dispose();
 	}

@@ -1,11 +1,10 @@
 package com.breaktrycatch.needmorehumans.view;
 
 import processing.core.PApplet;
-import processing.core.PImage;
 
 import com.breaktrycatch.lib.view.AbstractView;
+import com.breaktrycatch.needmorehumans.control.physics.PhysicsControl;
 import com.breaktrycatch.needmorehumans.control.webcam.CaptureControl;
-import com.breaktrycatch.needmorehumans.control.webcam.callback.ICaptureCallback;
 
 public class GameView extends AbstractView
 {
@@ -14,7 +13,7 @@ public class GameView extends AbstractView
 	 */
 	private static final long serialVersionUID = 1L;
 	private CaptureControl _capControl;
-	private PhysicsView _physControl;
+	private PhysicsControl _physControl;
 
 	public GameView()
 	{
@@ -26,10 +25,10 @@ public class GameView extends AbstractView
 	{
 		super.initialize(app);
 
-		_physControl = new PhysicsView();
+		_physControl = new PhysicsControl(app);
 		_physControl.width = (app.width / 2);
 		_physControl.height = (app.height);
-		_physControl.initialize(app);
+		_physControl.init();
 		add(_physControl);
 
 //		_capControl = new CaptureControl(app, new ICaptureCallback()
