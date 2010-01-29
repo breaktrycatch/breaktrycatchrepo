@@ -96,6 +96,7 @@ public class CaptureControl extends DisplayObject
 					_imageCaptured = true;
 					_processor.setProcessingEnabled(false);
 					
+					
 					captureCallback.execute(_processedImage);
 					//TODO: Dispatch an event telling the parent that we've created our image
 				}

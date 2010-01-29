@@ -49,22 +49,51 @@ public class TwitterTools
 		twitter.updateStatus(message);
 	}
 
-	// TODO: This doesn't seem to work asynchronously... may slow things down?
 	public static void postTweet(String message, PImage image)
 	{
+		AsyncTweetPicRequest request = new AsyncTweetPicRequest(USERNAME, PASSWORD, message, image);
+		request.startProcess();
+	}
+}
+
+class AsyncTweetPicRequest implements Runnable
+{
+	private String _username;
+	private String _password;
+	private String _message;
+	private PImage _image;
+	private Thread _thread;
+
+	public AsyncTweetPicRequest(String username, String password, String message, PImage image)
+	{
+		_username = username;
+		_password = password;
+		_message = message;
+		_image = image;
+	}
+
+	public void startProcess()
+	{
+		_thread = new Thread(this);
+		_thread.start();
+	}
+
+	@Override
+	public void run()
+	{
 		String filename = "tweetImageTemp" + new Date().getTime() + ".png";
-		image.save(filename);
+		_image.save(filename);
 		File file = new File(filename);
 
 		PApplet.println("got file: " + file.getAbsolutePath());
 
-		TwitPic tpRequest = new TwitPic(USERNAME, PASSWORD);
+		TwitPic tpRequest = new TwitPic(_username, _password);
 		TwitPicResponse tpResponse = null;
 
 		// Make request and handle exceptions
 		try
 		{
-			tpResponse = tpRequest.uploadAndPost(file, message);
+			tpResponse = tpRequest.uploadAndPost(file, _message);
 		} catch (IOException e)
 		{
 			e.printStackTrace();
