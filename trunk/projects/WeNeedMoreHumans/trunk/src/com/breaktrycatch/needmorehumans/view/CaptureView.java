@@ -139,10 +139,6 @@ public class CaptureView extends AbstractView
 				_processor.setProcessingEnabled(false);
 				
 				
-
-				PApplet.println("Posting tweet...");
-				TwitterTools.postTweet("Just captured a skinny dude: ", masked);
-				
 				app.key = 'q';
 				
 

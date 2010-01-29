@@ -27,6 +27,8 @@ import org.jbox2d.testbed.TestSettings;
 
 import processing.core.PApplet;
 
+import com.breaktrycatch.lib.display.DisplayObject;
+
 /**
  * A wrapper class to make using JBox2d with Processing dead simple.
  * <BR><BR>
@@ -98,7 +100,7 @@ import processing.core.PApplet;
  * <BR><BR>
  * @author ewjordan
  */
-public class Physics {
+public class Physics extends DisplayObject {
 	// All the crap you'd otherwise have to handle yourself
 	private World m_world;
 	private PApplet m_parent;
@@ -155,6 +157,9 @@ public class Physics {
 								   float screenAABBWidth, float screenAABBHeight,
 								   float borderBoxWidth, float borderBoxHeight,
 								   float pixelsPerMeter) {
+		
+		super(parent);
+		
 		m_parent = parent;
 		m_draw = new ProcessingDebugDraw(m_parent);
 		m_gravity = new Vec2(gravX, gravY);
@@ -176,7 +181,7 @@ public class Physics {
 		
 		m_border = createHollowBox(screenW*.5f, screenH*.5f, borderBoxWidth, borderBoxHeight, 10.0f);
 		
-		parent.registerDraw(this);
+//		parent.registerDraw(this);
 	}
 	
 	/**

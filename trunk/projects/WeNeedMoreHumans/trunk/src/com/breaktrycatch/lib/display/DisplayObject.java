@@ -1,5 +1,6 @@
 package com.breaktrycatch.lib.display;
 
+import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -13,16 +14,20 @@ public class DisplayObject extends ArrayList<DisplayObject>
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
+	private static float toRads = PApplet.PI / 180;
 
 	private ArrayList<ITween> _activeTweens;
 	public int x;
 	public int y;
 	public int width;
 	public int height;
-	public float rotation;
+	public float scaleX = 1;
+	public float scaleY = 1;
+	public float rotation = 0;
 
 	private PApplet _app;
 	private DisplayObject _parent;
+	private boolean _rotateAroundCenter;
 
 	public DisplayObject(PApplet app)
 	{
@@ -40,11 +45,32 @@ public class DisplayObject extends ArrayList<DisplayObject>
 		_activeTweens.add(new SlideTo(getApp(), this, x, y, duration, shape));
 	}
 
+	public void rotateTo(float rot, float duration)
+	{
+		_activeTweens.add(new SlideTo(getApp(), this, x, y, duration));
+	}
+
+	public void rotateTo(float rot, float duration, Class<Shaper> shape)
+	{
+		_activeTweens.add(new SlideTo(getApp(), this, x, y, duration, shape));
+	}
+
 	public void preDraw()
 	{
 		getApp().pushMatrix();
-		getApp().rotate(rotation);
+
 		getApp().translate(x, y);
+		getApp().scale(scaleX, scaleY);
+		if (getRotateAroundCenter())
+		{
+			getApp().translate(width / 2, height / 2);
+		}
+		getApp().rotate(rotation * toRads);
+		if (getRotateAroundCenter())
+		{
+			getApp().translate(-width / 2, -height / 2);
+		}
+
 	}
 
 	public void postDraw()
@@ -72,9 +98,8 @@ public class DisplayObject extends ArrayList<DisplayObject>
 		{
 			child.preDraw();
 			child.draw();
-			child.postDraw();
-
 			child.drawChildren();
+			child.postDraw();
 		}
 	}
 
@@ -153,6 +178,21 @@ public class DisplayObject extends ArrayList<DisplayObject>
 	{
 		_parent = parent;
 	}
+
+	public void setRotateAroundCenter(boolean _rotateAroundCenter)
+	{
+		this._rotateAroundCenter = _rotateAroundCenter;
+	}
+
+	public boolean getRotateAroundCenter()
+	{
+		return _rotateAroundCenter;
+	}
+
+	public Rectangle getBounds()
+	{
+		return new Rectangle(x, y, (int) (width * scaleX), (int) (height * scaleY));
+	}
 }
 
 interface ITween
@@ -162,14 +202,24 @@ interface ITween
 	public boolean isComplete();
 }
 
-class SlideTo implements ITween
+class AbstractTween
 {
-	private Tween _tween;
+
+	protected Tween _tween;
+	protected DisplayObject _target;
+
+	public boolean isComplete()
+	{
+		return !_tween.isTweening();
+	}
+}
+
+class SlideTo extends AbstractTween implements ITween
+{
 	private int _targetX;
 	private int _targetY;
 	private int _startX;
 	private int _startY;
-	private DisplayObject _target;
 
 	private void init(PApplet app, DisplayObject target, int x, int y)
 	{
@@ -208,5 +258,40 @@ class SlideTo implements ITween
 	public boolean isComplete()
 	{
 		return !_tween.isTweening();
+	}
+}
+
+class RotateTo extends AbstractTween implements ITween
+{
+	private float _targetRotation;
+	private float _startRotation;
+
+	private void init(PApplet app, DisplayObject target, float rot)
+	{
+		_target = target;
+
+		_targetRotation = target.rotation;
+		_targetRotation = rot;
+	}
+
+	public RotateTo(PApplet app, DisplayObject target, float rot, float duration, Class<Shaper> shape)
+	{
+		init(app, target, rot);
+		_tween = new Tween(app, duration, Tween.SECONDS, shape);
+	}
+
+	public RotateTo(PApplet app, DisplayObject target, float rot, float duration)
+	{
+		init(app, target, rot);
+		_tween = new Tween(app, duration, Tween.SECONDS);
+	}
+
+	public void update()
+	{
+		if (_tween.isTweening())
+		{
+			float amt = _tween.time() * _tween.position();
+			_target.rotation = _startRotation + ((_targetRotation - _startRotation) * amt);
+		}
 	}
 }

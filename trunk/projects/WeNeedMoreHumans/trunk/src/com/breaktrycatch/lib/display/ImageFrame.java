@@ -15,6 +15,8 @@ public class ImageFrame extends DisplayObject
 	{
 		super(app);
 		_img = img;
+		width = _img.width;
+		height = _img.height;
 	}
 
 	@Override

@@ -13,6 +13,7 @@ import processing.core.PApplet;
 import processing.core.PImage;
 
 import com.breaktrycatch.lib.view.AbstractView;
+import com.breaktrycatch.needmorehumans.control.sprite.PhysicsSprite;
 import com.breaktrycatch.needmorehumans.tracing.ImageAnalysis;
 import com.breaktrycatch.needmorehumans.utils.LogRepository;
 
@@ -51,9 +52,11 @@ public class PhysicsView extends AbstractView {
 	public void initialize(PApplet app) {
 		super.initialize(app);
 		
-		width = app.width;
-		height = app.height;
-		
+		if(width == 0)
+		{
+			width = app.width;
+			height = app.height;
+		}
 		initPhysics();
 	}
 	
@@ -167,12 +170,16 @@ public class PhysicsView extends AbstractView {
 //		}
 //		
 //		PApplet.println("UPPER BOUND Y: " + _physWorld.getWorld().getWorldAABB().upperBound.y);
+		
+		PhysicsSprite sprite = new PhysicsSprite(getApp(),bd,_currentSprite);
+		add(sprite);
 	}
 	
 	private void initPhysics() {
 //		_physWorld = new Physics(getApp(), getApp().width, getApp().height);
 		_physWorld = new Physics(getApp(), width, height, 0.0f, -10.0f, width * 2.2f, height * 1.2f, width, height, 100.0f);
 		_physWorld.setDensity(1.0f);
+		add(_physWorld);
 		
 		_imageAnalysis = new ImageAnalysis(getApp(), _physWorld);
 		

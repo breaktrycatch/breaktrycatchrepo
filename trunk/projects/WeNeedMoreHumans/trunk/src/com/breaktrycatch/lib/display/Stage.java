@@ -20,7 +20,10 @@ public class Stage extends DisplayObject
 		super.draw();
 		
 		// start drawing from the root of the display hierarchy.
+		
+		preDraw();
 		drawChildren();
+		postDraw();
 		
 	}
 }

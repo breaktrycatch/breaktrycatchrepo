@@ -11,7 +11,8 @@ import com.esotericsoftware.controller.device.Axis;
 import com.esotericsoftware.controller.input.JInputXboxController;
 import com.esotericsoftware.controller.input.XboxController;
 
-public class InputTestView extends AbstractView {
+public class InputTestView extends AbstractView
+{
 
 	/**
 	 * 
@@ -20,21 +21,23 @@ public class InputTestView extends AbstractView {
 	private ImageFrame _frame;
 	private XboxController _controller;
 
-	public InputTestView() {
+	public InputTestView()
+	{
 
 	}
 
 	@Override
-	public void initialize(PApplet app) {
+	public void initialize(PApplet app)
+	{
 
 		super.initialize(app);
-		
-		List<XboxController> jInputControllers = JInputXboxController
-				.getJInputControllers();
+
+		List<XboxController> jInputControllers = JInputXboxController.getJInputControllers();
 		_controller = jInputControllers.get(0);
 
 		// none found
-		if (_controller == null) {
+		if (_controller == null)
+		{
 			throw new NullPointerException("No gamepad found");
 		}
 
@@ -43,20 +46,20 @@ public class InputTestView extends AbstractView {
 		add(_frame);
 
 	}
-	
+
 	@Override
-	public void draw() {
+	public void draw()
+	{
 		// TODO Auto-generated method stub
 		super.draw();
-		
+
 		_controller.poll();
 
 		_frame.rotation += _controller.get(Axis.leftTrigger);
 		_frame.rotation -= _controller.get(Axis.rightTrigger);
 
-		_frame.x += (int)(_controller.get(Axis.leftStickX) * 5);
-		_frame.y -= (int)(_controller.get(Axis.leftStickY) * 5);
-		
-		
+		_frame.x += (int) (_controller.get(Axis.leftStickX) * 5);
+		_frame.y -= (int) (_controller.get(Axis.leftStickY) * 5);
+
 	}
 }
