@@ -4,6 +4,8 @@ import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import org.jbox2d.p5.PhysicsUtils;
+
 import megamu.shapetween.Shaper;
 import megamu.shapetween.Tween;
 import processing.core.PApplet;
@@ -14,7 +16,6 @@ public class DisplayObject extends ArrayList<DisplayObject>
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private static float toRads = PApplet.PI / 180;
 
 	private ArrayList<ITween> _activeTweens;
 	public int x;
@@ -23,7 +24,7 @@ public class DisplayObject extends ArrayList<DisplayObject>
 	public int height;
 	public float scaleX = 1;
 	public float scaleY = 1;
-	public float rotation = 0;
+	public float rotationRad = 0;
 
 	private PApplet _app;
 	private DisplayObject _parent;
@@ -65,7 +66,7 @@ public class DisplayObject extends ArrayList<DisplayObject>
 		{
 			getApp().translate(width / 2, height / 2);
 		}
-		getApp().rotate(rotation * toRads);
+		getApp().rotate(rotationRad);
 		if (getRotateAroundCenter())
 		{
 			getApp().translate(-width / 2, -height / 2);
@@ -193,6 +194,16 @@ public class DisplayObject extends ArrayList<DisplayObject>
 	{
 		return new Rectangle(x, y, (int) (width * scaleX), (int) (height * scaleY));
 	}
+	
+	public float getRotationDeg()
+	{
+		return PhysicsUtils.radToDeg(rotationRad);
+	}
+	
+	public void setRotationDeg(float deg)
+	{
+		rotationRad = PhysicsUtils.degToRad(deg);
+	}
 }
 
 interface ITween
@@ -270,8 +281,8 @@ class RotateTo extends AbstractTween implements ITween
 	{
 		_target = target;
 
-		_targetRotation = target.rotation;
-		_targetRotation = rot;
+		_targetRotation = target.rotationRad;
+		_startRotation = rot;
 	}
 
 	public RotateTo(PApplet app, DisplayObject target, float rot, float duration, Class<Shaper> shape)
@@ -291,7 +302,7 @@ class RotateTo extends AbstractTween implements ITween
 		if (_tween.isTweening())
 		{
 			float amt = _tween.time() * _tween.position();
-			_target.rotation = _startRotation + ((_targetRotation - _startRotation) * amt);
+			_target.rotationRad = _startRotation + ((_targetRotation - _startRotation) * amt);
 		}
 	}
 }

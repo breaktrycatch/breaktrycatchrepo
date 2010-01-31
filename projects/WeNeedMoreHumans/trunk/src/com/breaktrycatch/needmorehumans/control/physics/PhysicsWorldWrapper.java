@@ -3,12 +3,12 @@ package com.breaktrycatch.needmorehumans.control.physics;
 import java.util.ArrayList;
 
 import org.jbox2d.collision.AABB;
-import org.jbox2d.collision.CircleDef;
 import org.jbox2d.collision.PolygonDef;
 import org.jbox2d.collision.ShapeDef;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.BodyDef;
+import org.jbox2d.dynamics.DebugDraw;
 import org.jbox2d.dynamics.World;
 import org.jbox2d.p5.PhysicsUtils;
 import org.jbox2d.testbed.ProcessingDebugDraw;
@@ -17,6 +17,7 @@ import processing.core.PApplet;
 
 import com.breaktrycatch.lib.display.DisplayObject;
 import com.breaktrycatch.needmorehumans.model.PhysicsShapeDefVO;
+import com.breaktrycatch.needmorehumans.model.PolyVO;
 
 public class PhysicsWorldWrapper {
 
@@ -29,7 +30,7 @@ public class PhysicsWorldWrapper {
 	private Vec2 _gravity = new Vec2(0.0f, -10.0f);
 	private AABB _worldAABB;
 	private float _physScale;
-	private Vec2 _physHalfSize;
+	private Vec2 _screenHalfSize;
 	
 	private ArrayList<DisplayObject> _sprites;
 	private boolean _wakeAllOnNextTick = false;
@@ -45,21 +46,30 @@ public class PhysicsWorldWrapper {
 	{
 		_physScale = physScale;
 		
-		_physHalfSize = new Vec2(screenWidth/2.0f, screenHeight/2.0f);
+		_screenHalfSize = new Vec2(screenWidth/2.0f, screenHeight/2.0f);
 		
-		float worldBoundX = (_physHalfSize.x + 250) * _physScale;
-		float worldBoundY = (_physHalfSize.y + 250) * _physScale;
-		
+		float worldBoundX = (_screenHalfSize.x + 250) * _physScale;
+		float worldBoundY = (_screenHalfSize.y + 250) * _physScale;
+//		float worldBoundX = (_physHalfSize.x + 0) * _physScale;
+//		float worldBoundY = (_physHalfSize.y + 0) * _physScale;
+		System.out.println("WORLD HALF SIZE: " + _screenHalfSize);
 		_worldAABB = new AABB();
 		_worldAABB.lowerBound = new Vec2(-worldBoundX, -worldBoundY);
 		_worldAABB.upperBound = new Vec2(worldBoundX, worldBoundY);
 		
+		System.out.println(_worldAABB.lowerBound);
+		System.out.println(_worldAABB.upperBound);
 		
 		_world = new World(_worldAABB, _gravity, true);
+		
 	}
 	
 	public void step()
 	{
+//		_world.setWarmStarting(false);
+//		_world.setPositionCorrection(false);
+//		_world.setContinuousPhysics(false);
+		
 		_world.step(PHYS_TIMESTEP, PHYS_ITERATIONS);
 		
 		for (Body body = _world.getBodyList(); body != null; body = body.getNext())
@@ -71,19 +81,28 @@ public class PhysicsWorldWrapper {
 				else
 					continue;
 			}
-			
-			
+
 			DisplayObject actor = (DisplayObject)body.getUserData();
 			if(actor != null)
 			{
 				Vec2 pos = worldToScreen(body.getPosition());
+				
+				//TODO: THIS IS A TEMP HACK TO GET THE IMAGE TO ROUGHLY LINE UP WITH THE PHYSICS DATA
+				//THis will be fixed once we have proper alignment of the polydata
+				pos.x -= (actor.width/2);
+				pos.y -= (actor.height/2);
+				
 				actor.x = (int)pos.x;
 				actor.y = (int)pos.y;
-				actor.rotation = PhysicsUtils.radToDeg(body.getAngle());
+				actor.rotationRad = -body.getAngle();
 				//trace(body.GetPosition().y, pos.y);
 			}
 			
 		}
+		
+
+		
+//		_world.drawDebugData();
 			
 	}
 	
@@ -121,24 +140,21 @@ public class PhysicsWorldWrapper {
 	public Body createRect(float x0, float y0, float x1, float y1, PhysicsShapeDefVO settings) {
 		float cxs = (x0 + x1) * .5f;
 		float cys = (y0 + y1) * .5f;
-		float wxs = Math.abs(x1-x0);
-		float wys = Math.abs(y1-y0);
+		float wxs = Math.abs(x1-x0) * .5f;
+		float wys = Math.abs(y1-y0) * .5f;
 		//System.out.println("Screen: ("+cxs + ","+cys+")");
-		Vec2 center = screenToWorld(_physHalfSize);
-		//System.out.println("World: "+center);
-		//float halfWidthWorld = .5f*m_draw.screenToWorld(wxs);
-		//float halfHeightWorld = .5f*m_draw.screenToWorld(wys);
-		//System.out.println("Half Width world: "+halfWidthWorld);
+		Vec2 center = screenToWorld(cxs, cys);
+//		Vec2 center = screenToWorld(x0, y0);
+//		Vec2 center  = _debugDraw.screenToWorld(cxs, cys);
+		System.out.println("Box World Pos: "+center);
+//		System.out.println("Half Width world: "+halfWidthWorld);
 		
 		PolygonDef pd = new PolygonDef();
-		//pd.setAsBox(halfWidthWorld, halfHeightWorld);
+		pd.setAsBox(wxs * _physScale, wys * _physScale);
 		setShapeDefProperties(pd, settings);
 		
 		
-		BodyDef bd = new BodyDef();
-		setBodyDefProperties(bd);
-		
-		Body b = _world.createBody(bd);
+		Body b = createNewBody();
 		b.createShape(pd);
 		if (pd.density > 0.0f) b.setMassFromShapes();
 		
@@ -147,6 +163,44 @@ public class PhysicsWorldWrapper {
 		return b;
 	}
 	
+	public Body createPolyHuman(ArrayList<PolyVO> data, PhysicsShapeDefVO settings, float screenX, float screenY, float radRotation)
+	{
+		Body body = createNewBody();
+		
+		for (PolyVO vo : data) {
+			body.createShape(createPolyDefFromVo(vo, settings));
+		}
+		
+//		body.createShape(createPolyDefFromVo(data.get(0), settings));
+		
+		if (settings.density > 0.0f) body.setMassFromShapes();
+		body.setXForm(screenToWorld(screenX, screenY), radRotation);
+		
+		return body;
+	}
+	
+	private PolygonDef createPolyDefFromVo(PolyVO vo, PhysicsShapeDefVO settings)
+	{
+		PolygonDef polyDef = new PolygonDef();
+		setShapeDefProperties(polyDef, settings);
+		
+		for(int i = 0; i < vo.getCapacity(); i++)
+		{
+			Vec2 vert = vo.getVertex(i).mul(_physScale);
+			vert.y *= -1.0f;
+			polyDef.addVertex(vert);
+		}
+		
+		return polyDef;
+	}
+	
+	private Body createNewBody()
+	{
+		BodyDef bd = new BodyDef();
+		setBodyDefProperties(bd);
+		
+		return _world.createBody(bd);
+	}
 	
 	
 	/**
@@ -188,24 +242,32 @@ public class PhysicsWorldWrapper {
 		bd.isBullet = false;
 	}
 	
-	public Vec2 screenToWorld(Vec2 screenSize)
+	public Vec2 screenToWorld(Vec2 screenPos)
 	{
-		return screenSize.sub(_physHalfSize).mulLocal(_physScale);
+		Vec2 worldPos = screenPos.sub(_screenHalfSize).mulLocal(_physScale);
+		worldPos.y *= -1.0f;
+		return worldPos;
 	}
 	
-	public Vec2 worldToScreen(Vec2 worldSize)
+	public Vec2 worldToScreen(Vec2 worldPos)
 	{
-		return worldSize.mul(1/_physScale).addLocal(_physHalfSize);
+		worldPos.y *= -1;
+		Vec2 screenPos = worldPos.mul(1/_physScale).addLocal(_screenHalfSize);
+		return screenPos;
 	}
 	
 	public Vec2 screenToWorld(float screenX, float screenY)
 	{
-		return new Vec2(screenX, screenY).subLocal(_physHalfSize).mulLocal(_physScale);
+		Vec2 worldPos = new Vec2(screenX, screenY).subLocal(_screenHalfSize).mulLocal(_physScale);
+		worldPos.y *= -1;
+		return worldPos;
 	}
 	
-	public Vec2 worldToScreen(float screenX, float screenY)
+	public Vec2 worldToScreen(float worldX, float worldY)
 	{
-		return new Vec2(screenX, screenY).mulLocal(1/_physScale).addLocal(_physHalfSize);
+		worldY *= -1;
+		Vec2 screenPos = new Vec2(worldX, worldY).mulLocal(1/_physScale).addLocal(_screenHalfSize);
+		return screenPos;
 	}
 	
 	//DO NOT USE
@@ -224,7 +286,16 @@ public class PhysicsWorldWrapper {
 	public void enableDebugDraw(PApplet app)
 	{
 		_debugDraw = new ProcessingDebugDraw(app);
-		_debugDraw.setCamera(0, 0, _physScale);
+		
+		_debugDraw.appendFlags(DebugDraw.e_shapeBit);
+		_debugDraw.appendFlags(DebugDraw.e_jointBit);
+		_debugDraw.appendFlags(DebugDraw.e_coreShapeBit);
+//		_debugDraw.appendFlags(DebugDraw.e_aabbBit);
+//		_debugDraw.appendFlags(DebugDraw.e_obbBit);
+		_debugDraw.appendFlags(DebugDraw.e_pairBit);
+		_debugDraw.appendFlags(DebugDraw.e_centerOfMassBit);
+		
+		_debugDraw.setCamera(_screenHalfSize.x * _physScale ,0 , 1/_physScale);
 		
 		_world.setDebugDraw(_debugDraw);
 	}

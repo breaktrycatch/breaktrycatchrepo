@@ -43,6 +43,7 @@ public class NeedMoreHumansCore extends Stage
 	public void draw()
 	{
 		getApp().background(0xff00ff);
+		
 		super.draw();
 		
 		PApplet app = getApp();

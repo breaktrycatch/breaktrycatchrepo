@@ -26,5 +26,10 @@ public class ImageFrame extends DisplayObject
 
 		getApp().image(_img, 0, 0);
 	}
+	
+	public PImage getDisplay()
+	{
+		return _img;
+	}
 
 }

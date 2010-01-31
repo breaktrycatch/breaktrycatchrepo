@@ -13,7 +13,6 @@ import processing.core.PApplet;
 import processing.core.PImage;
 
 import com.breaktrycatch.lib.view.AbstractView;
-import com.breaktrycatch.needmorehumans.control.sprite.PhysicsSprite;
 import com.breaktrycatch.needmorehumans.tracing.ImageAnalysis;
 import com.breaktrycatch.needmorehumans.utils.LogRepository;
 
@@ -171,8 +170,8 @@ public class PhysicsView extends AbstractView {
 //		
 //		PApplet.println("UPPER BOUND Y: " + _physWorld.getWorld().getWorldAABB().upperBound.y);
 		
-		PhysicsSprite sprite = new PhysicsSprite(getApp(),bd,_currentSprite);
-		add(sprite);
+		//PhysicsSprite sprite = new PhysicsSprite(getApp(),bd,_currentSprite);
+		//add(sprite);
 	}
 	
 	private void initPhysics() {
@@ -181,7 +180,7 @@ public class PhysicsView extends AbstractView {
 		_physWorld.setDensity(1.0f);
 		add(_physWorld);
 		
-		_imageAnalysis = new ImageAnalysis(getApp(), _physWorld);
+//		_imageAnalysis = new ImageAnalysis(getApp(), _physWorld);
 		
 		setSprite(0);
 		createPolyHuman(new Vec2( width/2, height/2));
@@ -219,6 +218,6 @@ public class PhysicsView extends AbstractView {
 		_currentSpriteIndex = -1;
 		_currentSprite = img;
 		
-		_polyHumanDef = _imageAnalysis.analyzeImage(_currentSprite);
+		//_polyHumanDef = _imageAnalysis.analyzeImage(_currentSprite);
 	}
 }

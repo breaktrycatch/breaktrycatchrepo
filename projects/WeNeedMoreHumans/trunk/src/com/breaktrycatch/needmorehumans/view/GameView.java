@@ -45,4 +45,12 @@ public class GameView extends AbstractView
 //		_capControl.height = (app.height);
 //		add(_capControl);
 	}
+	
+	@Override
+	public void draw() {
+		// TODO Auto-generated method stub
+		super.draw();
+		
+		
+	}
 }

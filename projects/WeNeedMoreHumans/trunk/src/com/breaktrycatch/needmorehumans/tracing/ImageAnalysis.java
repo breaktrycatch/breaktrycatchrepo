@@ -11,6 +11,7 @@ import processing.core.PGraphics;
 import processing.core.PImage;
 import processing.core.PVector;
 
+import com.breaktrycatch.needmorehumans.model.PolyVO;
 import com.breaktrycatch.needmorehumans.tracing.algorithms.BetterRelevancy;
 import com.breaktrycatch.needmorehumans.tracing.polyTool.PolyTool;
 import com.breaktrycatch.needmorehumans.utils.LogRepository;
@@ -34,7 +35,7 @@ public class ImageAnalysis
 
 	ArrayList<ArrayList<PixelVO>> finalPoints;
 
-	ArrayList<PolygonDef> polyDefs;
+	ArrayList<PolyVO> polyDefs;
 
 	private PolyTool polyTool;
 
@@ -43,16 +44,16 @@ public class ImageAnalysis
 	private final int START_FOUND = 0;
 	private final int PIXEL_VALID = 1;
 	private final int PIXEL_INVALID = 2;
-	private Physics __physWorld;
+	//private Physics __physWorld;
 	private int __pixelCount;
 	private TileImageDrawer _debugDrawer;
 
 
-	public ImageAnalysis(PApplet _app, Physics _physWorld)
+	public ImageAnalysis(PApplet _app)
 	{
 		// TODO Auto-generated constructor stub
 		app = _app;
-		__physWorld = _physWorld;
+		//__physWorld = _physWorld;
 		bodyCount = 0;
 	}
 
@@ -149,7 +150,7 @@ public class ImageAnalysis
 		return true;
 	}
 
-	public ArrayList<PolygonDef> analyzeImage(PImage _image)
+	public ArrayList<PolyVO> analyzeImage(PImage _image)
 	{
 
 		__originalImage = _image;
@@ -503,7 +504,7 @@ public class ImageAnalysis
 
 	private void convertToPolys()
 	{
-		polyDefs = new ArrayList<PolygonDef>();
+		polyDefs = new ArrayList<PolyVO>();
 		polyTool = new PolyTool();
 
 		// if (culledPoints.size() > 8) {
@@ -573,12 +574,6 @@ public class ImageAnalysis
 			{
 				if (polys.get(i) != null)
 				{
-
-					PolygonDef polyDef;
-					polyDef = new PolygonDef();
-					polyDef.friction = 0.7f;
-					polyDef.restitution = 0.3f;
-					polyDef.density = 1.0f;
 					// if(p_static)
 					// polyDef.density = 0.0;
 					// else
@@ -586,24 +581,18 @@ public class ImageAnalysis
 
 					// Might not need?
 					// polyDef.vertexCount = polys.get(i).size();
-
-					Vec2 v;
+					
 					// for (int j = 0; j < polys.get(i).size(); j++) {
-
-					for (int j = polys.get(i).size() - 1; j >= 0; j--)
+					int vertexCount = polys.get(i).size();
+					PolyVO poly = new PolyVO(vertexCount);
+					
+					for (int j = 0; j < vertexCount; j++)
 					{
 						// polyDef.vertices.add(j, new
 						// Vec2(polys.get(i).get(j).x/30,
 						// polys.get(i).get(j).y/30));
-						v = new Vec2(polys.get(i).get(j).x, polys.get(i).get(j).y);
-
-						if (__physWorld != null)
-						{
-							v = __physWorld.screenToWorld(v);
-						}
-						polyDef.addVertex(v);
-						//polyDef.vertices.add(v);
-						
+						Vec2 v = new Vec2(polys.get(i).get(j).x, polys.get(i).get(j).y);
+						poly.addVertexAt(v, (vertexCount - 1)- j);
 						
 						//Record the extremes of the polygon collection
 						if(v.x > maxX)
@@ -626,9 +615,8 @@ public class ImageAnalysis
 							minY = v.y;
 						}
 					}
-
-					polyDefs.add(polyDef);
-
+					
+					polyDefs.add(poly);
 					// p_body.createShape(polyDef);
 				}
 			}
@@ -643,12 +631,11 @@ public class ImageAnalysis
 			
 			for(int k = 0; k < polyDefs.size(); k++)
 			{
-				Vec2[] verticies = polyDefs.get(k).getVertexArray();
-				
-				for(int l = 0; l < verticies.length; l++)
+				for(int l = 0; l < polyDefs.get(k).getCapacity(); l++)
 				{
-					verticies[l].x -= shiftX;
-					verticies[l].y -= shiftY;
+					
+					polyDefs.get(k).getVertex(l).x -= shiftX;
+					polyDefs.get(k).getVertex(l).y -= shiftY;
 				}
 			}
 			
