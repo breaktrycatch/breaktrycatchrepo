@@ -59,7 +59,8 @@ public class PhysicsControl extends DisplayObject {
 		ImageAnalysis imageAnalysis = new ImageAnalysis(getApp());
 		ArrayList<PolyVO> polyData = imageAnalysis.analyzeImage(sprite.getDisplay());
 		
-		Body human = _physWorld.createPolyHuman(polyData, new PhysicsShapeDefVO(), sprite.x, sprite.y, sprite.rotationRad);
+		DisplayObject castSprite = (DisplayObject)sprite;
+		Body human = _physWorld.createPolyHuman(polyData, new PhysicsShapeDefVO(), castSprite.x, castSprite.y, castSprite.rotationRad);
 		human.setUserData(sprite);
 		add(sprite);
 	}
@@ -70,8 +71,15 @@ public class PhysicsControl extends DisplayObject {
 		// TODO Auto-generated method stub
 		super.draw();
 		
-		getApp().fill(0xff000000);
-		getApp().rect(0, 0, width, height);
+		for(DisplayObject me : this)
+		{
+			PApplet.println(me);
+		}
+		
+		PApplet.println("----------");
+		
+//		getApp().fill(0xff000000);
+//		getApp().rect(0, 0, width, height);
 		
 		_physWorld.step();
 	}

@@ -10,14 +10,14 @@ import com.breaktrycatch.lib.component.ManagerLocator;
 import com.breaktrycatch.lib.component.TimeManager;
 
 
-public class Sprite extends DisplayObject
+public class Sprite extends ImageFrame
 {
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
 
-	public ArrayList<DisplayObject> _timeline;
+	public ArrayList<ImageFrame> _timeline;
 	private int _frame = 0;
 
 	private boolean _playing;
@@ -29,16 +29,13 @@ public class Sprite extends DisplayObject
 	{
 		super(app);
 		_fps = (int)app.frameRate;
-		_timeline = new ArrayList<DisplayObject>();
+		_timeline = new ArrayList<ImageFrame>();
 		_playing = true;
 	}
 
 	@Override
 	public void draw()
 	{
-		// TODO Auto-generated method stub
-		super.draw();
-
 		DisplayObject displayObject = _timeline.get(_frame);
 		displayObject.draw();
 
@@ -72,21 +69,25 @@ public class Sprite extends DisplayObject
 		return _timeline.size();
 	}
 
-	public void addFrame(DisplayObject frame)
-	{
-		_timeline.add(frame);
-		invalidateDimensions();
-	}
-	
 	public void addFrame(PImage img)
 	{
 		_timeline.add(new ImageFrame(getApp(), img));
 		invalidateDimensions();
 	}
 
-	public void addFrames(ArrayList<DisplayObject> images)
+
+	@Override
+	public PImage getDisplay()
 	{
-		_timeline.addAll(images);
+		return _timeline.get(_frame).getDisplay();
+	}
+
+	public void addFrames(ArrayList<PImage> images)
+	{
+		for(PImage img : images)
+		{
+			_timeline.add(new ImageFrame(getApp(), img));
+		}
 		invalidateDimensions();
 	}
 	

@@ -1,18 +1,21 @@
 package com.breaktrycatch.needmorehumans.view;
 
+import java.io.File;
+
 import processing.core.PApplet;
 import processing.core.PImage;
 
 import com.breaktrycatch.lib.component.KeyboardManager;
 import com.breaktrycatch.lib.component.ManagerLocator;
 import com.breaktrycatch.lib.component.XBoxControllerManager;
+import com.breaktrycatch.lib.display.ImageFrame;
 import com.breaktrycatch.lib.util.callback.ISimpleCallback;
 import com.breaktrycatch.lib.view.AbstractView;
 import com.breaktrycatch.needmorehumans.control.display.Countdown;
-import com.breaktrycatch.needmorehumans.control.display.XBoxControllableSpite;
+import com.breaktrycatch.needmorehumans.control.display.XBoxControllableSprite;
 import com.breaktrycatch.needmorehumans.control.physics.PhysicsControl;
 import com.breaktrycatch.needmorehumans.control.webcam.CaptureControl;
-import com.breaktrycatch.needmorehumans.control.webcam.callback.ICaptureCallback;
+import com.breaktrycatch.needmorehumans.utils.ImageUtils;
 import com.breaktrycatch.needmorehumans.utils.LogRepository;
 import com.esotericsoftware.controller.device.Button;
 
@@ -67,10 +70,36 @@ public class GameView extends AbstractView
 							PImage img = _capControl.getProcessedImage();
 							if (img.width > 0 && img.height > 0)
 							{
-								XBoxControllableSpite sprite = new XBoxControllableSpite(getApp());
-								sprite.setRotateAroundCenter(true);
-								sprite.addFrame(img);
-								_capControl.add(sprite);
+
+								// this one works..
+								img = getApp().loadImage("../data/tracing/RealPerson_1.png");
+
+								// but this one doesn't...????
+								// img = getApp().loadImage("../data/subtraction/debug-image-1252438725312.png");
+								img.loadPixels();
+
+								ImageFrame sprite = new ImageFrame(getApp(), img);
+								// sprite.setRotateAroundCenter(true);
+								sprite.x = 200;
+								sprite.y = 200;
+								_physControl.addHuman(sprite);
+
+								ImageFrame debugSprite = new ImageFrame(getApp(), ImageUtils.cloneImage(img));
+								_capControl.add(debugSprite);
+								//								
+								//								
+								// img.save( new File("").getAbsolutePath() +
+								// "debug-image-"+System.nanoTime() +".png");
+								//								
+								// XBoxControllableSprite sprite = new
+								// XBoxControllableSprite(getApp());
+								// sprite.setRotateAroundCenter(true);
+								// sprite.addFrame(img);
+								// sprite.x = 200;
+								// sprite.y = 200;
+								// // _capControl.add(sprite);
+								//								
+								// _physControl.addHuman(sprite);
 
 								PApplet.println("Captured image of size: " + img.width + ", " + img.height);
 							} else
@@ -101,12 +130,12 @@ public class GameView extends AbstractView
 		controllerManager.registerButtonOnce(Button.a, countdownCallback);
 		keyboardManager.registerKeyOnce('c', countdownCallback);
 	}
-	
+
 	@Override
-	public void draw() {
+	public void draw()
+	{
 		// TODO Auto-generated method stub
 		super.draw();
-		
-		
+
 	}
 }

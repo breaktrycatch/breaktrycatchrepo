@@ -116,7 +116,7 @@ public class DisplayObject extends ArrayList<DisplayObject>
 	{
 
 	}
-
+	
 	private void executeRemoves()
 	{
 

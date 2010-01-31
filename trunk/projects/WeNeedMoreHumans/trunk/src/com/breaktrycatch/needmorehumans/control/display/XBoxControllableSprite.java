@@ -11,9 +11,8 @@ import com.breaktrycatch.lib.display.Sprite;
 import com.breaktrycatch.lib.util.callback.IFloatCallback;
 import com.esotericsoftware.controller.device.Axis;
 
-public class XBoxControllableSpite extends Sprite
+public class XBoxControllableSprite extends Sprite
 {
-
 	/**
 	 * 
 	 */
@@ -21,9 +20,12 @@ public class XBoxControllableSpite extends Sprite
 
 	private Vec2D _velocity;
 	private float _rotation;
-	private static final int MAX_VEL = 10;
+	private static final int MAX_VEL = 20;
+	private static final float MAX_ROT = .2f;
+	private boolean _updatedVel = false;
+	private boolean _updatedRot = false;
 
-	public XBoxControllableSpite(PApplet app)
+	public XBoxControllableSprite(PApplet app)
 	{
 		super(app);
 
@@ -34,16 +36,18 @@ public class XBoxControllableSpite extends Sprite
 		{
 			public void execute(float value)
 			{
+				_updatedRot = true;
 				_rotation += value;
-				_rotation = MathUtils.clamp(_rotation, -1, 1);
+				_rotation = MathUtils.clamp(_rotation, -MAX_ROT, MAX_ROT);
 			}
 		});
 		manager.registerAxis(Axis.rightTrigger, new IFloatCallback()
 		{
 			public void execute(float value)
 			{
+				_updatedRot = true;
 				_rotation -= value;
-				_rotation = MathUtils.clamp(_rotation, -1, 1);
+				_rotation = MathUtils.clamp(_rotation, -MAX_ROT, MAX_ROT);
 			}
 		});
 
@@ -51,6 +55,7 @@ public class XBoxControllableSpite extends Sprite
 		{
 			public void execute(float value)
 			{
+				_updatedVel = true;
 				_velocity.x += value;
 				_velocity.x = MathUtils.clamp(_velocity.x, -MAX_VEL, MAX_VEL);
 			}
@@ -60,6 +65,7 @@ public class XBoxControllableSpite extends Sprite
 		{
 			public void execute(float value)
 			{
+				_updatedVel = true;
 				_velocity.y += value;
 				_velocity.y = MathUtils.clamp(_velocity.y, -MAX_VEL, MAX_VEL);
 			}
@@ -69,14 +75,26 @@ public class XBoxControllableSpite extends Sprite
 	@Override
 	public void draw()
 	{
-		_rotation *= .9;
+		float dampening = .7f;
+		if (!_updatedRot)
+		{
+			_rotation *= dampening;
+		}
+		
 		rotationRad -= _rotation;
+		
+		if (!_updatedVel)
+		{
+			_velocity.x *= dampening;
+			_velocity.y *= dampening;
+		}
 
-		_velocity.x *= .9;
-		_velocity.y *= .9;
 		x += _velocity.x;
 		y -= _velocity.y;
 		
+		_updatedVel = false;
+		_updatedRot = false;
+
 		super.draw();
 	}
 
