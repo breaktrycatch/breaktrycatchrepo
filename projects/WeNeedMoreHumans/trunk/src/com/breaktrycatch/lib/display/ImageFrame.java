@@ -19,14 +19,22 @@ public class ImageFrame extends DisplayObject
 		height = _img.height;
 	}
 
+	public ImageFrame(PApplet app)
+	{
+		super(app);
+	}
+
 	@Override
 	public void draw()
 	{
 		super.draw();
 
-		getApp().image(_img, 0, 0);
+		if (_img != null)
+		{
+			getApp().image(_img, 0, 0);
+		}
 	}
-	
+
 	public PImage getDisplay()
 	{
 		return _img;
