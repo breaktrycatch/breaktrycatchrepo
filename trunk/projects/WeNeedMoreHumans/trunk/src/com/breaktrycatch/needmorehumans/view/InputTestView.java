@@ -55,8 +55,8 @@ public class InputTestView extends AbstractView
 
 		_controller.poll();
 
-		_frame.rotation += _controller.get(Axis.leftTrigger);
-		_frame.rotation -= _controller.get(Axis.rightTrigger);
+		_frame.setRotationDeg(_frame.getRotationDeg() + _controller.get(Axis.leftTrigger));
+		_frame.setRotationDeg(_frame.getRotationDeg() + _controller.get(Axis.rightTrigger));
 
 		_frame.x += (int) (_controller.get(Axis.leftStickX) * 5);
 		_frame.y -= (int) (_controller.get(Axis.leftStickY) * 5);

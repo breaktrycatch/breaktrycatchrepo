@@ -34,7 +34,7 @@ public class TracingDebugView extends AbstractView {
 		PImage p = app.loadImage(p1);
 		p.loadPixels();
 
-		__imageAnalysis = new ImageAnalysis(app, null);
+		__imageAnalysis = new ImageAnalysis(app);
 		__imageAnalysis.analyzeImage(p);
 
 	}

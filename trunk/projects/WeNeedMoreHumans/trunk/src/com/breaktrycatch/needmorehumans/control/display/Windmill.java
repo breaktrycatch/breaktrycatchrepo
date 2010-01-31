@@ -2,6 +2,8 @@ package com.breaktrycatch.needmorehumans.control.display;
 
 import java.awt.Rectangle;
 
+import org.jbox2d.p5.PhysicsUtils;
+
 import processing.core.PApplet;
 
 import com.breaktrycatch.lib.display.DisplayObject;
@@ -30,8 +32,8 @@ public class Windmill extends DisplayObject
 		_windmillBlades = new ImageFrame(app, app.loadImage("../data/world/windmill-blades.png"));
 		_windmillBlades.x = 37;
 		_windmillBlades.setRotateAroundCenter(true);
-		_windmillBlades.rotation = (float)Math.random() * 360;
-		_rotationSpeed = 5 + (float)Math.random() * 10;
+		_windmillBlades.rotationRad = PhysicsUtils.degToRad((float)Math.random() * 360);
+		_rotationSpeed = PhysicsUtils.degToRad(5 + (float)Math.random() * 10);
 		add(_windmillBase);
 		add(_windmillBlades);
 	}
@@ -48,7 +50,7 @@ public class Windmill extends DisplayObject
 		// TODO Auto-generated method stub
 		super.draw();
 
-		_windmillBlades.rotation += _rotationSpeed;
+		_windmillBlades.rotationRad += _rotationSpeed;
 	}
 
 	public void setRotationSpeed(float _rotationSpeed)
