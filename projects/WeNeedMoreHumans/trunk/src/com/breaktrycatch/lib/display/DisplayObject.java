@@ -18,10 +18,10 @@ public class DisplayObject extends ArrayList<DisplayObject>
 	private static final long serialVersionUID = 1L;
 
 	private ArrayList<ITween> _activeTweens;
-	public int x;
-	public int y;
-	public int width;
-	public int height;
+	public float x;
+	public float y;
+	public float width;
+	public float height;
 	public float scaleX = 1;
 	public float scaleY = 1;
 	public float rotationRad = 0;
@@ -29,11 +29,15 @@ public class DisplayObject extends ArrayList<DisplayObject>
 	private PApplet _app;
 	private DisplayObject _parent;
 	private boolean _rotateAroundCenter;
+	private ArrayList<DisplayObject> _removeList;
+	private ArrayList<DisplayObject> _addList;
 
 	public DisplayObject(PApplet app)
 	{
 		_app = app;
 		_activeTweens = new ArrayList<ITween>();
+		_removeList = new ArrayList<DisplayObject>();
+		_addList = new ArrayList<DisplayObject>();
 	}
 
 	public void slideTo(int x, int y, float duration)
@@ -102,18 +106,61 @@ public class DisplayObject extends ArrayList<DisplayObject>
 			child.drawChildren();
 			child.postDraw();
 		}
+
+		executeAdds();
+		executeRemoves();
 	}
 
+	// TODO: Make abstract?
 	public void dispose()
 	{
 
+	}
+
+	private void executeRemoves()
+	{
+
+		for (DisplayObject item : _removeList)
+		{
+			super.remove(item);
+		}
+		_removeList.clear();
+	}
+
+	private void executeAdds()
+	{
+		for (DisplayObject item : _addList)
+		{
+			super.add(item);
+		}
+		_addList.clear();
+	}
+
+	private void addToRemovalList(DisplayObject item)
+	{
+		item.setParent(null);
+		_removeList.add(item);
+	}
+
+	@Override
+	public boolean remove(Object o)
+	{
+		DisplayObject item = (DisplayObject) o;
+		if (contains(o))
+		{
+			addToRemovalList(item);
+			return true;
+		}
+		return false;
 	}
 
 	@Override
 	public DisplayObject remove(int index)
 	{
 		get(index).dispose();
-		return super.remove(index);
+		DisplayObject item = get(index);
+		addToRemovalList(item);
+		return item;
 	}
 
 	@Override
@@ -122,7 +169,9 @@ public class DisplayObject extends ArrayList<DisplayObject>
 		for (DisplayObject child : this)
 		{
 			child.dispose();
+			addToRemovalList(child);
 		}
+
 		super.clear();
 	}
 
@@ -192,7 +241,7 @@ public class DisplayObject extends ArrayList<DisplayObject>
 
 	public Rectangle getBounds()
 	{
-		return new Rectangle(x, y, (int) (width * scaleX), (int) (height * scaleY));
+		return new Rectangle((int) x, (int) y, (int) (width * scaleX), (int) (height * scaleY));
 	}
 	
 	public float getRotationDeg()
@@ -227,12 +276,12 @@ class AbstractTween
 
 class SlideTo extends AbstractTween implements ITween
 {
-	private int _targetX;
-	private int _targetY;
-	private int _startX;
-	private int _startY;
+	private float _targetX;
+	private float _targetY;
+	private float _startX;
+	private float _startY;
 
-	private void init(PApplet app, DisplayObject target, int x, int y)
+	private void init(PApplet app, DisplayObject target, float x, float y)
 	{
 		_target = target;
 
@@ -243,13 +292,13 @@ class SlideTo extends AbstractTween implements ITween
 		_targetY = y;
 	}
 
-	public SlideTo(PApplet app, DisplayObject target, int x, int y, float duration, Class<Shaper> shape)
+	public SlideTo(PApplet app, DisplayObject target, float x, float y, float duration, Class<Shaper> shape)
 	{
 		init(app, target, x, y);
 		_tween = new Tween(app, duration, Tween.SECONDS, shape);
 	}
 
-	public SlideTo(PApplet app, DisplayObject target, int x, int y, float duration)
+	public SlideTo(PApplet app, DisplayObject target, float x, float y, float duration)
 	{
 		init(app, target, x, y);
 		_tween = new Tween(app, duration, Tween.SECONDS);
@@ -281,8 +330,8 @@ class RotateTo extends AbstractTween implements ITween
 	{
 		_target = target;
 
-		_targetRotation = target.rotationRad;
-		_startRotation = rot;
+		_startRotation = target.rotationRad;
+		_targetRotation = rot;
 	}
 
 	public RotateTo(PApplet app, DisplayObject target, float rot, float duration, Class<Shaper> shape)

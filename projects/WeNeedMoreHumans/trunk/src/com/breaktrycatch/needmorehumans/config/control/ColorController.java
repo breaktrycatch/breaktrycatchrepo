@@ -21,8 +21,8 @@ public class ColorController extends DisplayObject
 		super(app);
 		this.x = x;
 		this.y = y;
-		this.width = width;
-		this.height = height;
+		this.width = w;
+		this.height = h;
 	}
 
 	public void setRed(float r)
@@ -70,7 +70,7 @@ public class ColorController extends DisplayObject
 
 		getApp().stroke(col);
 		getApp().fill(col);
-		getApp().rect(0, 0, width, height);
+		getApp().rect(0,0, width, height);
 	}
 
 }

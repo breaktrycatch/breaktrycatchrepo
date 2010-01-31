@@ -104,7 +104,7 @@ public class NeedMoreHumansConfigCore extends Stage
 		_colorRect.setRed(ConfigTools.getFloat(CAPTURE, "redBalance"));
 		_colorRect.setGreen(ConfigTools.getFloat(CAPTURE, "greenBalance"));
 		_colorRect.setBlue(ConfigTools.getFloat(CAPTURE, "blueBalance"));
-
+		add(_colorRect);
 	}
 
 	public void controlEvent(ControlEvent theEvent)
@@ -176,9 +176,9 @@ public class NeedMoreHumansConfigCore extends Stage
 	@Override
 	public void draw()
 	{
-		super.draw();
 
 		getApp().background(0);
+		super.draw();
 
 		for (Controller control : _manualList)
 		{
@@ -186,7 +186,6 @@ public class NeedMoreHumansConfigCore extends Stage
 		}
 
 		_controlP5.draw();
-		_colorRect.draw();
 		_capture.read();
 		_control.update();
 
@@ -201,7 +200,6 @@ public class NeedMoreHumansConfigCore extends Stage
 				
 				ImageUtils.tint(masked, 0xff0000, 1);
 				
-
 				getApp().image(_control.getRawCameraImage(), (getApp().width - _cameraWidth) / 2, getApp().height - _cameraHeight - 20);
 				getApp().image(masked, (getApp().width - _cameraWidth) / 2, getApp().height - _cameraHeight - 20);
 			}

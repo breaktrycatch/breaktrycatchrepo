@@ -4,6 +4,7 @@ import processing.core.PApplet;
 
 import com.breaktrycatch.lib.component.KeyboardManager;
 import com.breaktrycatch.lib.component.TimeManager;
+import com.breaktrycatch.lib.component.XBoxControllerManager;
 import com.breaktrycatch.lib.core.AbstractMain;
 import com.breaktrycatch.lib.display.Stage;
 
@@ -44,6 +45,7 @@ public class WeNeedMoreHumansMain extends AbstractMain
 		
 		addManager(new KeyboardManager(this));
 		addManager(new TimeManager());
+		addManager(new XBoxControllerManager());
 		
 		_stage = new NeedMoreHumansCore(this);
 	}

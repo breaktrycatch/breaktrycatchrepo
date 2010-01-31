@@ -78,7 +78,7 @@ public class MeanShiftVectorBackgroundSubtraction
 		int[] db1, db2, db3;
 		int xt, x;
 		final int min_mov = neighborhood;
-		double Pr, Pn, Pc, Pn_tmp, Pn_tmp2, sigma;
+		double Pr, Pn, Pc, Pn_tmp, sigma;
 		double inv_sigma_2;
 		double threshold2 = 0.5;
 		inv_sqrt_2pi = 1 / Math.sqrt(2 * Math.PI);
@@ -143,7 +143,6 @@ public class MeanShiftVectorBackgroundSubtraction
 					else
 					{
 						db2 = sources[sources.length - 2].pixels;
-						Pn_tmp2 = 0;
 						for (int l = -min_mov; l < min_mov; l++)
 						{
 							for (int m = -min_mov; m < min_mov; m++)

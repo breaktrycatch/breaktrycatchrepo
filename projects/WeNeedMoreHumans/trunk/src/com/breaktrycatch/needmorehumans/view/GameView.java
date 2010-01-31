@@ -1,10 +1,20 @@
 package com.breaktrycatch.needmorehumans.view;
 
 import processing.core.PApplet;
+import processing.core.PImage;
 
+import com.breaktrycatch.lib.component.KeyboardManager;
+import com.breaktrycatch.lib.component.ManagerLocator;
+import com.breaktrycatch.lib.component.XBoxControllerManager;
+import com.breaktrycatch.lib.util.callback.ISimpleCallback;
 import com.breaktrycatch.lib.view.AbstractView;
+import com.breaktrycatch.needmorehumans.control.display.Countdown;
+import com.breaktrycatch.needmorehumans.control.display.XBoxControllableSpite;
 import com.breaktrycatch.needmorehumans.control.physics.PhysicsControl;
 import com.breaktrycatch.needmorehumans.control.webcam.CaptureControl;
+import com.breaktrycatch.needmorehumans.control.webcam.callback.ICaptureCallback;
+import com.breaktrycatch.needmorehumans.utils.LogRepository;
+import com.esotericsoftware.controller.device.Button;
 
 public class GameView extends AbstractView
 {
@@ -14,6 +24,7 @@ public class GameView extends AbstractView
 	private static final long serialVersionUID = 1L;
 	private CaptureControl _capControl;
 	private PhysicsControl _physControl;
+	protected Countdown _countdown;
 
 	public GameView()
 	{
@@ -31,19 +42,64 @@ public class GameView extends AbstractView
 		_physControl.init();
 		add(_physControl);
 
-//		_capControl = new CaptureControl(app, new ICaptureCallback()
-//		{
-//			public void execute(PImage img)
-//			{
-//				// whenever we've captured an image in the capture view, we set
-//				// the sprite in PhysicsControl
-//				_physicsControl.setSprite(img);
-//			}
-//		});
-//		_capControl.x = (app.width / 2);
-//		_capControl.width = (app.width / 2);
-//		_capControl.height = (app.height);
-//		add(_capControl);
+		_capControl = new CaptureControl(app);
+		_capControl.x = (app.width / 2);
+		_capControl.width = (app.width / 2);
+		_capControl.height = (app.height);
+		_capControl.setDebugMode(true);
+		add(_capControl);
+
+		XBoxControllerManager controllerManager = (XBoxControllerManager) ManagerLocator.getManager(XBoxControllerManager.class);
+		KeyboardManager keyboardManager = (KeyboardManager) ManagerLocator.getManager(KeyboardManager.class);
+
+		ISimpleCallback countdownCallback = new ISimpleCallback()
+		{
+			public void execute()
+			{
+				// don't start a count down if one is in progress.
+				if (_countdown == null)
+				{
+					_countdown = new Countdown(getApp(), new ISimpleCallback()
+					{
+						public void execute()
+						{
+							LogRepository.getInstance().getPaulsLogger().info("Countdown complete, processing image.");
+							PImage img = _capControl.getProcessedImage();
+							if (img.width > 0 && img.height > 0)
+							{
+								XBoxControllableSpite sprite = new XBoxControllableSpite(getApp());
+								sprite.setRotateAroundCenter(true);
+								sprite.addFrame(img);
+								_capControl.add(sprite);
+
+								PApplet.println("Captured image of size: " + img.width + ", " + img.height);
+							} else
+							{
+								// TODO: Trap images that are > 60% opaque. They
+								// are too big and we had a lighting glitch.
+								// TODO: Inform user that no image was captured.
+
+								LogRepository.getInstance().getPaulsLogger().warn("Image was no good! Discarding.");
+							}
+
+							remove(_countdown);
+							_countdown = null;
+
+						};
+					});
+
+					_countdown.x = _capControl.x + _capControl.width / 2;
+					_countdown.y = _capControl.y + _capControl.height / 2;
+					_countdown.start();
+					add(_countdown);
+				}
+				LogRepository.getInstance().getPaulsLogger().info("Beginning count down");
+			};
+		};
+
+		// A button triggers the start of the count down...
+		controllerManager.registerButtonOnce(Button.a, countdownCallback);
+		keyboardManager.registerKeyOnce('c', countdownCallback);
 	}
 	
 	@Override

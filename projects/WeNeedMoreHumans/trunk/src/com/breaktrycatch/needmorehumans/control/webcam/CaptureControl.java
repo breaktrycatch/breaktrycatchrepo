@@ -9,11 +9,8 @@ import com.breaktrycatch.lib.component.ManagerLocator;
 import com.breaktrycatch.lib.display.DisplayObject;
 import com.breaktrycatch.lib.util.callback.ISimpleCallback;
 import com.breaktrycatch.needmorehumans.control.video.PS3EyeCapture;
-import com.breaktrycatch.needmorehumans.control.webcam.callback.ICaptureCallback;
-import com.breaktrycatch.needmorehumans.tracing.ImageAnalysis;
 import com.breaktrycatch.needmorehumans.utils.ConfigTools;
 import com.breaktrycatch.needmorehumans.utils.TileImageDrawer;
-import com.breaktrycatch.needmorehumans.utils.TwitterTools;
 
 public class CaptureControl extends DisplayObject
 {
@@ -29,16 +26,12 @@ public class CaptureControl extends DisplayObject
 	private SimpleCapture _capture;
 	private HumanProcessorControl _processor;
 	private TileImageDrawer _debugDrawer;
-	private ImageAnalysis _imageAnalysis;
-
-	private boolean _debugMode = false;
-	private boolean _imageCaptured = false;
 
 	private PImage _processedImage;
 
 	private static final String CAPTURE = "capture";
 
-	public CaptureControl(PApplet app, final ICaptureCallback captureCallback)
+	public CaptureControl(PApplet app)
 	{
 		super(app);
 		app.background(100);
@@ -59,49 +52,24 @@ public class CaptureControl extends DisplayObject
 		_processor.setDebugDrawer(_debugDrawer);
 		add(_debugDrawer);
 
+		_processor.captureBackgrounds(_maxBackgrounds);
+		
 		KeyboardManager keyboardManager = (KeyboardManager) ManagerLocator.getManager(KeyboardManager.class);
-		keyboardManager.registerKey('p', new ISimpleCallback()
-		{
-			public void execute()
-			{
-				PApplet.println("And now again p is pressed!");
-			};
-		});
-		keyboardManager.registerKeyOnce('p', new ISimpleCallback()
-		{
-			public void execute()
-			{
-				PApplet.println("We pressed P once.");
-			};
-		});
 
 		// SPACE will re-capture the background images.
 		keyboardManager.registerKeyOnce(' ', new ISimpleCallback()
 		{
 			public void execute()
 			{
-				PApplet.println("Captureing backgrounds....");
+				PApplet.println("Capturing backgrounds....");
 				_processor.captureBackgrounds(_maxBackgrounds);
 			};
 		});
-
-		keyboardManager.registerKeyOnce('c', new ISimpleCallback()
-		{
-			public void execute()
-			{
-				PApplet.println("Captureing backgrounds....");
-				if (!_processor.isCapturingBackgrounds())
-				{
-//					analizeImage(_processedImage);
-					_imageCaptured = true;
-					_processor.setProcessingEnabled(false);
-					
-					
-					captureCallback.execute(_processedImage);
-					//TODO: Dispatch an event telling the parent that we've created our image
-				}
-			};
-		});
+	}
+	
+	public PImage getProcessedImage()
+	{
+		return _processor.getProcessedImage();
 	}
 
 	@Override
@@ -116,36 +84,14 @@ public class CaptureControl extends DisplayObject
 	{
 		super.draw();
 
-		if (_debugMode)
-		{
-			return;
-		}
-
-		_debugDrawer.reset();
-		PApplet app = getApp();
-
 		_processor.update();
-		if (!_imageCaptured)
-		{
-			_processedImage = _processor.getProcessedImage();
-			float ratio = (float) width / (float) _cameraWidth;
-			app.image(_processedImage, 0, height - (_cameraHeight * ratio), _cameraWidth * ratio, _cameraHeight * ratio);
-		}
-
-		if (_imageAnalysis != null)
-		{
-			_imageAnalysis.draw();
-		}
+		_debugDrawer.reset();
 	}
-
-	private void analizeImage(PImage img)
+	
+	public void setDebugMode(boolean debug)
 	{
-		// Physics View Handles this - Mike was here
-		// _imageAnalysis = new ImageAnalysis(getApp(),
-		// _physicsSim.getPhysWorld());
-		// _imageAnalysis.setDebugDrawer(_debugDrawer);
-		// ArrayList<PolygonDef> polys = _imageAnalysis.analyzeImage(img);
-
-		// _physicsSim.setSprite(img);
+		_debugDrawer.setEnabled(debug);
+		_debugDrawer.width = width;
+		_debugDrawer.height = height;
 	}
 }
