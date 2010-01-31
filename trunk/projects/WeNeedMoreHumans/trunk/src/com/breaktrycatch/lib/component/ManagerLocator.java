@@ -2,8 +2,6 @@ package com.breaktrycatch.lib.component;
 
 import java.util.ArrayList;
 
-import processing.core.PApplet;
-
 public class ManagerLocator extends ArrayList<IManager>
 {
 	/**

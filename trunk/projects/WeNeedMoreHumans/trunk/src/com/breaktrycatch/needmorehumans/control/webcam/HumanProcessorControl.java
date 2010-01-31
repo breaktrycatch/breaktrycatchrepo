@@ -14,11 +14,11 @@ import toxi.video.capture.plugins.ProcessorPlugin;
 import com.breaktrycatch.needmorehumans.control.video.plugins.ChannelThresholdPlugin;
 import com.breaktrycatch.needmorehumans.control.video.plugins.GapFillPlugin;
 import com.breaktrycatch.needmorehumans.utils.ImageUtils;
+import com.breaktrycatch.needmorehumans.utils.LogRepository;
 import com.breaktrycatch.needmorehumans.utils.TileImageDrawer;
 
 public class HumanProcessorControl
 {
-	private PApplet _app;
 	private ProcessorPipeline _prePipeline;
 	private ProcessorPipeline _pipeline;
 	private ProcessorPipeline _postPipeline;
@@ -34,7 +34,6 @@ public class HumanProcessorControl
 
 	public HumanProcessorControl(PApplet app, SimpleCapture capture)
 	{
-		_app = app;
 		_capture = capture;
 		_processingEnabled = true;
 
@@ -64,10 +63,16 @@ public class HumanProcessorControl
 		_debugMode = true;
 	}
 
+	public void setBackgroundImage(PImage background)
+	{
+		_subtractor.setBackgroundImage(background);
+	}
+
 	private void configurePrePipeline()
 	{
-//		HashMap<String, Comparable<?>> contrastConfig = new HashMap<String, Comparable<?>>();
-//		addPlugin(_prePipeline, ContrastPlugin.class, contrastConfig);
+		// HashMap<String, Comparable<?>> contrastConfig = new HashMap<String,
+		// Comparable<?>>();
+		// addPlugin(_prePipeline, ContrastPlugin.class, contrastConfig);
 	}
 
 	private void configurePostPipeline()
@@ -148,13 +153,13 @@ public class HumanProcessorControl
 
 	private void debugDraw(PImage img)
 	{
-		if(_debugMode )
+		if (_debugMode)
 		{
 			_debugDrawer.drawImage(img);
 		}
 	}
-	
-	public PImage createDiffedImage(PImage foreground)
+
+	private PImage createDiffedImage(PImage foreground)
 	{
 		// get the frame with the foreground object in it from the camera.
 		PImage frame = ImageUtils.cloneImage(foreground);
@@ -176,23 +181,20 @@ public class HumanProcessorControl
 		// post process to clean up the image.
 		maskedFrame.pixels = _postPipeline.process(maskedFrame.pixels, maskedFrame.width, maskedFrame.height);
 
-		return maskedFrame;
-	}
-
-	public void setBackgroundImage(PImage background)
-	{
-		_subtractor.setBackgroundImage(background);
+		return ImageUtils.trimTransparency(maskedFrame);
 	}
 
 	public void update()
 	{
-		_capture.read();
-		_rawFrame = _capture.getFrame();
-		debugDraw(_rawFrame);
-		_rawFrame.pixels = _prePipeline.process(_rawFrame.pixels, _rawFrame.width, _rawFrame.height);
-
 		if (_captureBackgrounds)
 		{
+			PApplet.println("CAPTURING BACKGROUNDS..........");
+			_capture.read();
+			_rawFrame = _capture.getFrame();
+			debugDraw(_rawFrame);
+			
+			_rawFrame.pixels = _prePipeline.process(_rawFrame.pixels, _rawFrame.width, _rawFrame.height);
+
 			debugDraw(_rawFrame);
 			_subtractor.addBackgroundImage(ImageUtils.cloneImage(_rawFrame));
 
@@ -206,6 +208,11 @@ public class HumanProcessorControl
 		// we want this to follow through if we just average the backgrounds.
 		if (!_captureBackgrounds && _processingEnabled)
 		{
+			_capture.read();
+			_rawFrame = _capture.getFrame();
+			debugDraw(_rawFrame);
+			_rawFrame.pixels = _prePipeline.process(_rawFrame.pixels, _rawFrame.width, _rawFrame.height);
+
 			debugDraw(_subtractor.getBackgroundImage());
 
 			PImage initialFrame = ImageUtils.cloneImage(_capture.getFrame());
@@ -217,12 +224,33 @@ public class HumanProcessorControl
 
 	public PImage getRawCameraImage()
 	{
+		_capture.read();
+		_rawFrame = _capture.getFrame();
 		return _rawFrame;
 	}
 
 	public PImage getProcessedImage()
 	{
-		return _processedImage;
+		if (!_captureBackgrounds)
+		{
+			_capture.read();
+			_rawFrame = _capture.getFrame();
+			debugDraw(_rawFrame);
+			
+			_rawFrame.pixels = _prePipeline.process(_rawFrame.pixels, _rawFrame.width, _rawFrame.height);
+
+			debugDraw(_subtractor.getBackgroundImage());
+
+			PImage initialFrame = ImageUtils.cloneImage(_capture.getFrame());
+
+			// overlay the mask.
+			return createDiffedImage(initialFrame);
+
+		} else
+		{
+			LogRepository.getInstance().getPaulsLogger().warn("Attempted to capture differenced image while backgrounds were being captured!");
+			return null;
+		}
 	}
 
 	public void captureBackgrounds(int numBackgrounds)

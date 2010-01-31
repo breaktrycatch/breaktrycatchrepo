@@ -22,17 +22,12 @@ public class NeedMoreHumansCore extends Stage
 		super(app);
 
 		Toolkit toolkit = Toolkit.getDefaultToolkit();
-
-		// Get the current screen size
 		Dimension scrnsize = toolkit.getScreenSize();
 
 		app.frameRate(60);
 		app.size(scrnsize.width, scrnsize.height - 120, PApplet.P2D);
 
 		_mainViewManager = new ViewManager(app);
-		
-		PApplet.println("Changing to game view???");
-		
 		_mainViewManager.changeView(ViewManager.GAME_VIEW);
 		add(_mainViewManager);
 
@@ -42,7 +37,7 @@ public class NeedMoreHumansCore extends Stage
 	@Override
 	public void draw()
 	{
-		getApp().background(0xff00ff);
+		getApp().background(0x78C6DC);
 		
 		super.draw();
 		

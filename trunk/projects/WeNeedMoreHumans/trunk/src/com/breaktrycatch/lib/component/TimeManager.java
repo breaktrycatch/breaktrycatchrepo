@@ -1,46 +1,32 @@
 package com.breaktrycatch.lib.component;
 
-import java.util.Date;
+import processing.core.PApplet;
 
 public class TimeManager implements IManager
 {
-	private static long _lastTime;
-	private static long _gameTimeDiff;
-	private static GameTime _time;
+	private long _lastTime;
+	private long _gameTimeDiff;
 
-	static
+	public TimeManager()
 	{
-		_lastTime = new Date().getTime();
-		_time = new GameTime();
+		PApplet.println("Setting start time; " + System.nanoTime());
+		_lastTime = System.nanoTime();
 	}
 
 	public void update()
 	{
-//		long frameInTime = System.nanoTime();
-//
-//		long elapsedTime = System.nanoTime() - frameInTime;
-//		long updateElapsedTime = System.nanoTime() - frameInTime;
-//
-//		_time.updateElapsedTime = updateElapsedTime;
-//		_time.isRunningSlowly = targetElap < elapOver + updateElapsedTime;
-//
-//		long drawTime = elapsedTime - updateElapsedTime;
-//		long elapOver = elapsedTime - targetElap;
-//
-//		_time.appendTotalElapsedOverTime(elapOver);
-//
-//		_time.drawElapsedTime = drawTime;
-//		_time.elapsedOverTime = elapOver;
-//		_time.totalRealTime += (_time.elapsedRealTime = System.nanoTime() - frameInTime);
-//		_time.totalGameTime += (_time.elapsedGameTime = targetElap);
-
-		long newDate = new Date().getTime();
+		long newDate = System.nanoTime();
 		_gameTimeDiff = newDate - _lastTime;
 		_lastTime = newDate;
 	}
 
-	public static long getGameTimeDiff()
+	public long getGameTimeDiff()
 	{
 		return _gameTimeDiff;
+	}
+
+	public float getGameTimeDiffMillis()
+	{
+		return (_gameTimeDiff / 1000000);
 	}
 }

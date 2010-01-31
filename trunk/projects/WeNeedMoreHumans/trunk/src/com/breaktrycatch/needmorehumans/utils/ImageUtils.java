@@ -253,4 +253,59 @@ public class ImageUtils
 			masked.pixels[i] = (a << 24 | r << 16 | g << 8 | b);
 		}
 	}
+	
+	public static PImage trimTransparency(PImage source)
+	{
+		// treat the w and h of the rect as the far right left/right points.
+		Rectangle clipRect = new Rectangle(source.width, source.height, 0, 0);
+		int i = 0;
+		for (int y = 0; y < source.height; y++)
+		{
+			for (int x = 0; x < source.width; x++)
+			{
+				int alpha = (source.pixels[i] >> 24) & 0xFF;
+				if (alpha > 0)
+				{
+					if (x < clipRect.x)
+					{
+						clipRect.x = x;
+					}
+					if (y < clipRect.y)
+					{
+						clipRect.y = y;
+					}
+
+					if (x > clipRect.width)
+					{
+						clipRect.width = x;
+					}
+
+					if (y > clipRect.height)
+					{
+						clipRect.height = y;
+					}
+				}
+				i++;
+			}
+		}
+
+		int padding = 3;
+		int width = clipRect.width - clipRect.x;
+		int height = clipRect.height - clipRect.y;
+
+		// holds the image with a 3 pixel border of transparent pixels.
+		PImage borderedImage = new PImage(width + padding * 2, height + padding * 2, PApplet.ARGB);
+		PImage newImage = new PImage(width, height, PApplet.ARGB);
+
+		for (int y = clipRect.y; y < clipRect.y + height; y++)
+		{
+			for (int x = clipRect.x; x < clipRect.x + width; x++)
+			{
+				int pt = y * source.width + x;
+				newImage.pixels[(y - clipRect.y) * width + (x - clipRect.x)] = source.pixels[pt];
+			}
+		}
+		borderedImage.copy(newImage, 0, 0, newImage.width, newImage.height, padding, padding, newImage.width, newImage.height);
+		return borderedImage;
+	}
 }

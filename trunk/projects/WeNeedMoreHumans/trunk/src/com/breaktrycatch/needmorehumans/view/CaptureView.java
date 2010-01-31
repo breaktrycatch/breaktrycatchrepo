@@ -11,7 +11,6 @@ import com.breaktrycatch.needmorehumans.control.webcam.HumanProcessorControl;
 import com.breaktrycatch.needmorehumans.tracing.ImageAnalysis;
 import com.breaktrycatch.needmorehumans.utils.ConfigTools;
 import com.breaktrycatch.needmorehumans.utils.TileImageDrawer;
-import com.breaktrycatch.needmorehumans.utils.TwitterTools;
 
 public class CaptureView extends AbstractView
 {
@@ -70,15 +69,11 @@ public class CaptureView extends AbstractView
 		_physicsSim.initialize(app);
 		add(_physicsSim);
 		
-		
-		
 		Sprite s = new Sprite(app);
 		for(String path : _spriteLookup)
 		{
-			
 			final PImage img = app.loadImage(path);
 			s.addFrame(img);
-			
 		}
 		s.setFPS(1);
 		add(s);

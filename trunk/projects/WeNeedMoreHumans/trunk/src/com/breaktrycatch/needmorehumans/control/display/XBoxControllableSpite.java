@@ -1,4 +1,4 @@
-package com.breaktrycatch.needmorehumans.view;
+package com.breaktrycatch.needmorehumans.control.display;
 
 import org.jbox2d.common.MathUtils;
 
@@ -7,52 +7,33 @@ import toxi.geom.Vec2D;
 
 import com.breaktrycatch.lib.component.ManagerLocator;
 import com.breaktrycatch.lib.component.XBoxControllerManager;
+import com.breaktrycatch.lib.display.Sprite;
 import com.breaktrycatch.lib.util.callback.IFloatCallback;
-import com.breaktrycatch.lib.view.AbstractView;
-import com.breaktrycatch.needmorehumans.control.sprite.PhysicsSprite;
 import com.esotericsoftware.controller.device.Axis;
 
-public class InputTestView extends AbstractView
+public class XBoxControllableSpite extends Sprite
 {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private static final int MAX_VEL = 10;
 
-	private PhysicsSprite _frame;
 	private Vec2D _velocity;
 	private float _rotation;
+	private static final int MAX_VEL = 10;
 
-	public InputTestView()
+	public XBoxControllableSpite(PApplet app)
 	{
-
-	}
-
-	@Override
-	public void initialize(PApplet app)
-	{
-		super.initialize(app);
+		super(app);
 
 		_velocity = new Vec2D();
-		_frame = new PhysicsSprite(app, app.loadImage("../data/tracing/RealPerson_1.png"));
-		_frame.setRotateAroundCenter(true);
-		add(_frame);
-	}
-
-	@Override
-	public void draw()
-	{
-		super.draw();
-
 		XBoxControllerManager manager = (XBoxControllerManager) ManagerLocator.getManager(XBoxControllerManager.class);
 
 		manager.registerAxis(Axis.leftTrigger, new IFloatCallback()
 		{
 			public void execute(float value)
 			{
-				PApplet.println("LEFT TRIGGER " + value);
 				_rotation += value;
 				_rotation = MathUtils.clamp(_rotation, -1, 1);
 			}
@@ -83,13 +64,20 @@ public class InputTestView extends AbstractView
 				_velocity.y = MathUtils.clamp(_velocity.y, -MAX_VEL, MAX_VEL);
 			}
 		});
+	}
 
+	@Override
+	public void draw()
+	{
 		_rotation *= .9;
-		_frame.rotationRad -= _rotation;
+		rotationRad -= _rotation;
 
 		_velocity.x *= .9;
 		_velocity.y *= .9;
-		_frame.x += _velocity.x;
-		_frame.y -= _velocity.y;
+		x += _velocity.x;
+		y -= _velocity.y;
+		
+		super.draw();
 	}
+
 }
