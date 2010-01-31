@@ -25,7 +25,7 @@ public class GameView extends AbstractView
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private CaptureControl _capControl;
+//	private CaptureControl _capControl;
 	private PhysicsControl _physControl;
 	protected Countdown _countdown;
 
@@ -45,12 +45,12 @@ public class GameView extends AbstractView
 		_physControl.init();
 		add(_physControl);
 
-		_capControl = new CaptureControl(app);
-		_capControl.x = (app.width / 2);
-		_capControl.width = (app.width / 2);
-		_capControl.height = (app.height);
-		_capControl.setDebugMode(true);
-		add(_capControl);
+//		_capControl = new CaptureControl(app);
+//		_capControl.x = (app.width / 2);
+//		_capControl.width = (app.width / 2);
+//		_capControl.height = (app.height);
+//		_capControl.setDebugMode(true);
+//		add(_capControl);
 
 		XBoxControllerManager controllerManager = (XBoxControllerManager) ManagerLocator.getManager(XBoxControllerManager.class);
 		KeyboardManager keyboardManager = (KeyboardManager) ManagerLocator.getManager(KeyboardManager.class);
@@ -67,15 +67,15 @@ public class GameView extends AbstractView
 						public void execute()
 						{
 							LogRepository.getInstance().getPaulsLogger().info("Countdown complete, processing image.");
-							PImage img = _capControl.getProcessedImage();
-							if (img.width > 0 && img.height > 0)
-							{
+//							PImage img = _capControl.getProcessedImage();
+//							if (img.width > 0 && img.height > 0)
+//							{
 
 								// this one works..
-								img = getApp().loadImage("../data/tracing/RealPerson_1.png");
+								PImage img = getApp().loadImage("../data/tracing/RealPerson_1.png");
 
 								// but this one doesn't...????
-								// img = getApp().loadImage("../data/subtraction/debug-image-1252438725312.png");
+//								 img = getApp().loadImage("../data/subtraction/debug-image-1252438725312.png");
 								img.loadPixels();
 
 								ImageFrame sprite = new ImageFrame(getApp(), img);
@@ -85,7 +85,7 @@ public class GameView extends AbstractView
 								_physControl.addHuman(sprite);
 
 								ImageFrame debugSprite = new ImageFrame(getApp(), ImageUtils.cloneImage(img));
-								_capControl.add(debugSprite);
+//								_capControl.add(debugSprite);
 								//								
 								//								
 								// img.save( new File("").getAbsolutePath() +
@@ -102,14 +102,14 @@ public class GameView extends AbstractView
 								// _physControl.addHuman(sprite);
 
 								PApplet.println("Captured image of size: " + img.width + ", " + img.height);
-							} else
-							{
+//							} else
+//							{
 								// TODO: Trap images that are > 60% opaque. They
 								// are too big and we had a lighting glitch.
 								// TODO: Inform user that no image was captured.
 
-								LogRepository.getInstance().getPaulsLogger().warn("Image was no good! Discarding.");
-							}
+//								LogRepository.getInstance().getPaulsLogger().warn("Image was no good! Discarding.");
+//							}
 
 							remove(_countdown);
 							_countdown = null;
@@ -117,8 +117,8 @@ public class GameView extends AbstractView
 						};
 					});
 
-					_countdown.x = _capControl.x + _capControl.width / 2;
-					_countdown.y = _capControl.y + _capControl.height / 2;
+//					_countdown.x = _capControl.x + _capControl.width / 2;
+//					_countdown.y = _capControl.y + _capControl.height / 2;
 					_countdown.start();
 					add(_countdown);
 				}
