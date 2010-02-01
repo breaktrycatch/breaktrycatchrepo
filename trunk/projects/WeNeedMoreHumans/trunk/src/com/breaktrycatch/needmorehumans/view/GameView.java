@@ -6,6 +6,7 @@ import processing.core.PImage;
 import com.breaktrycatch.lib.component.KeyboardManager;
 import com.breaktrycatch.lib.component.ManagerLocator;
 import com.breaktrycatch.lib.component.XBoxControllerManager;
+import com.breaktrycatch.lib.display.ImageFrame;
 import com.breaktrycatch.lib.util.callback.ISimpleCallback;
 import com.breaktrycatch.lib.view.AbstractView;
 import com.breaktrycatch.needmorehumans.control.display.Countdown;
@@ -23,6 +24,7 @@ public class GameView extends AbstractView
 	// private CaptureControl _capControl;
 	private PhysicsControl _physControl;
 	protected Countdown _countdown;
+	private ImageFrame _background;
 
 	public GameView()
 	{
@@ -33,6 +35,9 @@ public class GameView extends AbstractView
 	public void initialize(PApplet app)
 	{
 		super.initialize(app);
+
+		_background = new ImageFrame(app, app.loadImage("../data/world/large-background.png"));
+		add(_background);
 
 		_physControl = new PhysicsControl(app);
 		_physControl.width = (app.width / 2);
@@ -67,10 +72,11 @@ public class GameView extends AbstractView
 							// {
 
 							// this one works..
-							 PImage img = getApp().loadImage("../data/tracing/RealPerson_1.png");
+							PImage img = getApp().loadImage("../data/tracing/RealPerson_1.png");
 
 							// but this one doesn't...????
-//							PImage img = getApp().loadImage("../data/subtraction/debug-image-1252438725312.png");
+							// PImage img =
+							// getApp().loadImage("../data/subtraction/debug-image-1252438725312.png");
 
 							final XBoxControllableSprite sprite = new XBoxControllableSprite(getApp());
 							sprite.setRotateAroundCenter(true);
