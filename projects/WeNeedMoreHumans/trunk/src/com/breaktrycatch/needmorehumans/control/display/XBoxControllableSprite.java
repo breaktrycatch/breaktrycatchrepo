@@ -103,7 +103,7 @@ public class XBoxControllableSprite extends Sprite
 	{
 		public void execute()
 		{
-			rightTrigger.execute(1f);
+			rightTrigger.execute(.3f);
 		}
 	};
 
@@ -111,7 +111,7 @@ public class XBoxControllableSprite extends Sprite
 	{
 		public void execute()
 		{
-			leftTrigger.execute(1f);
+			leftTrigger.execute(.3f);
 		}
 	};
 

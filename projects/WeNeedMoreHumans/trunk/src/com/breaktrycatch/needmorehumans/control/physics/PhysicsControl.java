@@ -99,7 +99,7 @@ public class PhysicsControl extends DisplayObject {
 		// TODO Auto-generated method stub
 		super.draw();
 		
-		getApp().fill(0xff000000);
+		getApp().fill(0x44000000);
 		getApp().rect(0, 0, width, height);
 		if(getApp().mouseX > this.x && getApp().mouseX < this.width + this.x && getApp().mousePressed)
 		{
