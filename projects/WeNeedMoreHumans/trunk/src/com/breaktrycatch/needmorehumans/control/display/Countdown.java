@@ -1,5 +1,7 @@
 package com.breaktrycatch.needmorehumans.control.display;
 
+import org.jbox2d.common.MathUtils;
+
 import processing.core.PApplet;
 
 import com.breaktrycatch.lib.component.ManagerLocator;
@@ -48,9 +50,7 @@ public class Countdown extends DisplayObject
 				_currentCount = (int) Math.floor(_ctr);
 			}
 
-			int counter = _countFrom - _currentCount;
-			
-			PApplet.println("COUNTER... " + counter);
+			int counter = (int)MathUtils.clamp(_countFrom - _currentCount, 1, Integer.MAX_VALUE);
 			_textlabel.setValue(String.valueOf(counter));
 			_textlabel.draw(getApp());
 

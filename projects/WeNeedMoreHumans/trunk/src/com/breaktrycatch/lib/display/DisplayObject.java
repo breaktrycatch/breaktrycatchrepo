@@ -30,14 +30,14 @@ public class DisplayObject extends ArrayList<DisplayObject>
 	private DisplayObject _parent;
 	private boolean _rotateAroundCenter;
 	private ArrayList<DisplayObject> _removeList;
-	private ArrayList<DisplayObject> _addList;
+	private ArrayList<ItemToAdd> _addList;
 
 	public DisplayObject(PApplet app)
 	{
 		_app = app;
 		_activeTweens = new ArrayList<ITween>();
 		_removeList = new ArrayList<DisplayObject>();
-		_addList = new ArrayList<DisplayObject>();
+		_addList = new ArrayList<ItemToAdd>();
 	}
 
 	public void slideTo(int x, int y, float duration)
@@ -119,7 +119,6 @@ public class DisplayObject extends ArrayList<DisplayObject>
 	
 	private void executeRemoves()
 	{
-
 		for (DisplayObject item : _removeList)
 		{
 			super.remove(item);
@@ -129,9 +128,17 @@ public class DisplayObject extends ArrayList<DisplayObject>
 
 	private void executeAdds()
 	{
-		for (DisplayObject item : _addList)
+		for (ItemToAdd item : _addList)
 		{
-			super.add(item);
+			if(item.index == -1)
+			{
+				super.add(item.element);
+			}
+			else
+			{
+				super.add(item.index, item.element);
+			}
+			
 		}
 		_addList.clear();
 	}
@@ -140,6 +147,17 @@ public class DisplayObject extends ArrayList<DisplayObject>
 	{
 		item.setParent(null);
 		_removeList.add(item);
+	}
+	
+	private void addToAddList(DisplayObject item, int index)
+	{
+		item.setParent(this);
+		_addList.add(new ItemToAdd(item, index));
+	}
+	
+	private void addToAddList(DisplayObject item)
+	{
+		addToAddList(item, -1);
 	}
 
 	@Override
@@ -186,17 +204,16 @@ public class DisplayObject extends ArrayList<DisplayObject>
 	}
 
 	@Override
-	public boolean add(DisplayObject e)
+	public boolean add(DisplayObject item)
 	{
-		e.setParent(this);
-		return super.add(e);
+		addToAddList(item);
+		return true;
 	}
 
 	@Override
-	public void add(int index, DisplayObject element)
+	public void add(int index, DisplayObject item)
 	{
-		element.setParent(this);
-		super.add(index, element);
+		addToAddList(item, index);
 	}
 
 	@Override
@@ -204,9 +221,9 @@ public class DisplayObject extends ArrayList<DisplayObject>
 	{
 		for (DisplayObject item : c)
 		{
-			item.setParent(this);
+			addToAddList(item);
 		}
-		return super.addAll(c);
+		return true;
 	}
 
 	@Override
@@ -214,9 +231,9 @@ public class DisplayObject extends ArrayList<DisplayObject>
 	{
 		for (DisplayObject item : c)
 		{
-			item.setParent(this);
+			addToAddList(item);
 		}
-		return super.addAll(index, c);
+		return true;
 	}
 
 	public DisplayObject getParent()
@@ -252,6 +269,23 @@ public class DisplayObject extends ArrayList<DisplayObject>
 	public void setRotationDeg(float deg)
 	{
 		rotationRad = PhysicsUtils.degToRad(deg);
+	}
+}
+
+class ItemToAdd
+{
+	public DisplayObject element;
+	public int index = -1;
+
+	public ItemToAdd(DisplayObject item, int index)
+	{
+		this.element = item;
+		this.index = index;
+	}
+
+	public ItemToAdd(DisplayObject item)
+	{
+		this.element = item;
 	}
 }
 

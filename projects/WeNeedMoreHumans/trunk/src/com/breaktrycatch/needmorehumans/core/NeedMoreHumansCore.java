@@ -25,8 +25,8 @@ public class NeedMoreHumansCore extends Stage
 		Dimension scrnsize = toolkit.getScreenSize();
 
 		app.frameRate(60);
-		app.size(scrnsize.width, scrnsize.height - 120, PApplet.P2D);
-
+		app.size(scrnsize.width, scrnsize.height - 120, PApplet.OPENGL);
+		
 		_mainViewManager = new ViewManager(app);
 		_mainViewManager.changeView(ViewManager.GAME_VIEW);
 		add(_mainViewManager);

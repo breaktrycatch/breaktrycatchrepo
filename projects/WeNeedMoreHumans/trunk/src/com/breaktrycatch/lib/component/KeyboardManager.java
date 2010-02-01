@@ -7,6 +7,14 @@ import processing.core.PApplet;
 
 import com.breaktrycatch.lib.util.callback.ISimpleCallback;
 
+/**
+ * A simple keyboard manager that allows you to register call backs that trigger
+ * every update while the key is depressed, or just once when the key is first
+ * pressed.
+ * 
+ * @author Paul
+ * 
+ */
 public class KeyboardManager implements IManager
 {
 	private PApplet _app;
@@ -22,19 +30,38 @@ public class KeyboardManager implements IManager
 		_onceCharMap = new HashMap<Character, ArrayList<ISimpleCallback>>();
 	}
 
+	/**
+	 * Registers a call back that will be triggered every update while the key
+	 * is pressed.
+	 * 
+	 * @param key
+	 *            A key to register a call back to.
+	 * @param callback
+	 *            The call back to fire every update while the supplied key is
+	 *            pressed.
+	 */
 	public void registerKey(char key, ISimpleCallback callback)
 	{
-		if(!_charMap.containsKey(key))
+		if (!_charMap.containsKey(key))
 		{
 			_charMap.put(key, new ArrayList<ISimpleCallback>());
 		}
-		
+
 		_charMap.get(key).add(callback);
 	}
-	
+
+	/**
+	 * Registers a call back that will be triggered only once every time a key
+	 * is pressed.
+	 * 
+	 * @param key
+	 *            A key to register a call back to.
+	 * @param callback
+	 *            The call back to fire once per key press.
+	 */
 	public void registerKeyOnce(char key, ISimpleCallback callback)
 	{
-		if(!_onceCharMap.containsKey(key))
+		if (!_onceCharMap.containsKey(key))
 		{
 			_onceCharMap.put(key, new ArrayList<ISimpleCallback>());
 		}
@@ -42,7 +69,38 @@ public class KeyboardManager implements IManager
 		_onceCharMap.get(key).add(callback);
 	}
 
+	/**
+	 * Unregisters a call back that was set using registerKey.
+	 * 
+	 * @param key
+	 *            The key used to register the listener.
+	 * @param callback
+	 *            The call back to unregister.
+	 * @return If the removal was successful.
+	 */
+	public boolean unregisterKey(char key, ISimpleCallback callback)
+	{
+		return internalUnregisterKey(_charMap, key, callback);
+	}
+
+	/**
+	 * Unregisters a call back that was set using registerKeyOnce.
+	 * 
+	 * @param key
+	 *            The key used to register the listener.
+	 * @param callback
+	 *            The call back to unregister.
+	 * @return If the removal was successful.
+	 */
+	public boolean unregisterKeyOnce(char key, ISimpleCallback callback)
+	{
+		return internalUnregisterKey(_onceCharMap, key, callback);
+	}
+
 	@Override
+	/**
+	 * Called automatically by the ManagerLocator.
+	 */
 	public void update()
 	{
 		if (!_app.keyPressed && _lastKey != null)
@@ -64,10 +122,19 @@ public class KeyboardManager implements IManager
 			executeList(callbacks);
 		}
 	}
-	
+
+	private boolean internalUnregisterKey(HashMap<Character, ArrayList<ISimpleCallback>> list, char key, ISimpleCallback callback)
+	{
+		if (!list.containsKey(key))
+		{
+			return list.get(key).remove(callback);
+		}
+		return false;
+	}
+
 	private void executeList(ArrayList<ISimpleCallback> callbacks)
 	{
-		for(ISimpleCallback callback : callbacks)
+		for (ISimpleCallback callback : callbacks)
 		{
 			callback.execute();
 		}
