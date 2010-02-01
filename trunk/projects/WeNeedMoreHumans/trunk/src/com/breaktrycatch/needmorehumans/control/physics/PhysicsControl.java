@@ -16,6 +16,10 @@ import com.breaktrycatch.needmorehumans.tracing.ImageAnalysis;
 
 public class PhysicsControl extends DisplayObject {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private PhysicsWorldWrapper _physWorld;
 	private Point _lastMousePos;
 	
@@ -36,10 +40,8 @@ public class PhysicsControl extends DisplayObject {
 		vo.density = 0.0f;
 		_physWorld.createRect(0, height - 10, width, height, vo);
 		
-		
-		
 		addDebugSmileBoxes();
-		addDebugPolyHuman();
+//		addDebugPolyHuman();
 //		_physWorld.createRect(50, 150, 150, 250, new PhysicsShapeDefVO());
 	}
 	
@@ -54,7 +56,7 @@ public class PhysicsControl extends DisplayObject {
 				x = (i * size) + 220;
 				y = (j * size) + 310;
 				Body rect = _physWorld.createRect(x, y, x + size, y + size, new PhysicsShapeDefVO());
-				
+
 				PImage img = getApp().loadImage("../data/physics/BoxMcSmiles.png");
 				img.loadPixels();
 				ImageFrame sprite = new ImageFrame(getApp(), img);
@@ -86,7 +88,7 @@ public class PhysicsControl extends DisplayObject {
 		ArrayList<PolyVO> polyData = imageAnalysis.analyzeImage(sprite.getDisplay());
 		
 		DisplayObject castSprite = (DisplayObject)sprite;
-		Body human = _physWorld.createPolyHuman(polyData, new PhysicsShapeDefVO(), castSprite.x, castSprite.y, castSprite.rotationRad);
+		Body human = _physWorld.createPolyHuman(polyData, new PhysicsShapeDefVO(), castSprite.x + castSprite.width / 2, castSprite.y + castSprite.height / 2, -castSprite.rotationRad);
 		human.setUserData(sprite);
 		add(sprite);
 	}
@@ -97,14 +99,8 @@ public class PhysicsControl extends DisplayObject {
 		// TODO Auto-generated method stub
 		super.draw();
 		
-//		for(DisplayObject me : this)
-//		{
-//			PApplet.println(me);
-//		}
-		
-//		PApplet.println("----------");
-		
-		//Scroll control up and down
+		getApp().fill(0xff000000);
+		getApp().rect(0, 0, width, height);
 		if(getApp().mouseX > this.x && getApp().mouseX < this.width + this.x && getApp().mousePressed)
 		{
 			if(_lastMousePos != null)
@@ -129,8 +125,6 @@ public class PhysicsControl extends DisplayObject {
 			_lastMousePos = null;
 		}
 		
-		getApp().fill(0xff000000);
-		getApp().rect(0, 0, width, height);
 		
 		_physWorld.step();
 	}

@@ -129,10 +129,6 @@ public class PhysicsView extends AbstractView {
 		getApp().popMatrix();
 	}
 	
-	private void drawAtRotation(float rotation, PImage obj)
-	{
-	}
-	
 	private void createPolyHuman(Vec2 spawnPoint)
 	{
 		Body bd = _physWorld.getWorld().createBody(new BodyDef());

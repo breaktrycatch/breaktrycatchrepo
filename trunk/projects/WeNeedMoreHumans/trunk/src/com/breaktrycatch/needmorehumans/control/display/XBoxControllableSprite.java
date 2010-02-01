@@ -5,10 +5,12 @@ import org.jbox2d.common.MathUtils;
 import processing.core.PApplet;
 import toxi.geom.Vec2D;
 
+import com.breaktrycatch.lib.component.KeyboardManager;
 import com.breaktrycatch.lib.component.ManagerLocator;
 import com.breaktrycatch.lib.component.XBoxControllerManager;
 import com.breaktrycatch.lib.display.Sprite;
 import com.breaktrycatch.lib.util.callback.IFloatCallback;
+import com.breaktrycatch.lib.util.callback.ISimpleCallback;
 import com.esotericsoftware.controller.device.Axis;
 
 public class XBoxControllableSprite extends Sprite
@@ -25,77 +27,188 @@ public class XBoxControllableSprite extends Sprite
 	private boolean _updatedVel = false;
 	private boolean _updatedRot = false;
 
+	private final IFloatCallback leftTrigger = new IFloatCallback()
+	{
+		public void execute(float value)
+		{
+			_updatedRot = true;
+			_rotation += value;
+			_rotation = MathUtils.clamp(_rotation, -MAX_ROT, MAX_ROT);
+		}
+	};
+
+	private final IFloatCallback rightTrigger = new IFloatCallback()
+	{
+		public void execute(float value)
+		{
+			_updatedRot = true;
+			_rotation -= value;
+			_rotation = MathUtils.clamp(_rotation, -MAX_ROT, MAX_ROT);
+		}
+	};
+
+	private final IFloatCallback leftStickX = new IFloatCallback()
+	{
+		public void execute(float value)
+		{
+			_updatedVel = true;
+			_velocity.x += value;
+			_velocity.x = MathUtils.clamp(_velocity.x, -MAX_VEL, MAX_VEL);
+		}
+	};
+
+	private final IFloatCallback leftStickY = new IFloatCallback()
+	{
+		public void execute(float value)
+		{
+			_updatedVel = true;
+			_velocity.y += value;
+			_velocity.y = MathUtils.clamp(_velocity.y, -MAX_VEL, MAX_VEL);
+		}
+	};
+
+	private final ISimpleCallback keyboardForward = new ISimpleCallback()
+	{
+		public void execute()
+		{
+			leftStickY.execute(1f);
+		}
+	};
+
+	private final ISimpleCallback keyboardBackward = new ISimpleCallback()
+	{
+		public void execute()
+		{
+			leftStickY.execute(-1f);
+		}
+	};
+
+	private final ISimpleCallback keyboardLeft = new ISimpleCallback()
+	{
+		public void execute()
+		{
+			leftStickX.execute(-1f);
+		}
+	};
+
+	private final ISimpleCallback keyboardRight = new ISimpleCallback()
+	{
+		public void execute()
+		{
+			leftStickX.execute(1f);
+		}
+	};
+
+	private final ISimpleCallback keyboardRotateRight = new ISimpleCallback()
+	{
+		public void execute()
+		{
+			rightTrigger.execute(1f);
+		}
+	};
+
+	private final ISimpleCallback keyboardRotateLeft = new ISimpleCallback()
+	{
+		public void execute()
+		{
+			leftTrigger.execute(1f);
+		}
+	};
+
+	private boolean _enabled;
+
 	public XBoxControllableSprite(PApplet app)
 	{
 		super(app);
 
+		_enabled = true;
+		_rotation = 0;
 		_velocity = new Vec2D();
-		XBoxControllerManager manager = (XBoxControllerManager) ManagerLocator.getManager(XBoxControllerManager.class);
 
-		manager.registerAxis(Axis.leftTrigger, new IFloatCallback()
-		{
-			public void execute(float value)
-			{
-				_updatedRot = true;
-				_rotation += value;
-				_rotation = MathUtils.clamp(_rotation, -MAX_ROT, MAX_ROT);
-			}
-		});
-		manager.registerAxis(Axis.rightTrigger, new IFloatCallback()
-		{
-			public void execute(float value)
-			{
-				_updatedRot = true;
-				_rotation -= value;
-				_rotation = MathUtils.clamp(_rotation, -MAX_ROT, MAX_ROT);
-			}
-		});
+		enableListeners();
+	}
 
-		manager.registerAxis(Axis.leftStickX, new IFloatCallback()
-		{
-			public void execute(float value)
-			{
-				_updatedVel = true;
-				_velocity.x += value;
-				_velocity.x = MathUtils.clamp(_velocity.x, -MAX_VEL, MAX_VEL);
-			}
-		});
+	private void enableListeners()
+	{
+		XBoxControllerManager controllerManager = (XBoxControllerManager) ManagerLocator.getManager(XBoxControllerManager.class);
+		KeyboardManager keyboardManager = (KeyboardManager) ManagerLocator.getManager(KeyboardManager.class);
+		keyboardManager.registerKey('w', keyboardForward);
+		keyboardManager.registerKey('s', keyboardBackward);
 
-		manager.registerAxis(Axis.leftStickY, new IFloatCallback()
-		{
-			public void execute(float value)
-			{
-				_updatedVel = true;
-				_velocity.y += value;
-				_velocity.y = MathUtils.clamp(_velocity.y, -MAX_VEL, MAX_VEL);
-			}
-		});
+		keyboardManager.registerKey('a', keyboardLeft);
+		keyboardManager.registerKey('d', keyboardRight);
+
+		keyboardManager.registerKey('.', keyboardRotateRight);
+		keyboardManager.registerKey(',', keyboardRotateLeft);
+
+		controllerManager.registerAxis(Axis.leftTrigger, leftTrigger);
+		controllerManager.registerAxis(Axis.rightTrigger, rightTrigger);
+
+		controllerManager.registerAxis(Axis.leftStickX, leftStickX);
+		controllerManager.registerAxis(Axis.leftStickY, leftStickY);
+	}
+
+	private void disableListeners()
+	{
+		XBoxControllerManager controllerManager = (XBoxControllerManager) ManagerLocator.getManager(XBoxControllerManager.class);
+		KeyboardManager keyboardManager = (KeyboardManager) ManagerLocator.getManager(KeyboardManager.class);
+		keyboardManager.unregisterKey('w', keyboardForward);
+		keyboardManager.unregisterKey('s', keyboardBackward);
+
+		keyboardManager.unregisterKey('a', keyboardLeft);
+		keyboardManager.unregisterKey('d', keyboardRight);
+
+		keyboardManager.unregisterKey('.', keyboardRotateRight);
+		keyboardManager.unregisterKey(',', keyboardRotateLeft);
+
+		controllerManager.unregisterAxis(Axis.leftTrigger, leftTrigger);
+		controllerManager.unregisterAxis(Axis.rightTrigger, rightTrigger);
+
+		controllerManager.unregisterAxis(Axis.leftStickX, leftStickX);
+		controllerManager.unregisterAxis(Axis.leftStickY, leftStickY);
 	}
 
 	@Override
 	public void draw()
 	{
-		float dampening = .7f;
-		if (!_updatedRot)
+		if (_enabled)
 		{
-			_rotation *= dampening;
-		}
-		
-		rotationRad -= _rotation;
-		
-		if (!_updatedVel)
-		{
-			_velocity.x *= dampening;
-			_velocity.y *= dampening;
-		}
+			float dampening = .7f;
+			if (!_updatedRot)
+			{
+				_rotation *= dampening;
+			}
 
-		x += _velocity.x;
-		y -= _velocity.y;
-		
-		_updatedVel = false;
-		_updatedRot = false;
+			rotationRad -= _rotation;
 
+			if (!_updatedVel)
+			{
+				_velocity.x *= dampening;
+				_velocity.y *= dampening;
+			}
+
+			x += _velocity.x;
+			y -= _velocity.y;
+
+			_updatedVel = false;
+			_updatedRot = false;
+		}
 		super.draw();
+	}
+
+	public void enableController(boolean b)
+	{
+		if (b != _enabled)
+		{
+			_enabled = b;
+			if (_enabled)
+			{
+				enableListeners();
+			} else
+			{
+				disableListeners();
+			}
+		}
 	}
 
 }
