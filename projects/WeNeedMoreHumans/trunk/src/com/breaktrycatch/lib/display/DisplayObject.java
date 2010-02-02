@@ -30,7 +30,7 @@ public class DisplayObject extends ArrayList<DisplayObject>
 	private DisplayObject _parent;
 	private boolean _rotateAroundCenter;
 	private ArrayList<DisplayObject> _removeList;
-	private ArrayList<ItemToAdd> _addList;
+	protected ArrayList<ItemToAdd> _addList;
 
 	public DisplayObject(PApplet app)
 	{

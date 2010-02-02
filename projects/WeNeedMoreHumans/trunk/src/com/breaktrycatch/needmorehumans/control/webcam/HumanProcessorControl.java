@@ -27,7 +27,6 @@ public class HumanProcessorControl
 	private TileImageDrawer _debugDrawer;
 	private boolean _captureBackgrounds;
 	private int _numBackgrounds;
-	private PImage _processedImage;
 	private PImage _rawFrame;
 	private boolean _processingEnabled;
 	private boolean _debugMode = false;
@@ -84,7 +83,7 @@ public class HumanProcessorControl
 
 		HashMap<String, Comparable<?>> contractBack = new HashMap<String, Comparable<?>>();
 		contractBack.put(ErosionPlugin.INVERTED, false);
-		contractBack.put(ErosionPlugin.NUM_PASSES, 2);
+		contractBack.put(ErosionPlugin.NUM_PASSES, 4);
 		addPlugin(_postPipeline, ErosionPlugin.class, contractBack);
 	}
 
@@ -178,18 +177,21 @@ public class HumanProcessorControl
 		_subtractor.extractLargestBlob(maskedFrame);
 		// _subtractor.removeShadows(maskedFrame);
 
+		maskedFrame = ImageUtils.trimTransparency(maskedFrame);
+		
 		// post process to clean up the image.
 		maskedFrame.pixels = _postPipeline.process(maskedFrame.pixels, maskedFrame.width, maskedFrame.height);
 
-		return ImageUtils.trimTransparency(maskedFrame);
+		return maskedFrame;
 	}
 
 	public void update()
 	{
+		_capture.read();
+		
 		if (_captureBackgrounds)
 		{
 			PApplet.println("CAPTURING BACKGROUNDS..........");
-			_capture.read();
 			_rawFrame = _capture.getFrame();
 			debugDraw(_rawFrame);
 			
@@ -208,7 +210,6 @@ public class HumanProcessorControl
 		// we want this to follow through if we just average the backgrounds.
 		if (!_captureBackgrounds && _processingEnabled)
 		{
-			_capture.read();
 			_rawFrame = _capture.getFrame();
 			debugDraw(_rawFrame);
 			_rawFrame.pixels = _prePipeline.process(_rawFrame.pixels, _rawFrame.width, _rawFrame.height);
@@ -218,13 +219,13 @@ public class HumanProcessorControl
 			PImage initialFrame = ImageUtils.cloneImage(_capture.getFrame());
 
 			// overlay the mask.
-			_processedImage = createDiffedImage(initialFrame);
+			createDiffedImage(initialFrame);
 		}
+		
 	}
 
 	public PImage getRawCameraImage()
 	{
-		_capture.read();
 		_rawFrame = _capture.getFrame();
 		return _rawFrame;
 	}
@@ -233,7 +234,6 @@ public class HumanProcessorControl
 	{
 		if (!_captureBackgrounds)
 		{
-			_capture.read();
 			_rawFrame = _capture.getFrame();
 			debugDraw(_rawFrame);
 			

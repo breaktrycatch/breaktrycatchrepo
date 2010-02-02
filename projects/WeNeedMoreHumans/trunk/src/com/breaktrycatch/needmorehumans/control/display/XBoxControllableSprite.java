@@ -193,6 +193,7 @@ public class XBoxControllableSprite extends Sprite
 			_updatedVel = false;
 			_updatedRot = false;
 		}
+		
 		super.draw();
 	}
 

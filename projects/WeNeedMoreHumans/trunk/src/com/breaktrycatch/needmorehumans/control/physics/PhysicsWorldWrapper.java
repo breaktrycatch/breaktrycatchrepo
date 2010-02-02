@@ -10,7 +10,6 @@ import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.BodyDef;
 import org.jbox2d.dynamics.DebugDraw;
 import org.jbox2d.dynamics.World;
-import org.jbox2d.p5.PhysicsUtils;
 import org.jbox2d.testbed.ProcessingDebugDraw;
 
 import processing.core.PApplet;
@@ -31,11 +30,7 @@ public class PhysicsWorldWrapper {
 	private AABB _worldAABB;
 	private float _physScale;
 	private Vec2 _screenHalfSize;
-	
-	private ArrayList<DisplayObject> _sprites;
 	private boolean _wakeAllOnNextTick = false;
-	
-	
 	
 	public PhysicsWorldWrapper(float screenWidth, float screenHeight) 
 	{
@@ -85,6 +80,8 @@ public class PhysicsWorldWrapper {
 			DisplayObject actor = (DisplayObject)body.getUserData();
 			if(actor != null)
 			{
+				PApplet.println("BEfore conversion: " + body.getPosition());
+				
 				Vec2 pos = worldToScreen(body.getPosition());
 				
 				//TODO: THIS IS A TEMP HACK TO GET THE IMAGE TO ROUGHLY LINE UP WITH THE PHYSICS DATA
@@ -95,7 +92,13 @@ public class PhysicsWorldWrapper {
 				actor.x = (int)pos.x;
 				actor.y = (int)pos.y;
 				actor.rotationRad = -body.getAngle();
-				//trace(body.GetPosition().y, pos.y);
+				
+				PApplet.println("POS: " + pos + " : " + body.getPosition());
+			}
+			else
+			{
+//				throw new ArithmeticException();
+//				LogRepository.getInstance().getMikesLogger().warn("Physics DisplayObject is null and will not be drawn!");
 			}
 			
 		}
@@ -146,7 +149,7 @@ public class PhysicsWorldWrapper {
 		Vec2 center = screenToWorld(cxs, cys);
 //		Vec2 center = screenToWorld(x0, y0);
 //		Vec2 center  = _debugDraw.screenToWorld(cxs, cys);
-		System.out.println("Box World Pos: "+center);
+//		System.out.println("Box World Pos: "+center);
 //		System.out.println("Half Width world: "+halfWidthWorld);
 		
 		PolygonDef pd = new PolygonDef();
@@ -173,8 +176,15 @@ public class PhysicsWorldWrapper {
 		
 //		body.createShape(createPolyDefFromVo(data.get(0), settings));
 		
+		PApplet.println("Density: " + settings.density);
+		
 		if (settings.density > 0.0f) body.setMassFromShapes();
+		
+		
+		PApplet.println("Calculating screenToWorld: " + screenX + " : " + screenY + " -> " + screenToWorld(screenX, screenY));
 		body.setXForm(screenToWorld(screenX, screenY), radRotation);
+		
+		PApplet.println("SET THE XFORM: " + body.getXForm());
 		
 		return body;
 	}
@@ -294,8 +304,9 @@ public class PhysicsWorldWrapper {
 //		_debugDraw.appendFlags(DebugDraw.e_obbBit);
 		_debugDraw.appendFlags(DebugDraw.e_pairBit);
 		_debugDraw.appendFlags(DebugDraw.e_centerOfMassBit);
-		
-		_debugDraw.setCamera(_screenHalfSize.x * _physScale ,0 , 1/_physScale);
+
+//		_debugDraw.setCamera(_screenHalfSize.x * _physScale ,0 , 1/_physScale);
+		_debugDraw.setCamera(0 ,0 , 1/_physScale);
 		
 		_world.setDebugDraw(_debugDraw);
 	}
