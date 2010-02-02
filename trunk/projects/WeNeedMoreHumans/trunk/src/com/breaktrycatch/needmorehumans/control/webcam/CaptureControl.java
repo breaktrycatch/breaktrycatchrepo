@@ -26,9 +26,7 @@ public class CaptureControl extends DisplayObject
 	private SimpleCapture _capture;
 	private HumanProcessorControl _processor;
 	private TileImageDrawer _debugDrawer;
-
-	private PImage _processedImage;
-
+	
 	private static final String CAPTURE = "capture";
 
 	public CaptureControl(PApplet app)
@@ -50,6 +48,7 @@ public class CaptureControl extends DisplayObject
 
 		_processor = new HumanProcessorControl(getApp(), _capture);
 		_processor.setDebugDrawer(_debugDrawer);
+		_processor.setProcessingEnabled(false);
 		add(_debugDrawer);
 
 		_processor.captureBackgrounds(_maxBackgrounds);
@@ -61,7 +60,7 @@ public class CaptureControl extends DisplayObject
 		{
 			public void execute()
 			{
-				PApplet.println("Capturing backgrounds....");
+				PApplet.println("Re-Capturing backgrounds....");
 				_processor.captureBackgrounds(_maxBackgrounds);
 			};
 		});

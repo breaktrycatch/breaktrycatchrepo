@@ -300,6 +300,7 @@ class XBoxControllerFacade
 	private HashMap<Axis, ArrayList<IFloatCallback>> _axisMap;
 
 	private float _deadZone = .3f;
+	private float _triggerDeadZone = .1f;
 
 	private boolean _disconnected;
 
@@ -427,12 +428,11 @@ class XBoxControllerFacade
 			}
 		}
 
-		// axis call backs fired every time the axis is outside the dead zone
-		// (triggers have no dead zone).
+		// axis call backs fired every time the axis is outside the dead zone.
 		for (Axis axis : _axisMap.keySet())
 		{
 			float value = _controller.get(axis);
-			if (Math.abs(value) > getDeadZone() || ((axis == Axis.leftTrigger || axis == Axis.rightTrigger) && value > 0))
+			if (Math.abs(value) > getDeadZone() || ((axis == Axis.leftTrigger || axis == Axis.rightTrigger) && value > _triggerDeadZone))
 			{
 				ArrayList<IFloatCallback> callbacks = _axisMap.get(axis);
 				executeFloatList(callbacks, value);
@@ -452,17 +452,17 @@ class XBoxControllerFacade
 
 	private void executeList(ArrayList<ISimpleCallback> callbacks)
 	{
-		for (ISimpleCallback callback : callbacks)
+		for(int i = callbacks.size() - 1; i >= 0; i--)
 		{
-			callback.execute();
+			callbacks.get(i).execute();
 		}
 	}
 
 	private void executeFloatList(ArrayList<IFloatCallback> callbacks, float value)
 	{
-		for (IFloatCallback callback : callbacks)
+		for(int i = callbacks.size() - 1; i >= 0; i--)
 		{
-			callback.execute(value);
+			callbacks.get(i).execute(value);
 		}
 	}
 
