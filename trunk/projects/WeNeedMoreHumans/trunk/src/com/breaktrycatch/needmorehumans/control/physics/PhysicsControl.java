@@ -55,7 +55,9 @@ public class PhysicsControl extends DisplayObject
 
 		PhysicsShapeDefVO vo = new PhysicsShapeDefVO();
 		vo.density = 0.0f;
-		_physWorld.createRect(0, height - 10, width, height, vo);
+		vo.friction = 1.0f;
+		_physWorld.createHollowBox(width/2.0f, height/2.0f, width, height, 15.0f, vo);
+//		_physWorld.createRect(0, height - 10, width, height, vo);
 
 		addDebugSmileBoxes();
 		// addDebugPolyHuman();
@@ -105,8 +107,8 @@ public class PhysicsControl extends DisplayObject
 		ImageAnalysis imageAnalysis = new ImageAnalysis(getApp());
 		ArrayList<PolyVO> polyData = imageAnalysis.analyzeImage(sprite.getDisplay());
 
-		DisplayObject castSprite = (DisplayObject) sprite;
-		Body human = _physWorld.createPolyHuman(polyData, new PhysicsShapeDefVO(), castSprite.x + castSprite.width / 2, castSprite.y + castSprite.height / 2, -castSprite.rotationRad);
+		//DisplayObject castSprite = (DisplayObject) sprite;
+		Body human = _physWorld.createPolyHuman(polyData, new PhysicsShapeDefVO(), sprite.x, sprite.y, -sprite.rotationRad);
 		human.setUserData(sprite);
 
 		PApplet.println("Adding sprite!");

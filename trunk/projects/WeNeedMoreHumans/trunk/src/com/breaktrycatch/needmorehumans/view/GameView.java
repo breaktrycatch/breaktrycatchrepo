@@ -95,7 +95,8 @@ public class GameView extends AbstractView
 //							PImage img = _capControl.getProcessedImage();
 //							if (img.width > 0 && img.height > 0)
 //							{
-								final PImage img = getApp().loadImage("../data/subtraction/debug-image-1252438725312.png");
+//								final PImage img = getApp().loadImage("../data/subtraction/debug-image-1252438725312.png");
+								final PImage img = getApp().loadImage("../data/tracing/RealPerson_2_trimmed.png");
 
 								String path = new File("").getAbsolutePath() + "debug-image" + System.nanoTime() + ".png";
 								LogRepository.getInstance().getPaulsLogger().info("Saving Debug Image " + path);
