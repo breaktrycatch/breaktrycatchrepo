@@ -3,9 +3,6 @@ package com.breaktrycatch.needmorehumans.view;
 import java.awt.Rectangle;
 import java.awt.geom.Point2D.Float;
 import java.io.File;
-import java.util.logging.Logger;
-
-import org.apache.log4j.Level;
 
 import processing.core.PApplet;
 import processing.core.PImage;
@@ -23,7 +20,6 @@ import com.breaktrycatch.needmorehumans.control.display.XBoxControllableSprite;
 import com.breaktrycatch.needmorehumans.control.physics.PhysicsControl;
 import com.breaktrycatch.needmorehumans.control.webcam.CaptureControl;
 import com.breaktrycatch.needmorehumans.utils.LogRepository;
-import com.breaktrycatch.needmorehumans.utils.RectUtils;
 import com.esotericsoftware.controller.device.Button;
 
 public class GameView extends AbstractView
@@ -39,7 +35,49 @@ public class GameView extends AbstractView
 
 	public GameView()
 	{
-		// TODO Auto-generated constructor stub
+	}
+	
+	private void createEnvironment()
+	{
+		// creates the environment
+		PApplet app = getApp();
+		_background = new ParallaxBackground(app, _physControl.width * 3, _physControl.height);
+		DisplayObject background = _background.addVerticalTilingLayer(app.loadImage("../data/world/large-background.png"), 0);
+		DisplayObject trees = _background.addHorizontalTilingLayer(app.loadImage("../data/world/trees.png"), .5f);
+		DisplayObject windmill = _background.addLayer(new Windmill(app), .7f);
+		DisplayObject ground = _background.addHorizontalTilingLayer(app.loadImage("../data/world/ground.png"), 1);
+		background.y = -app.height;
+		ground.y = _physControl.height - 7; // 7 is half the thickness of the physics ground plane
+		windmill.y = ground.y - windmill.height + 20;
+		trees.y = ground.y - trees.height;
+		
+		add(_background);
+	}
+	
+	private void createPhysicsControl()
+	{
+		PApplet app = getApp();
+		_physControl = new PhysicsControl(app);
+		_physControl.width = app.width * 2;
+		_physControl.height = app.height * 6;
+		
+		_physControl.x = -_physControl.width / 2 + app.width / 2;
+		_physControl.y = -_physControl.height + app.height - 25; // (40 is the height of the ground image)
+		
+		Rectangle rect = new Rectangle((int)-_physControl.width / 2, (int)_physControl.y, (int) _physControl.width - app.width, (int) _physControl.height);
+		_physControl.setScrollBounds(rect);
+		_physControl.init();
+	}
+	
+	private void createCaptureControl()
+	{
+//		PApplet app = getApp();
+//		_capControl = new CaptureControl(app);
+//		_capControl.x = (app.width / 2);
+//		_capControl.width = (app.width / 2);
+//		_capControl.height = (app.height);
+//		_capControl.setDebugMode(true);
+//		add(_capControl);
 	}
 
 	@Override
@@ -47,39 +85,17 @@ public class GameView extends AbstractView
 	{
 		super.initialize(app);
 
-		_physControl = new PhysicsControl(app);
-		_physControl.width = (int) (app.width);
-		_physControl.height = app.height;// * 10;
-//		_physControl.y = _physControl.height - app.height;
-		_physControl.setScrollBounds(new Rectangle(-app.width / 2 + 50, -30, (int) _physControl.width - 50, (int) _physControl.height));
-		_physControl.init();
-
-		// creates the environment
-		_background = new ParallaxBackground(app, app.width * 3);
-		DisplayObject background = _background.addHorizontalTilingLayer(app.loadImage("../data/world/large-background.png"), 0);
-		DisplayObject trees = _background.addHorizontalTilingLayer(app.loadImage("../data/world/trees.png"), .5f);
-		DisplayObject windmill = _background.addLayer(new Windmill(app), .7f);
-		DisplayObject ground = _background.addHorizontalTilingLayer(app.loadImage("../data/world/ground.png"), 1);
-		background.y = -app.height;
-		ground.y = _physControl.height;
-		windmill.y = ground.y - windmill.height + 20;
-		trees.y = ground.y - trees.height;
+		createPhysicsControl();
+		createEnvironment();
 		
-		add(_background);
+		// add after we create the environment!
 		add(_physControl);
-
-//		_capControl = new CaptureControl(app);
-//		_capControl.x = (app.width / 2);
-//		_capControl.width = (app.width / 2);
-//		_capControl.height = (app.height);
-//		_capControl.setDebugMode(true);
-//		add(_capControl);
+		
+		createCaptureControl();
 
 		final XBoxControllerManager controllerManager = (XBoxControllerManager) ManagerLocator.getManager(XBoxControllerManager.class);
 		final KeyboardManager keyboardManager = (KeyboardManager) ManagerLocator.getManager(KeyboardManager.class);
 
-		LogRepository.getInstance().getJonsLogger().setLevel(Level.WARN);
-		
 		ISimpleCallback countdownCallback = new ISimpleCallback()
 		{
 			public void execute()
@@ -104,13 +120,12 @@ public class GameView extends AbstractView
 
 								final XBoxControllableSprite sprite = new XBoxControllableSprite(getApp());
 								sprite.setRotateAroundCenter(true);
-//								Rectangle imageBounds = (Rectangle)_physControl.getScrollBounds().clone();
-//								imageBounds.width += sprite.width;
-//								
-//								sprite.setScrollBounds(imageBounds);
 								sprite.addFrame(img);
-								sprite.x = 200;
-								sprite.y = 200;
+								sprite.x = _physControl.width / 2 - sprite.width / 2;
+								sprite.y = _physControl.height - getApp().height / 2 - sprite.height / 2;
+
+								Rectangle imageBounds = new Rectangle(0,0,(int)(_physControl.width - sprite.width), (int)(_physControl.height - sprite.height));
+								sprite.setScrollBounds(imageBounds);
 								
 								// on update check if our sprite is near the edges and scroll the view port so we never lose it.
 								sprite.setUpdatedCallback(new ISimpleCallback()
@@ -119,23 +134,27 @@ public class GameView extends AbstractView
 									{
 										Float localToGlobal = sprite.localToGlobal();
 										float margin = 5;
+										PApplet app = getApp();
 										if(localToGlobal.x < margin)
 										{
 											_physControl.x += margin - localToGlobal.x;
 										}
-										else if(localToGlobal.x > _physControl.width - img.width - margin)
+										else if(localToGlobal.x > app.width - img.width - margin)
 										{
-											_physControl.x -= (localToGlobal.x - _physControl.width + img.width) + margin;
+											_physControl.x -= (localToGlobal.x - app.width + img.width) + margin;
 										}
 										
 										if(localToGlobal.y < margin)
 										{
 											_physControl.y += margin - localToGlobal.y;
 										}
-										else if(localToGlobal.y > _physControl.height - img.height - margin)
+										else if(localToGlobal.y > app.height - img.height - margin)
 										{
-											_physControl.y -= (localToGlobal.y - _physControl.height + img.height) + margin;
+											_physControl.y -= (localToGlobal.y - app.height + img.height) + margin;
 										}
+
+//										_background.scaleX = _background.scaleY -= .01f;
+//										_physControl.scaleX = _physControl.scaleY -= .01f;
 										
 										_physControl.constrainToBounds();
 										sprite.constrainToBounds();
@@ -178,8 +197,8 @@ public class GameView extends AbstractView
 						};
 					});
 
-					_countdown.x = _physControl.width / 2;
-					_countdown.y = _physControl.height / 2;
+					_countdown.x = _physControl.width / 2 - _countdown.width / 2;
+					_countdown.y = _physControl.height - getApp().height / 2;
 					_countdown.setCountFrom(1);
 					_countdown.start();
 					_physControl.add(_countdown);
