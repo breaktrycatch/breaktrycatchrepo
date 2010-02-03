@@ -32,7 +32,7 @@ public class PhysicsControl extends DisplayObject
 	public PhysicsControl(PApplet app)
 	{
 		super(app);
-		_scrollBounds = new Rectangle(-Integer.MAX_VALUE, -Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE);
+		_scrollBounds = new Rectangle(Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE);
 	}
 
 	public void setScrollBounds(Rectangle bounds)
@@ -55,9 +55,11 @@ public class PhysicsControl extends DisplayObject
 
 		 PhysicsShapeDefVO vo = new PhysicsShapeDefVO();
 		 vo.density = 0.0f;
-		 _physWorld.createRect(0, height - 10, width, height, vo);
+		 vo.friction = 1.0f;
+		 _physWorld.createHollowBox(width/2.0f, height/2.0f, width, height, 15, vo);
+//		 _physWorld.createRect(0, height - 10, width, height, vo);
 
-		 addDebugSmileBoxes();
+//		 addDebugSmileBoxes();
 		// addDebugPolyHuman();
 		// _physWorld.createRect(50, 150, 150, 250, new PhysicsShapeDefVO());
 	}
@@ -121,9 +123,9 @@ public class PhysicsControl extends DisplayObject
 
 		DisplayObject castSprite = (DisplayObject) sprite;
 		Body human = _physWorld.createPolyHuman(polyData, new PhysicsShapeDefVO(), castSprite.x + castSprite.width / 2, castSprite.y + castSprite.height / 2, -castSprite.rotationRad);
-		human.setUserData(sprite);
+		//human.setUserData(sprite);
 
-		add(sprite);
+		//add(sprite);
 	}
 
 	@Override
