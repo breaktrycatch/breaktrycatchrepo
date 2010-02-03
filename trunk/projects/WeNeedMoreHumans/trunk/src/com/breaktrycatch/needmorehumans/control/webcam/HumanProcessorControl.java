@@ -22,6 +22,7 @@ public class HumanProcessorControl
 	private ProcessorPipeline _prePipeline;
 	private ProcessorPipeline _pipeline;
 	private ProcessorPipeline _postPipeline;
+	private ProcessorPipeline _postFilterPipeline;
 	private ImageSubstractionController _subtractor;
 	private SimpleCapture _capture;
 	private TileImageDrawer _debugDrawer;
@@ -42,10 +43,12 @@ public class HumanProcessorControl
 		_prePipeline = new ProcessorPipeline(vis);
 		_pipeline = new ProcessorPipeline(vis);
 		_postPipeline = new ProcessorPipeline(vis);
-
+		_postFilterPipeline = new ProcessorPipeline(vis);
+		
 		configurePrePipeline();
 		configurePipeline();
 		configurePostPipeline();
+		configurePostFilterPipeline();
 	}
 
 	public void setProcessingEnabled(boolean enabled)
@@ -56,7 +59,7 @@ public class HumanProcessorControl
 	public void setDebugDrawer(TileImageDrawer debugDrawer)
 	{
 		_debugDrawer = debugDrawer;
-		_postPipeline.setDebugDrawer(_debugDrawer);
+		_postFilterPipeline.setDebugDrawer(_debugDrawer);
 		_pipeline.setDebugDrawer(_debugDrawer);
 		_prePipeline.setDebugDrawer(_debugDrawer);
 		_debugMode = true;
@@ -76,15 +79,24 @@ public class HumanProcessorControl
 
 	private void configurePostPipeline()
 	{
+		HashMap<String, Comparable<?>> contractBack = new HashMap<String, Comparable<?>>();
+		contractBack.put(ErosionPlugin.INVERTED, false);
+		contractBack.put(ErosionPlugin.NUM_PASSES, 2);
+		addPlugin(_postPipeline, ErosionPlugin.class, contractBack);
+	}
+
+	private void configurePostFilterPipeline()
+	{
 		// HashMap<String, Comparable<?>> edgeDetect = new HashMap<String,
 		// Comparable<?>>();
 		// edgeDetect.put(SobelEdgeDetectionPlugin.TOLERANCE, 50);
-		// addPlugin(_postPipeline, SobelEdgeDetectionPlugin.class, edgeDetect);
+		// addPlugin(_postFilterPipeline, SobelEdgeDetectionPlugin.class,
+		// edgeDetect);
 
 		HashMap<String, Comparable<?>> contractBack = new HashMap<String, Comparable<?>>();
 		contractBack.put(ErosionPlugin.INVERTED, false);
-		contractBack.put(ErosionPlugin.NUM_PASSES, 4);
-		addPlugin(_postPipeline, ErosionPlugin.class, contractBack);
+		contractBack.put(ErosionPlugin.NUM_PASSES, 2);
+		addPlugin(_postFilterPipeline, ErosionPlugin.class, contractBack);
 	}
 
 	private void configurePipeline()
@@ -180,7 +192,7 @@ public class HumanProcessorControl
 		maskedFrame = ImageUtils.trimTransparency(maskedFrame);
 		
 		// post process to clean up the image.
-		maskedFrame.pixels = _postPipeline.process(maskedFrame.pixels, maskedFrame.width, maskedFrame.height);
+		maskedFrame.pixels = _postFilterPipeline.process(maskedFrame.pixels, maskedFrame.width, maskedFrame.height);
 
 		return maskedFrame;
 	}
@@ -188,13 +200,13 @@ public class HumanProcessorControl
 	public void update()
 	{
 		_capture.read();
-		
+
 		if (_captureBackgrounds)
 		{
 			PApplet.println("CAPTURING BACKGROUNDS..........");
 			_rawFrame = _capture.getFrame();
 			debugDraw(_rawFrame);
-			
+
 			_rawFrame.pixels = _prePipeline.process(_rawFrame.pixels, _rawFrame.width, _rawFrame.height);
 
 			debugDraw(_rawFrame);
@@ -221,7 +233,7 @@ public class HumanProcessorControl
 			// overlay the mask.
 			createDiffedImage(initialFrame);
 		}
-		
+
 	}
 
 	public PImage getRawCameraImage()
@@ -236,7 +248,7 @@ public class HumanProcessorControl
 		{
 			_rawFrame = _capture.getFrame();
 			debugDraw(_rawFrame);
-			
+
 			_rawFrame.pixels = _prePipeline.process(_rawFrame.pixels, _rawFrame.width, _rawFrame.height);
 
 			debugDraw(_subtractor.getBackgroundImage());
