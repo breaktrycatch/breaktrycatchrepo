@@ -140,7 +140,7 @@ public class ImageAnalysis
 	{
 		// Bug CHECK - If we have less than 90% of the points, something went
 		// wrong
-		if (orderedPixelOutline.size() < (pixelOutline.size() - (pixelOutline.size() * 0.1)))
+		if (orderedPixelOutline.size() < (pixelOutline.size() - (pixelOutline.size() * 0.3)))
 		{
 			for (int i = 0; i < pixelOutline.size(); i++)
 			{
@@ -168,9 +168,11 @@ public class ImageAnalysis
 
 		__pixelCount = 0;
 		orderPixels(__pixelCount);
+		LogRepository.getInstance().getJonsLogger().info("VALID PIXELS " + validPixels);
 		while (!verifyOutline())
 		{
 			orderPixels(__pixelCount);
+			LogRepository.getInstance().getJonsLogger().info("VALID PIXELS " + validPixels);
 		}
 
 		LogRepository.getInstance().getJonsLogger().info("NUMBER OF PIXELS IN ORDERED OUTLINE " + orderedPixelOutline.size());
