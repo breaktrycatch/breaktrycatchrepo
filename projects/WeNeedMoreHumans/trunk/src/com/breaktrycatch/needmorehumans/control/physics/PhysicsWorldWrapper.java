@@ -84,8 +84,8 @@ public class PhysicsWorldWrapper {
 				
 				//TODO: THIS IS A TEMP HACK TO GET THE IMAGE TO ROUGHLY LINE UP WITH THE PHYSICS DATA
 				//THis will be fixed once we have proper alignment of the polydata
-				pos.x -= (actor.width/2);
-				pos.y -= (actor.height/2);
+				pos.x -= (actor.width/2.0f);
+				pos.y -= (actor.height/2.0f);
 				
 				actor.x = (int)pos.x;
 				actor.y = (int)pos.y;
@@ -164,8 +164,6 @@ public class PhysicsWorldWrapper {
 		for (PolyVO vo : data) {
 			body.createShape(createPolyDefFromVo(vo, settings));
 		}
-		
-//		body.createShape(createPolyDefFromVo(data.get(0), settings));
 		
 		if (settings.density > 0.0f) body.setMassFromShapes();
 		
