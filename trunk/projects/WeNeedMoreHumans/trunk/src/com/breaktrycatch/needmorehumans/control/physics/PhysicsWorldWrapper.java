@@ -167,15 +167,10 @@ public class PhysicsWorldWrapper {
 		
 //		body.createShape(createPolyDefFromVo(data.get(0), settings));
 		
-		PApplet.println("Density: " + settings.density);
-		
 		if (settings.density > 0.0f) body.setMassFromShapes();
-		
 		
 		PApplet.println("Calculating screenToWorld: " + screenX + " : " + screenY + " -> " + screenToWorld(screenX, screenY));
 		body.setXForm(screenToWorld(screenX, screenY), radRotation);
-		
-		PApplet.println("SET THE XFORM: " + body.getXForm());
 		
 		return body;
 	}

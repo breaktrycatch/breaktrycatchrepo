@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import processing.core.PApplet;
+
 import com.breaktrycatch.lib.util.callback.IFloatCallback;
 import com.breaktrycatch.lib.util.callback.ISimpleCallback;
 import com.breaktrycatch.needmorehumans.utils.LogRepository;
@@ -367,7 +369,9 @@ class XBoxControllerFacade
 
 	public boolean unregisterAxis(Axis axis, IFloatCallback callback)
 	{
-		if (!_axisMap.containsKey(axis))
+		PApplet.println("Do I contain this axis? " +_axisMap.containsKey(axis));
+		
+		if (_axisMap.containsKey(axis))
 		{
 			return _axisMap.get(axis).remove(callback);
 		}
@@ -386,7 +390,7 @@ class XBoxControllerFacade
 
 	private boolean internalUnregisterButton(HashMap<Button, ArrayList<ISimpleCallback>> list, Button key, ISimpleCallback callback)
 	{
-		if (!list.containsKey(key))
+		if (list.containsKey(key))
 		{
 			return list.get(key).remove(callback);
 		}

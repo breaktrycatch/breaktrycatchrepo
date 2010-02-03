@@ -32,7 +32,7 @@ public class PhysicsControl extends DisplayObject
 	public PhysicsControl(PApplet app)
 	{
 		super(app);
-		_scrollBounds = new Rectangle(Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE);
+		_scrollBounds = new Rectangle(-Integer.MAX_VALUE / 2, -Integer.MAX_VALUE / 2, Integer.MAX_VALUE, Integer.MAX_VALUE);
 	}
 
 	public void setScrollBounds(Rectangle bounds)
@@ -53,13 +53,11 @@ public class PhysicsControl extends DisplayObject
 		_physWorld = new PhysicsWorldWrapper((float) width, (float) height);
 		_physWorld.enableDebugDraw(getApp());
 
-		 PhysicsShapeDefVO vo = new PhysicsShapeDefVO();
-		 vo.density = 0.0f;
-		 vo.friction = 1.0f;
-		 _physWorld.createHollowBox(width/2.0f, height/2.0f, width, height, 15, vo);
-//		 _physWorld.createRect(0, height - 10, width, height, vo);
+		PhysicsShapeDefVO vo = new PhysicsShapeDefVO();
+		vo.density = 0.0f;
+		_physWorld.createRect(0, height - 10, width, height, vo);
 
-//		 addDebugSmileBoxes();
+		addDebugSmileBoxes();
 		// addDebugPolyHuman();
 		// _physWorld.createRect(50, 150, 150, 250, new PhysicsShapeDefVO());
 	}
@@ -107,25 +105,13 @@ public class PhysicsControl extends DisplayObject
 		ImageAnalysis imageAnalysis = new ImageAnalysis(getApp());
 		ArrayList<PolyVO> polyData = imageAnalysis.analyzeImage(sprite.getDisplay());
 
-		for (int i = polyData.size() - 1; i >= 0; i--)
-		{
-			PolyVO vo = polyData.get(i);
-			Vec2 a = vo.getVertex(0);
-			Vec2 b = vo.getVertex(1);
-			Vec2 c = vo.getVertex(2);
-
-			float area = Math.abs((a.x - c.x) * (b.y - a.y) - (a.x - b.x) * (c.y - a.y)) * 0.5f;
-			if (area == 0)
-			{
-				polyData.remove(i);
-			}
-		}
-
 		DisplayObject castSprite = (DisplayObject) sprite;
 		Body human = _physWorld.createPolyHuman(polyData, new PhysicsShapeDefVO(), castSprite.x + castSprite.width / 2, castSprite.y + castSprite.height / 2, -castSprite.rotationRad);
-		//human.setUserData(sprite);
+		human.setUserData(sprite);
 
-		//add(sprite);
+		PApplet.println("Adding sprite!");
+
+		add(sprite);
 	}
 
 	@Override
@@ -144,16 +130,6 @@ public class PhysicsControl extends DisplayObject
 				this.x += getApp().mouseX - _lastMousePos.x;
 			}
 			_lastMousePos = new Point(getApp().mouseX, getApp().mouseY);
-			// int hitAreaSize = 50;
-			// int scrollSpeed = 2;
-			// if(getApp().mouseY < hitAreaSize)
-			// {
-			// this.y += scrollSpeed;
-			// }
-			// else if(getApp().mouseY > getApp().height - hitAreaSize)
-			// {
-			// this.y -= scrollSpeed;
-			// }
 		} else
 		{
 			_lastMousePos = null;
@@ -164,7 +140,7 @@ public class PhysicsControl extends DisplayObject
 		_physWorld.step();
 	}
 
-	private void constrainToBounds()
+	public void constrainToBounds()
 	{
 		Point2D.Float pt = RectUtils.constrain(new Point2D.Float((int) x, (int) y), _scrollBounds);
 		this.x = pt.x;
@@ -174,7 +150,6 @@ public class PhysicsControl extends DisplayObject
 	@Override
 	public void dispose()
 	{
-
 		_physWorld.destroy();
 
 		super.dispose();

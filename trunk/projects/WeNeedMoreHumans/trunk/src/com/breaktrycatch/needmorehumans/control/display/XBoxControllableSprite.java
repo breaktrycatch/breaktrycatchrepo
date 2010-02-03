@@ -1,5 +1,8 @@
 package com.breaktrycatch.needmorehumans.control.display;
 
+import java.awt.Rectangle;
+import java.awt.geom.Point2D;
+
 import org.jbox2d.common.MathUtils;
 
 import processing.core.PApplet;
@@ -11,6 +14,7 @@ import com.breaktrycatch.lib.component.XBoxControllerManager;
 import com.breaktrycatch.lib.display.Sprite;
 import com.breaktrycatch.lib.util.callback.IFloatCallback;
 import com.breaktrycatch.lib.util.callback.ISimpleCallback;
+import com.breaktrycatch.needmorehumans.utils.RectUtils;
 import com.esotericsoftware.controller.device.Axis;
 
 public class XBoxControllableSprite extends Sprite
@@ -26,6 +30,9 @@ public class XBoxControllableSprite extends Sprite
 	private static final float MAX_ROT = .2f;
 	private boolean _updatedVel = false;
 	private boolean _updatedRot = false;
+	private boolean _enabled;
+	private ISimpleCallback _updatedCallback;
+	private Rectangle _scrollBounds;
 
 	private final IFloatCallback leftTrigger = new IFloatCallback()
 	{
@@ -115,8 +122,6 @@ public class XBoxControllableSprite extends Sprite
 		}
 	};
 
-	private boolean _enabled;
-
 	public XBoxControllableSprite(PApplet app)
 	{
 		super(app);
@@ -124,8 +129,14 @@ public class XBoxControllableSprite extends Sprite
 		_enabled = true;
 		_rotation = 0;
 		_velocity = new Vec2D();
+		_scrollBounds = new Rectangle(-Integer.MAX_VALUE / 2, -Integer.MAX_VALUE / 2, Integer.MAX_VALUE, Integer.MAX_VALUE);
 
 		enableListeners();
+	}
+
+	public void setUpdatedCallback(ISimpleCallback callback)
+	{
+		_updatedCallback = callback;
 	}
 
 	private void enableListeners()
@@ -192,8 +203,13 @@ public class XBoxControllableSprite extends Sprite
 
 			_updatedVel = false;
 			_updatedRot = false;
+
+			if (_updatedCallback != null)
+			{
+				_updatedCallback.execute();
+			}
 		}
-		
+
 		super.draw();
 	}
 
@@ -209,6 +225,26 @@ public class XBoxControllableSprite extends Sprite
 			{
 				disableListeners();
 			}
+		}
+	}
+
+	public void setScrollBounds(Rectangle bounds)
+	{
+		_scrollBounds = bounds;
+	}
+
+	public Rectangle getScrollBounds()
+	{
+		return _scrollBounds;
+	}
+
+	public void constrainToBounds()
+	{
+		if (_scrollBounds != null)
+		{
+			Point2D.Float pt = RectUtils.constrain(new Point2D.Float((int) x, (int) y), _scrollBounds);
+			this.x = pt.x;
+			this.y = pt.y;
 		}
 	}
 

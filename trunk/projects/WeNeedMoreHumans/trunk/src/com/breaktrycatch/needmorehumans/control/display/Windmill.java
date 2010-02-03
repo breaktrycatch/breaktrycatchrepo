@@ -36,6 +36,9 @@ public class Windmill extends DisplayObject
 		_rotationSpeed = PhysicsUtils.degToRad(5 + (float)Math.random() * 10);
 		add(_windmillBase);
 		add(_windmillBlades);
+
+		width = (_windmillBase.width > _windmillBlades.width) ? (_windmillBase.width) : (_windmillBlades.width);
+		height = (_windmillBase.height > _windmillBlades.height) ? (_windmillBase.height) : (_windmillBlades.height);
 	}
 	
 	@Override
@@ -50,7 +53,7 @@ public class Windmill extends DisplayObject
 		// TODO Auto-generated method stub
 		super.draw();
 
-		_windmillBlades.rotationRad += _rotationSpeed;
+		_windmillBlades.rotationRad -= _rotationSpeed;
 	}
 
 	public void setRotationSpeed(float _rotationSpeed)
