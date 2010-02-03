@@ -1,7 +1,11 @@
 package com.breaktrycatch.needmorehumans.view;
 
 import java.awt.Rectangle;
+import java.awt.geom.Point2D.Float;
 import java.io.File;
+import java.util.logging.Logger;
+
+import org.apache.log4j.Level;
 
 import processing.core.PApplet;
 import processing.core.PImage;
@@ -19,6 +23,7 @@ import com.breaktrycatch.needmorehumans.control.display.XBoxControllableSprite;
 import com.breaktrycatch.needmorehumans.control.physics.PhysicsControl;
 import com.breaktrycatch.needmorehumans.control.webcam.CaptureControl;
 import com.breaktrycatch.needmorehumans.utils.LogRepository;
+import com.breaktrycatch.needmorehumans.utils.RectUtils;
 import com.esotericsoftware.controller.device.Button;
 
 public class GameView extends AbstractView
@@ -44,22 +49,23 @@ public class GameView extends AbstractView
 
 		_physControl = new PhysicsControl(app);
 		_physControl.width = (int) (app.width);
-		_physControl.height = app.height;
+		_physControl.height = app.height;// * 10;
+//		_physControl.y = _physControl.height - app.height;
 		_physControl.setScrollBounds(new Rectangle(-app.width / 2 + 50, -30, (int) _physControl.width - 50, (int) _physControl.height));
 		_physControl.init();
 
-		_background = new ParallaxBackground(app, 2000);
-		DisplayObject background = _background.addTilingLayer(app.loadImage("../data/world/large-background.png"), 0);
-		background.y = -1000;
-		DisplayObject trees = _background.addTilingLayer(app.loadImage("../data/world/trees.png"), .5f);
-		trees.y = 680;
-		DisplayObject ground = _background.addTilingLayer(app.loadImage("../data/world/ground.png"), 1);
-		ground.y = 770;
-
+		// creates the environment
+		_background = new ParallaxBackground(app, app.width * 3);
+		DisplayObject background = _background.addHorizontalTilingLayer(app.loadImage("../data/world/large-background.png"), 0);
+		DisplayObject trees = _background.addHorizontalTilingLayer(app.loadImage("../data/world/trees.png"), .5f);
 		DisplayObject windmill = _background.addLayer(new Windmill(app), .7f);
-		windmill.y = 600;
+		DisplayObject ground = _background.addHorizontalTilingLayer(app.loadImage("../data/world/ground.png"), 1);
+		background.y = -app.height;
+		ground.y = _physControl.height;
+		windmill.y = ground.y - windmill.height + 20;
+		trees.y = ground.y - trees.height;
+		
 		add(_background);
-
 		add(_physControl);
 
 //		_capControl = new CaptureControl(app);
@@ -72,6 +78,8 @@ public class GameView extends AbstractView
 		final XBoxControllerManager controllerManager = (XBoxControllerManager) ManagerLocator.getManager(XBoxControllerManager.class);
 		final KeyboardManager keyboardManager = (KeyboardManager) ManagerLocator.getManager(KeyboardManager.class);
 
+		LogRepository.getInstance().getJonsLogger().setLevel(Level.WARN);
+		
 		ISimpleCallback countdownCallback = new ISimpleCallback()
 		{
 			public void execute()
@@ -87,13 +95,7 @@ public class GameView extends AbstractView
 //							PImage img = _capControl.getProcessedImage();
 //							if (img.width > 0 && img.height > 0)
 //							{
-
-								// this one works..
-								// PImage img =
-								// getApp().loadImage("../data/tracing/RealPerson_1.png");
-
-								// but this one doesn't...????
-								PImage img = getApp().loadImage("../data/subtraction/debug-image-1252438725312.png");
+								final PImage img = getApp().loadImage("../data/subtraction/debug-image-1252438725312.png");
 
 								String path = new File("").getAbsolutePath() + "debug-image" + System.nanoTime() + ".png";
 								LogRepository.getInstance().getPaulsLogger().info("Saving Debug Image " + path);
@@ -101,9 +103,43 @@ public class GameView extends AbstractView
 
 								final XBoxControllableSprite sprite = new XBoxControllableSprite(getApp());
 								sprite.setRotateAroundCenter(true);
+//								Rectangle imageBounds = (Rectangle)_physControl.getScrollBounds().clone();
+//								imageBounds.width += sprite.width;
+//								
+//								sprite.setScrollBounds(imageBounds);
 								sprite.addFrame(img);
 								sprite.x = 200;
 								sprite.y = 200;
+								
+								// on update check if our sprite is near the edges and scroll the view port so we never lose it.
+								sprite.setUpdatedCallback(new ISimpleCallback()
+								{
+									public void execute()
+									{
+										Float localToGlobal = sprite.localToGlobal();
+										float margin = 5;
+										if(localToGlobal.x < margin)
+										{
+											_physControl.x += margin - localToGlobal.x;
+										}
+										else if(localToGlobal.x > _physControl.width - img.width - margin)
+										{
+											_physControl.x -= (localToGlobal.x - _physControl.width + img.width) + margin;
+										}
+										
+										if(localToGlobal.y < margin)
+										{
+											_physControl.y += margin - localToGlobal.y;
+										}
+										else if(localToGlobal.y > _physControl.height - img.height - margin)
+										{
+											_physControl.y -= (localToGlobal.y - _physControl.height + img.height) + margin;
+										}
+										
+										_physControl.constrainToBounds();
+										sprite.constrainToBounds();
+									}
+								});
 								_physControl.add(sprite);
 
 								final ISimpleCallback placementCallback = new ISimpleCallback()

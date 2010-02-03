@@ -9,7 +9,7 @@ public class ImageFrame extends DisplayObject
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private PImage _img;
+	protected PImage _img;
 
 	public ImageFrame(PApplet app, PImage img)
 	{

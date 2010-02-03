@@ -1,13 +1,16 @@
 package com.breaktrycatch.lib.display;
 
+import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.jbox2d.p5.PhysicsUtils;
-
 import megamu.shapetween.Shaper;
 import megamu.shapetween.Tween;
+
+import org.jbox2d.p5.PhysicsUtils;
+
 import processing.core.PApplet;
 
 public class DisplayObject extends ArrayList<DisplayObject>
@@ -269,6 +272,19 @@ public class DisplayObject extends ArrayList<DisplayObject>
 	public void setRotationDeg(float deg)
 	{
 		rotationRad = PhysicsUtils.degToRad(deg);
+	}
+	
+	public Point2D.Float localToGlobal()
+	{
+		if(getParent() != null)
+		{
+			Point2D.Float parent = getParent().localToGlobal();
+			return new Point2D.Float(x + parent.x, y + parent.y);
+		}
+		else
+		{
+			return new Point2D.Float(x, y);
+		}
 	}
 }
 

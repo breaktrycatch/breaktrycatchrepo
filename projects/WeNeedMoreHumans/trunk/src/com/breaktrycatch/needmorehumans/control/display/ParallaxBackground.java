@@ -27,7 +27,7 @@ public class ParallaxBackground extends DisplayObject
 		_layers = new ArrayList<ParallaxLayer>();
 	}
 
-	public DisplayObject addTilingLayer(PImage image, float movementAmt)
+	public DisplayObject addHorizontalTilingLayer(PImage image, float movementAmt)
 	{
 		return internalAddLayer(new TileBackground(getApp(), image, _maxWidth), movementAmt);
 	}

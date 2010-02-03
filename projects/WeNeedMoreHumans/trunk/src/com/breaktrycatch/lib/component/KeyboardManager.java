@@ -125,7 +125,7 @@ public class KeyboardManager implements IManager
 
 	private boolean internalUnregisterKey(HashMap<Character, ArrayList<ISimpleCallback>> list, char key, ISimpleCallback callback)
 	{
-		if (!list.containsKey(key))
+		if (list.containsKey(key))
 		{
 			return list.get(key).remove(callback);
 		}
@@ -134,8 +134,9 @@ public class KeyboardManager implements IManager
 
 	private void executeList(ArrayList<ISimpleCallback> callbacks)
 	{
-		for (ISimpleCallback callback : callbacks)
+		for(int i = callbacks.size() - 1; i >= 0; i--)
 		{
+			ISimpleCallback callback = callbacks.get(i);
 			callback.execute();
 		}
 	}
