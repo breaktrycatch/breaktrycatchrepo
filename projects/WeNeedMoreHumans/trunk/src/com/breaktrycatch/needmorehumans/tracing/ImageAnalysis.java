@@ -582,11 +582,6 @@ public class ImageAnalysis
 		}
 		ArrayList<ArrayList<PixelVO>> polys = polyTool.earClip(vertArray);
 		
-		float maxX = -999.0f;
-		float maxY = -999.0f;
-		float minX = 999.0f;
-		float minY = 999.0f;
-		
 		
 		if(polys != null) {
 			
@@ -632,26 +627,6 @@ public class ImageAnalysis
 							Vec2 v = new Vec2(polys.get(i).get(j).x, polys.get(i).get(j).y);
 							poly.addVertexAt(v, (vertexCount - 1)- j);
 							
-							//Record the extremes of the polygon collection
-							if(v.x > maxX)
-							{
-								maxX = v.x;
-							}
-							
-							if(v.x < minX)
-							{
-								minX = v.x;
-							}
-							
-							if(v.y > maxY)
-							{
-								maxY = v.y;
-							}
-							
-							if(v.y < minY)
-							{
-								minY = v.y;
-							}
 						}
 						
 						polyDefs.add(poly);
@@ -660,24 +635,6 @@ public class ImageAnalysis
 						culledPolygonsFromArea++;
 					}
 					// p_body.createShape(polyDef);
-				}
-			}
-			
-			LogRepository.getInstance().getMikesLogger().info("MIN X,Y: " + minX + ", " + minY);
-			LogRepository.getInstance().getMikesLogger().info("MAX X,Y: " + maxX + ", " + maxY);
-			
-			//TODO: JON - see if this can be done before points are placed? how does the image get reffed like this? 
-			//Shift the polygonal collection to be relative to a center reference
-			float shiftX = (maxX + ((minX-maxX)/2.0f));
-			float shiftY = (maxY + ((minY-maxY)/2.0f));
-			
-			for(int k = 0; k < polyDefs.size(); k++)
-			{
-				for(int l = 0; l < polyDefs.get(k).getCapacity(); l++)
-				{
-					
-					polyDefs.get(k).getVertex(l).x -= shiftX;
-					polyDefs.get(k).getVertex(l).y -= shiftY;
 				}
 			}
 			
