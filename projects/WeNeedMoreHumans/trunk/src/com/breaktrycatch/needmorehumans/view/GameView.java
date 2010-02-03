@@ -62,12 +62,12 @@ public class GameView extends AbstractView
 
 		add(_physControl);
 
-		_capControl = new CaptureControl(app);
-		_capControl.x = (app.width / 2);
-		_capControl.width = (app.width / 2);
-		_capControl.height = (app.height);
-		_capControl.setDebugMode(true);
-		add(_capControl);
+//		_capControl = new CaptureControl(app);
+//		_capControl.x = (app.width / 2);
+//		_capControl.width = (app.width / 2);
+//		_capControl.height = (app.height);
+//		_capControl.setDebugMode(true);
+//		add(_capControl);
 
 		final XBoxControllerManager controllerManager = (XBoxControllerManager) ManagerLocator.getManager(XBoxControllerManager.class);
 		final KeyboardManager keyboardManager = (KeyboardManager) ManagerLocator.getManager(KeyboardManager.class);

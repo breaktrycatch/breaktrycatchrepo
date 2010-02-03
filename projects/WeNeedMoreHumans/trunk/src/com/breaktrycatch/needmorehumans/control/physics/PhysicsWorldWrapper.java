@@ -80,8 +80,6 @@ public class PhysicsWorldWrapper {
 			DisplayObject actor = (DisplayObject)body.getUserData();
 			if(actor != null)
 			{
-				PApplet.println("BEfore conversion: " + body.getPosition());
-				
 				Vec2 pos = worldToScreen(body.getPosition());
 				
 				//TODO: THIS IS A TEMP HACK TO GET THE IMAGE TO ROUGHLY LINE UP WITH THE PHYSICS DATA
@@ -92,13 +90,6 @@ public class PhysicsWorldWrapper {
 				actor.x = (int)pos.x;
 				actor.y = (int)pos.y;
 				actor.rotationRad = -body.getAngle();
-				
-				PApplet.println("POS: " + pos + " : " + body.getPosition());
-			}
-			else
-			{
-//				throw new ArithmeticException();
-//				LogRepository.getInstance().getMikesLogger().warn("Physics DisplayObject is null and will not be drawn!");
 			}
 			
 		}
