@@ -1,12 +1,17 @@
 package com.humans.ui.view {
+	import caurina.transitions.Tweener;
+
+	import com.humans.buildings.BuildingFactory;
+	import com.humans.buildings.BuildingPlane;
+	import com.humans.buildings.events.BuildingClickedEvent;
+	import com.humans.buildings.events.BuildingCreatedEvent;
+	import com.humans.data.statics.ProjectStatics;
 	import com.module_keyinput.core.InputManager;
+	import com.module_subscriber.core.Subscriber;
 
 	import org.papervision3d.cameras.Camera3D;
 	import org.papervision3d.lights.PointLight3D;
 	import org.papervision3d.materials.ColorMaterial;
-	import org.papervision3d.materials.shadematerials.FlatShadeMaterial;
-	import org.papervision3d.objects.DisplayObject3D;
-	import org.papervision3d.objects.primitives.Plane;
 	import org.papervision3d.objects.primitives.Sphere;
 	import org.papervision3d.render.BasicRenderEngine;
 	import org.papervision3d.scenes.Scene3D;
@@ -30,12 +35,11 @@ package com.humans.ui.view {
 		
 		protected var __moveAmount:int;
 		
-		
-		protected var __worldGroup:DisplayObject3D;
-		
-		protected var __sphere:Sphere;
-		protected var __plane:Plane;
 		protected var __light:PointLight3D;
+		
+		
+		
+		protected var __buildings:Array;
 		
 		
 		public function GalleryView() {
@@ -50,6 +54,8 @@ package com.humans.ui.view {
 			
 			
 			__moveAmount = 10;
+			
+			__buildings = [];
 			
 			
 			__viewport = new Viewport3D(760,500,false,true,true,true);
@@ -83,48 +89,80 @@ package com.humans.ui.view {
 			InputManager.getInstance().mapFunction(InputManager.KEY_A, adjustCameraZoom, [-1], true);
 			InputManager.getInstance().mapFunction(InputManager.KEY_S, adjustCameraZoom, [1], true);
 			
+			InputManager.getInstance().mapFunction(InputManager.KEY_O, adjustCameraPitch, [-1], true);
+			InputManager.getInstance().mapFunction(InputManager.KEY_P, adjustCameraPitch, [1], true);
 			
-			var groundShader:FlatShadeMaterial = new FlatShadeMaterial(__light, 0x007700, 0x000000);
-			
-			
-			__sphere = new Sphere(groundShader, 800, 8, 8);
-			__sphere.roll(90);
-			__sphere.scaleY = 4;
-			
-			__plane = new Plane(new ColorMaterial(0xFF0000, 1), 1000, 3000);
-			var plane2:Plane = new Plane(new ColorMaterial(0xFFFF00, 1), 1000, 3000);
-			var plane3:Plane = new Plane(new ColorMaterial(0xFF00FF, 1), 1000, 3000);
-			
-			__plane.y = 0;
-			plane2.y = 1800;
-			plane2.x = 2000;
-			plane3.y = 1800;
-			plane3.x = -2000;
 			
 			__light.y = 5000;
 			
 			
+			var image:int;
+			var path:String;
 			
-			__sphere.y = -500;
+			Subscriber.subscribe(BuildingCreatedEvent.BUILDING_CREATED, onBuildingCreated);
+			Subscriber.subscribe(BuildingClickedEvent.BUILDING_CLICKED, onBuildingClick);
 			
-			__camera.rotationX = -30;
-			__camera.z = -3000;
+			for (var i:int = 0; i < 100; i++) {
+				image = Math.floor(Math.random() * 5) + 1;
+				path = ProjectStatics.getStatic( "image_url") + "b0" + image + ".png";
+				BuildingFactory.getInstance().createBuilding(path);
+			}
 			
 			
-			__worldGroup = new DisplayObject3D();
-			
-			__scene.addChild(__plane);
-			__scene.addChild(plane2);
-			__scene.addChild(plane3);
-			__scene.addChild(__sphere);
 			__scene.addChild(__light);
 			
 		}
 		
+		protected function onBuildingCreated(e:BuildingCreatedEvent):void {
+			var bp:BuildingPlane = e.building;
+			bp.x = Math.floor(Math.random() * 6000) - 3000;
+			bp.z = Math.floor(Math.random() * 3000);
+			bp.reposition();
+			__buildings.push(bp);
+			__scene.addChild(bp);
+		}
+		
+		protected function onBuildingClick(e:BuildingClickedEvent):void {
+			var bp:BuildingPlane = e.building;
+			
+			dtrace("FOV " + __camera.fov);
+			
+			var upperBound:Number;
+			var distance:int = 200;
+			
+			upperBound = -(distance * (Math.tan(__camera.fov)));
+			
+			var target:Number = bp.mc.height + 25;
+			var targetAngle:Number = Math.atan(target/200) * (180/3.14);
+			
+			var deltaAngle:Number = -(targetAngle - (__camera.fov/2));
+			
+			dtrace("UpperBound " + upperBound);
+			dtrace("BP Height " + bp.mc.height);
+			dtrace("TargetAngle " + targetAngle);
+			
+			var sphere:Sphere = new Sphere(new ColorMaterial(), 25);
+			sphere.y = upperBound;
+			sphere.z = bp.z;
+			sphere.x = bp.x;
+			
+			var sphere2:Sphere = new Sphere(new ColorMaterial(), 25);
+			sphere2.y = target;
+			sphere2.z = bp.z;
+			sphere2.x = bp.x;
+			
+			__scene.addChild(sphere);
+			__scene.addChild(sphere2);
+			
+			Tweener.addTween(__camera, {x:bp.x, z:bp.z - 200, rotationX:deltaAngle, time:1.5, transition:"easeoutexpo"});
+			
+		}
+
 		
 		protected function moveCamera(_x:int, _z:int):void {
 			__camera.x += (_x * __moveAmount);
 			__camera.z += (_z * __moveAmount);
+			dtrace("POS " + __camera.x, __camera.y, __camera.z);
 		}
 		
 		protected function adjustCameraFocus(_amount:int):void {
@@ -134,6 +172,10 @@ package com.humans.ui.view {
 		protected function adjustCameraZoom(_amount:int):void {
 			__camera.zoom += _amount;
 			dtrace("ZOOM " + __camera.zoom);
+		}
+		protected function adjustCameraPitch(_amount:int):void {
+			__camera.rotationX += _amount;
+			dtrace("PITCH " + __camera.rotationX);
 		}
 
 		
@@ -149,8 +191,6 @@ package com.humans.ui.view {
 		
 		protected function onRender(e:Event):void {
 			if (__rendering) {
-				__sphere.yaw(0.1);
-				__plane.pitch(-1);
 				__renderer.renderScene(__scene, __camera, __viewport);
 			}
 		}

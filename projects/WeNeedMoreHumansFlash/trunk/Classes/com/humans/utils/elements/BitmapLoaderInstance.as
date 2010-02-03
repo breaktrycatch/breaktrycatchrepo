@@ -25,7 +25,7 @@ package com.humans.utils.elements {
 		protected var __loaderContext:LoaderContext;
 		protected var __urlRequest:URLRequest;
 		
-		public function BitmapLoaderInstance(_url:String, _handlerSuccessFunction:Function, _handlerErrorFunction:Function, _handlerProgressFunction:Function = null) {
+		public function BitmapLoaderInstance(_url:String, _handlerSuccessFunction:Function = null, _handlerErrorFunction:Function = null, _handlerProgressFunction:Function = null) {
 			super();
 			
 			__onSuccessFunction = _handlerSuccessFunction;
@@ -47,12 +47,18 @@ package com.humans.utils.elements {
 			__bitmapLoader.contentLoaderInfo.addEventListener(IOErrorEvent.DISK_ERROR, onBitmapError);
 			__bitmapLoader.addEventListener(SecurityErrorEvent.SECURITY_ERROR, onBitmapError);
 			
+			
+		}
+		
+		public function loadBitmap():void {
 			__bitmapLoader.load(__urlRequest, __loaderContext);
 		}
 		
 		protected function onBitmapComplete(e:Event):void {
 			dispatchEvent(new BitmapLoadedEvent(BitmapLoadedEvent.BITMAP_LOADED, (__bitmapLoader.content as Bitmap).bitmapData));
-			__onSuccessFunction((__bitmapLoader.content as Bitmap).bitmapData);
+			if (__onSuccessFunction != null) {
+				__onSuccessFunction((__bitmapLoader.content as Bitmap).bitmapData);
+			}
 			destroy();
 		}
 		protected function onBitmapProgress(e:ProgressEvent):void {
@@ -61,7 +67,10 @@ package com.humans.utils.elements {
 			}
 		}
 		protected function onBitmapError(e:Event):void {
-			__onFailureFunction(e);	
+			dtrace("bitmap error " + e);
+			if (__onFailureFunction != null) {
+				__onFailureFunction(e);	
+			}
 			destroy();
 		}
 		
