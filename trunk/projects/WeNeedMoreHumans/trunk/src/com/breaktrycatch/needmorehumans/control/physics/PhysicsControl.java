@@ -5,7 +5,6 @@ import java.awt.Rectangle;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
-import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 
 import processing.core.PApplet;
@@ -56,8 +55,8 @@ public class PhysicsControl extends DisplayObject
 		PhysicsShapeDefVO vo = new PhysicsShapeDefVO();
 		vo.density = 0.0f;
 		vo.friction = 1.0f;
+		//_physWorld.createRect(0, height + 10, width, height, vo);
 		_physWorld.createHollowBox(width/2.0f, height/2.0f, width, height, 15.0f, vo);
-//		_physWorld.createRect(0, height - 10, width, height, vo);
 
 		addDebugSmileBoxes();
 		// addDebugPolyHuman();
@@ -76,7 +75,7 @@ public class PhysicsControl extends DisplayObject
 			for (int j = 0; j < 10; j++)
 			{
 				float x, y;
-				x = (i * size) + 220;
+				x = (i * size) + width / 2 - ((20/2) * size);
 				y = (j * size) + 310;
 				Body rect = _physWorld.createRect(x, y, x + size, y + size, new PhysicsShapeDefVO());
 				ImageFrame sprite = new ImageFrame(getApp(), img);
@@ -108,10 +107,8 @@ public class PhysicsControl extends DisplayObject
 		ArrayList<PolyVO> polyData = imageAnalysis.analyzeImage(sprite.getDisplay());
 
 		//DisplayObject castSprite = (DisplayObject) sprite;
-		Body human = _physWorld.createPolyHuman(polyData, new PhysicsShapeDefVO(), sprite.x, sprite.y, -sprite.rotationRad);
+		Body human = _physWorld.createPolyHuman(polyData, new PhysicsShapeDefVO(), sprite.x + sprite.width /2, sprite.y + sprite.height / 2, -sprite.rotationRad);
 		human.setUserData(sprite);
-
-		PApplet.println("Adding sprite!");
 
 		add(sprite);
 	}
@@ -137,8 +134,8 @@ public class PhysicsControl extends DisplayObject
 			_lastMousePos = null;
 		}
 
+		
 		constrainToBounds();
-
 		_physWorld.step();
 	}
 
