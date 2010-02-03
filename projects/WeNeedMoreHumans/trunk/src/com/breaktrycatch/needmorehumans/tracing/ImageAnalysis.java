@@ -40,6 +40,9 @@ public class ImageAnalysis
 	private PolyTool polyTool;
 
 	private int bodyCount;
+	private int culledPolygonsFromArea;
+	private int maybeCulledPolygons;
+	private int areaEpsilon = 10;
 
 	private final int START_FOUND = 0;
 	private final int PIXEL_VALID = 1;
@@ -47,6 +50,8 @@ public class ImageAnalysis
 	//private Physics __physWorld;
 	private int __pixelCount;
 	private TileImageDrawer _debugDrawer;
+	
+	private int validPixels;
 
 
 	public ImageAnalysis(PApplet _app)
@@ -55,6 +60,9 @@ public class ImageAnalysis
 		app = _app;
 		//__physWorld = _physWorld;
 		bodyCount = 0;
+		culledPolygonsFromArea = 0;
+		maybeCulledPolygons = 0;
+		validPixels = 0;
 	}
 
 	private void debugDrawPoints(ArrayList<PixelVO> points, int color)
@@ -83,10 +91,10 @@ public class ImageAnalysis
 
 	public void draw()
 	{
-		debugDrawPoints(pixelOutline, 0xffff0000);
+		//debugDrawPoints(pixelOutline, 0xffff0000);
 		debugDrawPoints(orderedPixelOutline, 0xff00ff00);
-		debugDrawPoints(culledSimplePixelOutline, 0xff0000ff);
-		debugDrawEdges(edges, 0x0000ff);
+		//debugDrawPoints(culledSimplePixelOutline, 0xff0000ff);
+		//debugDrawEdges(edges, 0x0000ff);
 
 		PGraphics debugCanvas = app.createGraphics(__originalImage.width, __originalImage.height, PApplet.P2D);
 		debugCanvas.beginDraw();
@@ -143,7 +151,7 @@ public class ImageAnalysis
 				pixelOutline.get(i).prev = null;
 			}
 
-			LogRepository.getInstance().getJonsLogger().info("LESS THAN 90%  Starting with " + (pixelOutline.size() / 2));
+			LogRepository.getInstance().getJonsLogger().info("LESS THAN 90%  Starting with " + __pixelCount);
 			__pixelCount++;
 			return false;
 		}
@@ -192,7 +200,8 @@ public class ImageAnalysis
 		convertToPolys();
 		LogRepository.getInstance().getJonsLogger().info("BODIES CREATED " + bodyCount);
 		LogRepository.getInstance().getJonsLogger().info("POLYGONS CREATED " + polyDefs.size());
-
+		LogRepository.getInstance().getJonsLogger().info("CULLED POLYGONS BECAUSE AREA WAS INSIGNIFICANT " + culledPolygonsFromArea);
+		LogRepository.getInstance().getJonsLogger().info("MAYBE COULD BE CULLED POLYGONS BECAUSE AREA IS LESS THAN " + areaEpsilon + " UNITS : " + maybeCulledPolygons);
 		return polyDefs;
 	}
 
@@ -267,6 +276,7 @@ public class ImageAnalysis
 		PixelVO startPixel = pixelOutline.get(_startPixelIndex);
 		PixelVO currentPixel = startPixel;
 		PixelVO checkPixel;
+		validPixels = 0;
 
 		ArrayList<ModVO> mods = new ArrayList<ModVO>();
 		// RIGHT
@@ -301,13 +311,14 @@ public class ImageAnalysis
 					break searchLoop;
 
 				case PIXEL_VALID:
+					validPixels++;
 					currentPixel = checkPixel;
 					continue searchLoop;
 
 				}
 			}
 
-			// LogRepository.getInstance().getJonsLogger().info("NO PIXEL FOUND ALL AROUND!");
+			LogRepository.getInstance().getJonsLogger().info("NO PIXEL FOUND ALL AROUND!");
 			currentPixel = currentPixel.prev;
 		}
 
@@ -382,6 +393,9 @@ public class ImageAnalysis
 			edges.add(new EdgeVO(currentPixel, nextPixel));
 			currentPixel = nextPixel;
 		}
+		
+		//LogRepository.getInstance().getJonsLogger().info("EDGE CHECKS " + edges.get(0).p1.x + " " + edges.get(0).p1.y + " " + edges.get(0).p1.id + " ");
+		//LogRepository.getInstance().getJonsLogger().info("EDGE CHECKS " + edges.get(edges.size()-1).p2.x + " " + edges.get(edges.size()-1).p2.y + " " + edges.get(edges.size()-1).p2.id + " ");
 	}
 
 	private void cullEdges(ArrayList<EdgeVO> _from, boolean _lengthCheck, boolean _relevancyCheck)
@@ -491,6 +505,14 @@ public class ImageAnalysis
 				}
 			}
 		}
+		
+		//Ensure Closed Circuit
+		culledEdges.get(culledEdges.size()-1).p2 = culledEdges.get(0).p1;
+		
+		
+		//LogRepository.getInstance().getJonsLogger().info("CULLED EDGE CHECKS " + culledEdges.get(0).p1.x + " " + culledEdges.get(0).p1.y + " " + culledEdges.get(0).p1.id + " ");
+		//LogRepository.getInstance().getJonsLogger().info("CULLED EDGE CHECKS " + culledEdges.get(culledEdges.size()-1).p1.x + " " + culledEdges.get(culledEdges.size()-1).p1.y + " " + culledEdges.get(culledEdges.size()-1).p1.id + " ");
+		//LogRepository.getInstance().getJonsLogger().info("CULLED EDGE CHECKS " + culledEdges.get(culledEdges.size()-1).p2.x + " " + culledEdges.get(culledEdges.size()-1).p2.y + " " + culledEdges.get(culledEdges.size()-1).p2.id + " ");
 	}
 
 	private void convertToPoints()
@@ -584,39 +606,59 @@ public class ImageAnalysis
 					
 					// for (int j = 0; j < polys.get(i).size(); j++) {
 					int vertexCount = polys.get(i).size();
-					PolyVO poly = new PolyVO(vertexCount);
 					
-					for (int j = 0; j < vertexCount; j++)
-					{
-						// polyDef.vertices.add(j, new
-						// Vec2(polys.get(i).get(j).x/30,
-						// polys.get(i).get(j).y/30));
-						Vec2 v = new Vec2(polys.get(i).get(j).x, polys.get(i).get(j).y);
-						poly.addVertexAt(v, (vertexCount - 1)- j);
+					//AREA CHECK
+					Vec2 a = new Vec2(polys.get(i).get(0).x,polys.get(i).get(0).y);
+					Vec2 b = new Vec2(polys.get(i).get(1).x,polys.get(i).get(1).y);
+					Vec2 c = new Vec2(polys.get(i).get(2).x,polys.get(i).get(2).y);
+					
+					float area = Math.abs((a.x-c.x)*(b.y-a.y)-(a.x-b.x)*(c.y-a.y)) * 0.5f;
+					
+					//LogRepository.getInstance().getJonsLogger().info("POLYGON AREA " + area);
+					
+					if (area > 0) {
 						
-						//Record the extremes of the polygon collection
-						if(v.x > maxX)
+						if (area < areaEpsilon) {
+							maybeCulledPolygons++;
+						}
+					
+						PolyVO poly = new PolyVO(vertexCount);
+						
+						for (int j = 0; j < vertexCount; j++)
 						{
-							maxX = v.x;
+							// polyDef.vertices.add(j, new
+							// Vec2(polys.get(i).get(j).x/30,
+							// polys.get(i).get(j).y/30));
+							Vec2 v = new Vec2(polys.get(i).get(j).x, polys.get(i).get(j).y);
+							poly.addVertexAt(v, (vertexCount - 1)- j);
+							
+							//Record the extremes of the polygon collection
+							if(v.x > maxX)
+							{
+								maxX = v.x;
+							}
+							
+							if(v.x < minX)
+							{
+								minX = v.x;
+							}
+							
+							if(v.y > maxY)
+							{
+								maxY = v.y;
+							}
+							
+							if(v.y < minY)
+							{
+								minY = v.y;
+							}
 						}
 						
-						if(v.x < minX)
-						{
-							minX = v.x;
-						}
-						
-						if(v.y > maxY)
-						{
-							maxY = v.y;
-						}
-						
-						if(v.y < minY)
-						{
-							minY = v.y;
-						}
+						polyDefs.add(poly);
 					}
-					
-					polyDefs.add(poly);
+					else {
+						culledPolygonsFromArea++;
+					}
 					// p_body.createShape(polyDef);
 				}
 			}
@@ -663,6 +705,8 @@ public class ImageAnalysis
 
 	private int validatePixel(PixelVO _start, PixelVO _current, PixelVO _check)
 	{
+		PixelVO _oldCurrent = _current;
+		
 		if (_check != null)
 		{
 			if (_check.marked == false)
@@ -673,7 +717,15 @@ public class ImageAnalysis
 				_current = _check;
 				if (_current.x == _start.x && _current.y == _start.y)
 				{
-					LogRepository.getInstance().getJonsLogger().info("FOUND START RIGHT");
+					//LogRepository.getInstance().getJonsLogger().info("FOUND START PIXEL " + _start.x + " " + _start.y + " " + _start.id);
+					//LogRepository.getInstance().getJonsLogger().info("CURRENT PIXEL " + _oldCurrent.x + " " + _oldCurrent.y + " " + _oldCurrent.id);
+					//LogRepository.getInstance().getJonsLogger().info("CHECK PIXEL " + _current.x + " " + _current.y + " " + _current.id);
+					
+					//float percentage = validPixels/pixelOutline.size();
+					
+					//LogRepository.getInstance().getJonsLogger().info("Percentage sought " + percentage);
+					
+					
 					return START_FOUND;
 				}
 				return PIXEL_VALID;
