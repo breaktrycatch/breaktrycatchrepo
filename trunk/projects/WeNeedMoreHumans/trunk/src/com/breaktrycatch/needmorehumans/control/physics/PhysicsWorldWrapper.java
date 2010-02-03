@@ -43,11 +43,11 @@ public class PhysicsWorldWrapper {
 		
 		_screenHalfSize = new Vec2(screenWidth/2.0f, screenHeight/2.0f);
 		
-		float worldBoundX = (_screenHalfSize.x + 250) * _physScale;
-		float worldBoundY = (_screenHalfSize.y + 250) * _physScale;
+		float worldBoundX = (_screenHalfSize.x + 150) * _physScale;
+		float worldBoundY = (_screenHalfSize.y + 150) * _physScale;
 //		float worldBoundX = (_physHalfSize.x + 0) * _physScale;
 //		float worldBoundY = (_physHalfSize.y + 0) * _physScale;
-		System.out.println("WORLD HALF SIZE: " + _screenHalfSize);
+//		System.out.println("WORLD HALF SIZE: " + _screenHalfSize);
 		_worldAABB = new AABB();
 		_worldAABB.lowerBound = new Vec2(-worldBoundX, -worldBoundY);
 		_worldAABB.upperBound = new Vec2(worldBoundX, worldBoundY);
