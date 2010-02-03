@@ -16,7 +16,7 @@ package com.humans.utils {
 		public function BitmapUtils() {
 		}
 		
-		public static function loadBitmap(_url:String, _handlerSuccessFunction:Function, _handlerErrorFunction:Function, _handlerProgressFunction:Function):BitmapLoaderInstance {
+		public static function loadBitmap(_url:String, _handlerSuccessFunction:Function = null, _handlerErrorFunction:Function = null, _handlerProgressFunction:Function = null):BitmapLoaderInstance {
 			return (new BitmapLoaderInstance(_url, _handlerSuccessFunction, _handlerErrorFunction, _handlerProgressFunction));
 		}
 		
