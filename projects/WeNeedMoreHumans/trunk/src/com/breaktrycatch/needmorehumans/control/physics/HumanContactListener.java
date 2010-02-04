@@ -21,13 +21,9 @@ public class HumanContactListener implements ContactListener {
 	public void add(ContactPoint point) {
 		DisplayObject sprite1 = (DisplayObject)point.shape1.getBody().getUserData();
 		DisplayObject sprite2 = (DisplayObject)point.shape2.getBody().getUserData();
-//		LogRepository.getInstance().getMikesLogger().info("CONTACT!");
 		
-//		if(sprite1 != null && sprite2 != null && (sprite1.isHuman || sprite2.isHuman))
-//		{
-//			LogRepository.getInstance().getMikesLogger().info("WE HAVE ONE HUMAN CONTACT!");
-//		}
-		if(sprite1 != null && sprite2 != null && sprite1.isHuman && sprite2.isHuman)
+//		if(sprite1 != null && sprite2 != null && sprite1.isHuman && sprite2.isHuman && (point.shape1.getUserData() == null || point.shape2.getUserData() == null))
+		if(sprite1 != null && sprite2 != null && sprite1.isHuman && sprite2.isHuman && (point.shape1.getBody() == _reportTo.getActiveHuman() || point.shape2.getBody() == _reportTo.getActiveHuman()))
 		{
 			LogRepository.getInstance().getMikesLogger().info("WE HAVE HUMAN CONTACT!");
 			ContactPoint cp = new ContactPoint();
