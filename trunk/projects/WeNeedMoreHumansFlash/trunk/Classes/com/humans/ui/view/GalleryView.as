@@ -10,8 +10,12 @@ package com.humans.ui.view {
 	import com.module_subscriber.core.Subscriber;
 
 	import org.papervision3d.cameras.Camera3D;
+	import org.papervision3d.core.clipping.FrustumClipping;
+	import org.papervision3d.core.math.Matrix3D;
+	import org.papervision3d.core.math.Number3D;
 	import org.papervision3d.lights.PointLight3D;
 	import org.papervision3d.materials.ColorMaterial;
+	import org.papervision3d.objects.DisplayObject3D;
 	import org.papervision3d.objects.primitives.Sphere;
 	import org.papervision3d.render.BasicRenderEngine;
 	import org.papervision3d.scenes.Scene3D;
@@ -37,6 +41,10 @@ package com.humans.ui.view {
 		
 		protected var __light:PointLight3D;
 		
+		protected var __worldSphere:Sphere;
+		
+		protected var __world:DisplayObject3D;
+		
 		
 		
 		protected var __buildings:Array;
@@ -59,11 +67,12 @@ package com.humans.ui.view {
 			
 			
 			__viewport = new Viewport3D(760,500,false,true,true,true);
-			__camera = new Camera3D(60,1,5000,true,true);
+			__camera = new Camera3D(60,0.1,5000,true,true);
 			
 			__scene = new Scene3D();
 			
 			__renderer = new BasicRenderEngine();
+			__renderer.clipping = new FrustumClipping(FrustumClipping.ALL);
 			
 			__light = new PointLight3D(true);
 			
@@ -94,7 +103,12 @@ package com.humans.ui.view {
 			
 			
 			__light.y = 5000;
+			__camera.z = 0;
+			__camera.y = 1550;
 			
+			
+			__world = new DisplayObject3D();
+			__scene.addChild(__world);			
 			
 			var image:int;
 			var path:String;
@@ -108,54 +122,84 @@ package com.humans.ui.view {
 				BuildingFactory.getInstance().createBuilding(path);
 			}
 			
+			__worldSphere = new Sphere(new ColorMaterial(), 1500, 8, 8);
+			__worldSphere.rotationZ = 90;
 			
-			__scene.addChild(__light);
+			__world.addChild(__worldSphere);
+			
+			__world.addChild(__light);
 			
 		}
 		
 		protected function onBuildingCreated(e:BuildingCreatedEvent):void {
 			var bp:BuildingPlane = e.building;
-			bp.x = Math.floor(Math.random() * 6000) - 3000;
-			bp.z = Math.floor(Math.random() * 3000);
-			bp.reposition();
+			//bp.x = Math.floor(Math.random() * 6000) - 3000;
+			//bp.z = Math.floor(Math.random() * 3000);
+			//bp.z = 0;
+			
+			var zRot:Number = Math.floor(Math.random() * 360)%22.5;
+			var xRot:Number = Math.floor(Math.random() * 360)%22.5;
+					
+			bp.rotationZ = zRot * 22.5;
+			bp.rotationX = xRot * 22.5;
+			
+			bp.translate(1500 + (bp.mc.height/2), new Number3D(0, 1, 0));
+			
+//			bp.x = -(v.x*(1500 + (bp.mc.height/2)));
+//			bp.y = v.y*(1500 + (bp.mc.height/2));
+//			bp.z = v.z*(1500 + (bp.mc.height/2));
+			
+			
 			__buildings.push(bp);
-			__scene.addChild(bp);
+			__world.addChild(bp);
 		}
 		
 		protected function onBuildingClick(e:BuildingClickedEvent):void {
 			var bp:BuildingPlane = e.building;
 			
-			dtrace("FOV " + __camera.fov);
 			
-			var upperBound:Number;
-			var distance:int = 200;
+			dtrace(bp.rotationX, bp.rotationZ);
 			
-			upperBound = -(distance * (Math.tan(__camera.fov)));
+			Tweener.addTween(__world, {rotationX:-bp.rotationX, rotationZ:-bp.rotationZ, time:2.0, transition:"easeinoutquad"});
 			
-			var target:Number = bp.mc.height + 25;
-			var targetAngle:Number = Math.atan(target/200) * (180/3.14);
+//			dtrace("FOV " + __camera.fov);
+//			
+//			var upperBound:Number;
+//			var distance:int = 200;
+//			
+//			upperBound = -(distance * (Math.tan(__camera.fov)));
+//			
+//			var target:Number = bp.mc.height + 25;
+//			var targetAngle:Number = Math.atan(target/200) * (180/3.14);
+//			
+//			var deltaAngle:Number = -(targetAngle - (__camera.fov/2));
+//			
+//			dtrace("UpperBound " + upperBound);
+//			dtrace("BP Height " + bp.mc.height);
+//			dtrace("TargetAngle " + targetAngle);
+//			
+//			//Debug Spheres to show upper bounds of the viewport
+////			var sphere:Sphere = new Sphere(new ColorMaterial(), 25);
+////			sphere.y = upperBound;
+////			sphere.z = bp.z;
+////			sphere.x = bp.x;
+////			
+////			var sphere2:Sphere = new Sphere(new ColorMaterial(), 25);
+////			sphere2.y = target;
+////			sphere2.z = bp.z;
+////			sphere2.x = bp.x;
+////			
+////			__scene.addChild(sphere);
+////			__scene.addChild(sphere2);
+//			
+//			Tweener.addTween(__camera, {rotationX:0, time:1.5, transition:"easeinoutquad", onComplete:lookUp, onCompleteParams:[deltaAngle]});
+//			
+//			Tweener.addTween(__camera, {x:bp.x, z:bp.z - 200, time:3.0, transition:"easeinoutexpo"});
 			
-			var deltaAngle:Number = -(targetAngle - (__camera.fov/2));
-			
-			dtrace("UpperBound " + upperBound);
-			dtrace("BP Height " + bp.mc.height);
-			dtrace("TargetAngle " + targetAngle);
-			
-			var sphere:Sphere = new Sphere(new ColorMaterial(), 25);
-			sphere.y = upperBound;
-			sphere.z = bp.z;
-			sphere.x = bp.x;
-			
-			var sphere2:Sphere = new Sphere(new ColorMaterial(), 25);
-			sphere2.y = target;
-			sphere2.z = bp.z;
-			sphere2.x = bp.x;
-			
-			__scene.addChild(sphere);
-			__scene.addChild(sphere2);
-			
-			Tweener.addTween(__camera, {x:bp.x, z:bp.z - 200, rotationX:deltaAngle, time:1.5, transition:"easeoutexpo"});
-			
+		}
+		
+		protected function lookUp(_deltaAngle:Number):void {
+			Tweener.addTween(__camera, {rotationX:_deltaAngle, time:1.5, transition:"easeoutquad"});
 		}
 
 		
@@ -192,6 +236,7 @@ package com.humans.ui.view {
 		protected function onRender(e:Event):void {
 			if (__rendering) {
 				__renderer.renderScene(__scene, __camera, __viewport);
+				__world.rotationX -= 0.3;
 			}
 		}
 
