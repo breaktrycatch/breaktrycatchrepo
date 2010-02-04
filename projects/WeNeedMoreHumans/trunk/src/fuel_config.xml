@@ -6,14 +6,14 @@
   <category name="capture">
     <property name="blueBalance" value="1.0"/>
     <property name="cameraFPS" value="30"/>
-    <property name="cameraHeight" value="240"/>
-    <property name="cameraWidth" value="320"/>
-    <property name="captureThreshold" value="25"/>
-    <property name="exposure" value="0.94"/>
-    <property name="gain" value="0.11"/>
-    <property name="greenBalance" value="0.53999996"/>
+    <property name="cameraHeight" value="480"/>
+    <property name="cameraWidth" value="640"/>
+    <property name="captureThreshold" value="58"/>
+    <property name="exposure" value="0.21"/>
+    <property name="gain" value="0.88"/>
+    <property name="greenBalance" value="0.52"/>
     <property name="maxBackgrounds" value="16"/>
-    <property name="redBalance" value="0.42"/>
+    <property name="redBalance" value="0.5"/>
     <property name="shadowThreshold" value="0.57"/>
     <property name="subtractionScale" value="1"/>
   </category>

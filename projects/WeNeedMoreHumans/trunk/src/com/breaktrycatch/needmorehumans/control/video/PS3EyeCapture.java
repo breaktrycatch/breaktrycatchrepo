@@ -60,9 +60,15 @@ public class PS3EyeCapture implements SimpleCapture
 		_height = height;
 		int numCams = CLCamera.cameraCount();
 		PApplet.println("Found " + numCams + " cameras");
+
+		if (numCams == 0)
+		{
+			return false;
+		}
+
 		PApplet.println("Initializing camera with UUID " + CLCamera.cameraUUID(0));
 		_cam = new CLCamera(_app);
-		
+
 		if (width == 640 && height == 480)
 		{
 			_cam.createCamera(0, CLCamera.CLEYE_COLOR, CLCamera.CLEYE_VGA, fps);
@@ -104,9 +110,12 @@ public class PS3EyeCapture implements SimpleCapture
 	@Override
 	public void shutdown()
 	{
-		_cam.stopCamera();
-		_cam.destroyCamera();
-		_cam.dispose();
+		if (_cam != null)
+		{
+			_cam.stopCamera();
+			_cam.destroyCamera();
+			_cam.dispose();
+		}
 	}
 
 	public void setExposure(float amt)
@@ -118,12 +127,12 @@ public class PS3EyeCapture implements SimpleCapture
 	{
 		_cam.setCameraParam(CLCamera.CLEYE_GAIN, (int) (amt * 79f));
 	}
-	
+
 	public void setColorBalance(float r, float g, float b)
 	{
-		_cam.setCameraParam(CLCamera.CLEYE_WHITEBALANCE_RED, (int)(r * 255));
-		_cam.setCameraParam(CLCamera.CLEYE_WHITEBALANCE_GREEN, (int)(g * 255));
-		_cam.setCameraParam(CLCamera.CLEYE_WHITEBALANCE_BLUE, (int)(b * 255));
+		_cam.setCameraParam(CLCamera.CLEYE_WHITEBALANCE_RED, (int) (r * 255));
+		_cam.setCameraParam(CLCamera.CLEYE_WHITEBALANCE_GREEN, (int) (g * 255));
+		_cam.setCameraParam(CLCamera.CLEYE_WHITEBALANCE_BLUE, (int) (b * 255));
 	}
 
 	public void blur(int amt)

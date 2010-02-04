@@ -26,7 +26,8 @@ public class CaptureControl extends DisplayObject
 	private SimpleCapture _capture;
 	private HumanProcessorControl _processor;
 	private TileImageDrawer _debugDrawer;
-	
+	private boolean _initialized;
+
 	private static final String CAPTURE = "capture";
 
 	public CaptureControl(PApplet app)
@@ -42,39 +43,51 @@ public class CaptureControl extends DisplayObject
 		_debugDrawer.setEnabled(true);
 
 		_capture = new PS3EyeCapture(app);
-		_capture.initVideo("", _cameraWidth, _cameraHeight, ConfigTools.getInt(CAPTURE, "cameraFPS"));
-		_capture.setExposure(ConfigTools.getFloat(CAPTURE, "exposure"));
-		_capture.setGain(ConfigTools.getFloat(CAPTURE, "gain"));
-
-		_processor = new HumanProcessorControl(getApp(), _capture);
-		_processor.setDebugDrawer(_debugDrawer);
-		_processor.setProcessingEnabled(false);
-		add(_debugDrawer);
-
-		_processor.captureBackgrounds(_maxBackgrounds);
-		
-		KeyboardManager keyboardManager = (KeyboardManager) ManagerLocator.getManager(KeyboardManager.class);
-
-		// SPACE will re-capture the background images.
-		keyboardManager.registerKeyOnce(' ', new ISimpleCallback()
+		if (_capture.initVideo("", _cameraWidth, _cameraHeight, ConfigTools.getInt(CAPTURE, "cameraFPS")))
 		{
-			public void execute()
+			_capture.setExposure(ConfigTools.getFloat(CAPTURE, "exposure"));
+			_capture.setGain(ConfigTools.getFloat(CAPTURE, "gain"));
+
+			_processor = new HumanProcessorControl(getApp(), _capture);
+			_processor.setDebugDrawer(_debugDrawer);
+			_processor.setProcessingEnabled(false);
+			add(_debugDrawer);
+
+			_processor.captureBackgrounds(_maxBackgrounds);
+
+			KeyboardManager keyboardManager = (KeyboardManager) ManagerLocator.getManager(KeyboardManager.class);
+
+			// SPACE will re-capture the background images.
+			keyboardManager.registerKeyOnce(' ', new ISimpleCallback()
 			{
-				PApplet.println("Re-Capturing backgrounds....");
-				_processor.captureBackgrounds(_maxBackgrounds);
-			};
-		});
+				public void execute()
+				{
+					PApplet.println("Re-Capturing backgrounds....");
+					_processor.captureBackgrounds(_maxBackgrounds);
+				};
+			});
+			_initialized = true;
+		}
 	}
-	
+
 	public PImage getProcessedImage()
 	{
-		return _processor.getProcessedImage();
+		if (_initialized)
+		{
+			return _processor.getProcessedImage();
+		} else
+		{
+			return null;
+		}
 	}
 
 	@Override
 	public void dispose()
 	{
-		_capture.shutdown();
+		if (_initialized)
+		{
+			_capture.shutdown();
+		}
 		super.dispose();
 	}
 
@@ -82,11 +95,13 @@ public class CaptureControl extends DisplayObject
 	public void draw()
 	{
 		super.draw();
-
-		_processor.update();
-		_debugDrawer.reset();
+		if (_initialized)
+		{
+			_processor.update();
+			_debugDrawer.reset();
+		}
 	}
-	
+
 	public void setDebugMode(boolean debug)
 	{
 		_debugDrawer.setEnabled(debug);

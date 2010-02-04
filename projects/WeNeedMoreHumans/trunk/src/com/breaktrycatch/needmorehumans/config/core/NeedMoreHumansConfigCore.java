@@ -44,7 +44,7 @@ public class NeedMoreHumansConfigCore extends Stage
 		super(app);
 
 		app.frameRate(60);
-		app.size(350, 650, PApplet.P2D);
+		app.size(ConfigTools.getInt(CAPTURE, "cameraWidth") + 50, ConfigTools.getInt(CAPTURE, "cameraHeight") + 400, PApplet.P2D);
 		createUI(app);
 		createCamera(app);
 	}
@@ -188,6 +188,8 @@ public class NeedMoreHumansConfigCore extends Stage
 		_controlP5.draw();
 		_capture.read();
 		_control.update();
+		
+		PApplet.println("USE SUB> " + System.nanoTime());
 
 		if (!_useSubtractor)
 		{

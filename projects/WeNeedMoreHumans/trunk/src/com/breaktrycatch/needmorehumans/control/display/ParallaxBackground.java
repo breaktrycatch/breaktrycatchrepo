@@ -20,7 +20,6 @@ public class ParallaxBackground extends DisplayObject
 
 	private ArrayList<ParallaxLayer> _layers;
 
-
 	public ParallaxBackground(PApplet app, float maxWidth, float maxHeight)
 	{
 		super(app);
@@ -40,11 +39,16 @@ public class ParallaxBackground extends DisplayObject
 		return internalAddLayer(new VerticalTileBackground(getApp(), image, _maxHeight), movementAmt);
 	}
 
+	public DisplayObject addTilingLayer(PImage image, float movementAmt)
+	{
+		return internalAddLayer(new TileBackground(getApp(), image, _maxWidth, _maxHeight), movementAmt);
+	}
+
 	public DisplayObject addLayer(PImage image, float movementAmt)
 	{
 		return internalAddLayer(new ImageFrame(getApp(), image), movementAmt);
 	}
-	
+
 	public DisplayObject addLayer(DisplayObject display, float movementAmt)
 	{
 		return internalAddLayer(display, movementAmt);
@@ -53,7 +57,7 @@ public class ParallaxBackground extends DisplayObject
 	private DisplayObject internalAddLayer(DisplayObject layer, float movementAmt)
 	{
 		add(layer);
-		
+
 		_layers.add(new ParallaxLayer(layer, movementAmt));
 		return layer;
 	}
