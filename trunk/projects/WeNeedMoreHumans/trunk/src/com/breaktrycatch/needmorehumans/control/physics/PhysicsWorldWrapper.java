@@ -12,9 +12,9 @@ import org.jbox2d.dynamics.BodyDef;
 import org.jbox2d.dynamics.DebugDraw;
 import org.jbox2d.dynamics.World;
 import org.jbox2d.dynamics.contacts.ContactPoint;
-import org.jbox2d.dynamics.joints.DistanceJoint;
 import org.jbox2d.dynamics.joints.DistanceJointDef;
 import org.jbox2d.dynamics.joints.Joint;
+import org.jbox2d.dynamics.joints.JointEdge;
 import org.jbox2d.testbed.ProcessingDebugDraw;
 
 import processing.core.PApplet;
@@ -37,7 +37,7 @@ public class PhysicsWorldWrapper {
 	private Vec2 _screenHalfSize;
 	private boolean _wakeAllOnNextTick = false;
 	private ArrayList<ContactPoint> _reportedContacts = new ArrayList<ContactPoint>();
-	
+	private Body _activeHuman;
 	
 	public PhysicsWorldWrapper(float screenWidth, float screenHeight) 
 	{
@@ -57,8 +57,6 @@ public class PhysicsWorldWrapper {
 		
 		float worldBoundX = (_screenHalfSize.x + 150) * _physScale;
 		float worldBoundY = (_screenHalfSize.y + 150) * _physScale;
-//		float worldBoundX = (_physHalfSize.x + 0) * _physScale;
-//		float worldBoundY = (_physHalfSize.y + 0) * _physScale;
 //		System.out.println("WORLD HALF SIZE: " + _screenHalfSize);
 		_worldAABB = new AABB();
 		_worldAABB.lowerBound = new Vec2(-worldBoundX, -worldBoundY);
@@ -76,7 +74,7 @@ public class PhysicsWorldWrapper {
 	{
 //		_world.setWarmStarting(false);
 //		_world.setPositionCorrection(false);
-//		_world.setContinuousPhysics(false);
+//		_world.setContinuousPhysics(true);
 		
 		_world.step(PHYS_TIMESTEP, PHYS_ITERATIONS);
 		
@@ -120,7 +118,7 @@ public class PhysicsWorldWrapper {
 		//Track Dups
 		ArrayList<ContactID> handledContacts = new ArrayList<ContactID>();
 		
-		final float _JOINT_SIZE = 0.10f;
+		final float _JOINT_SIZE = 0.05f;
 		
 		for(int i=0; i<_reportedContacts.size(); i++)
 		{
@@ -130,15 +128,19 @@ public class PhysicsWorldWrapper {
 			if(containsDupElement(handledContacts, contact.id)){ continue;	}
 			handledContacts.add(contact.id);
 			
+			if(sharedJointExists(contact.shape1.getBody(), contact.shape2.getBody())){ continue; }
+			
 			Vec2 jointHalfLength = contact.normal.mul(_JOINT_SIZE);
 			//Create a joint between the two objects
 			DistanceJointDef jd = new DistanceJointDef();
 			jd.collideConnected = true;
+			jd.dampingRatio = 1.0f;
 			jd.initialize(contact.shape1.getBody(), contact.shape2.getBody(), contact.position.sub(jointHalfLength), contact.position.add(jointHalfLength));
 //			jd.initialize(contact.shape1.getBody(), contact.shape2.getBody(), contact.normal.mul(_JOINT_SIZE), contact.normal.mul(_JOINT_SIZE));
 //			contact.shape1.getBody().setXForm(new Vec2(0,0), 0);
 			Joint joint = _world.createJoint(jd);
-			
+			contact.shape1.setUserData(joint);
+			contact.shape2.setUserData(joint);
 			
 			LogRepository.getInstance().getMikesLogger().info("JOINT CREATED! " + joint);
 			//break;
@@ -151,6 +153,19 @@ public class PhysicsWorldWrapper {
 	{
 		for (ContactID contactID : handledList) {
 			if(contactID.isEqual(id))
+			{
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	private boolean sharedJointExists(Body body1, Body body2)
+	{
+		for (JointEdge joint = body1.getJointList(); joint != null; joint = joint.next)
+		{
+			if(joint.other.equals(body2))
 			{
 				return true;
 			}
@@ -228,6 +243,8 @@ public class PhysicsWorldWrapper {
 		
 		PApplet.println("Calculating screenToWorld: " + screenX + " : " + screenY + " -> " + screenToWorld(screenX, screenY));
 		body.setXForm(screenToWorld(screenX, screenY), radRotation);
+		
+		_activeHuman = body;
 		
 		return body;
 	}
@@ -323,16 +340,10 @@ public class PhysicsWorldWrapper {
 		return screenPos;
 	}
 	
-	//DO NOT USE
-//	public float screenToWorld(float screenSize)
-//	{
-//		return screenSize * _physScale;
-//	}
-//	
-//	public float worldToScreen(float worldSize)
-//	{
-//		return worldSize * (1/_physScale);
-//	}
+	public Body getActiveHuman()
+	{
+		return _activeHuman;
+	}
 	
 	
 	// ******** DEBUG *************//
