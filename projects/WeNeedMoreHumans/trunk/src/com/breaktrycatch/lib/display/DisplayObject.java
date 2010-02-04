@@ -1,6 +1,5 @@
 package com.breaktrycatch.lib.display;
 
-import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
@@ -36,6 +35,8 @@ public class DisplayObject extends ArrayList<DisplayObject>
 	private ArrayList<DisplayObject> _removeList;
 	protected ArrayList<ItemToAdd> _addList;
 
+	private boolean _scaleAroundCenter;
+
 	public DisplayObject(PApplet app)
 	{
 		_app = app;
@@ -69,7 +70,17 @@ public class DisplayObject extends ArrayList<DisplayObject>
 		getApp().pushMatrix();
 
 		getApp().translate(x, y);
+		
+		if (getScaleAroundCenter())
+		{
+			getApp().translate(width / 2, height / 2);
+		}
 		getApp().scale(scaleX, scaleY);
+		if (getScaleAroundCenter())
+		{
+			getApp().translate(-width / 2, -height / 2);
+		}
+		
 		if (getRotateAroundCenter())
 		{
 			getApp().translate(width / 2, height / 2);
@@ -150,12 +161,21 @@ public class DisplayObject extends ArrayList<DisplayObject>
 	private void addToRemovalList(DisplayObject item)
 	{
 		item.setParent(null);
+		if(_addList.contains(item))
+		{
+			_addList.remove(item);
+		}
 		_removeList.add(item);
 	}
 	
 	private void addToAddList(DisplayObject item, int index)
 	{
 		item.setParent(this);
+		if(_removeList.contains(item))
+		{
+			_removeList.remove(item);
+		}
+		
 		_addList.add(new ItemToAdd(item, index));
 	}
 	
@@ -258,6 +278,17 @@ public class DisplayObject extends ArrayList<DisplayObject>
 	public boolean getRotateAroundCenter()
 	{
 		return _rotateAroundCenter;
+	}
+	
+
+	public void setScaleAroundCenter(boolean scaleAroundCenter)
+	{
+		_scaleAroundCenter = scaleAroundCenter;
+	}
+
+	public boolean getScaleAroundCenter()
+	{
+		return _scaleAroundCenter;
 	}
 
 	public Rectangle getBounds()
