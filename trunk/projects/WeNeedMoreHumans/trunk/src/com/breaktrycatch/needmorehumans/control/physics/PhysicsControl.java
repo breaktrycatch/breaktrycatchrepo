@@ -102,7 +102,8 @@ public class PhysicsControl extends DisplayObject
 	public void addHuman(ImageFrame sprite)
 	{
 		sprite.setRotateAroundCenter(true);
-
+		sprite.isHuman = true;
+		
 		ImageAnalysis imageAnalysis = new ImageAnalysis(getApp());
 		ArrayList<PolyVO> polyData = imageAnalysis.analyzeImage(sprite.getDisplay());
 
