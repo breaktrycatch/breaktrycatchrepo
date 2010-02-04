@@ -5,6 +5,8 @@ package com.humans.buildings {
 	import com.module_subscriber.core.Subscriber;
 
 	import org.papervision3d.materials.MovieMaterial;
+	import org.papervision3d.materials.WireframeMaterial;
+	import org.papervision3d.materials.special.CompositeMaterial;
 
 	import flash.display.Bitmap;
 
@@ -54,9 +56,14 @@ package com.humans.buildings {
 			mc.addChild(new Bitmap(e.bitmapData, "auto", true));
 			
 			var movieMaterial:MovieMaterial = new MovieMaterial(mc.display, true);
+			//movieMaterial.doubleSided = true;
 			movieMaterial.interactive = true;
 			
-			var bp:BuildingPlane = new BuildingPlane(movieMaterial, mc.width, mc.height);
+			var compositeMaterial:CompositeMaterial = new CompositeMaterial();
+			compositeMaterial.addMaterial(movieMaterial);
+			compositeMaterial.addMaterial(new WireframeMaterial());
+			
+			var bp:BuildingPlane = new BuildingPlane(movieMaterial, mc.width, mc.height, 3, 3);
 			bp.mc = mc;
 			mc.building = bp;
 			

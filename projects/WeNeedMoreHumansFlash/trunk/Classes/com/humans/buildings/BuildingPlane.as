@@ -21,7 +21,8 @@ package com.humans.buildings {
 		}
 		
 		public function reposition():void {
-			this.y = (mc.height/2);
+			//this.y = (mc.height/2);
+			
 		}
 		
 		public function get mc() : BuildingMC {
