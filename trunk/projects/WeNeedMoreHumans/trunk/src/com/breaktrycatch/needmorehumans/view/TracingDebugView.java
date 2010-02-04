@@ -30,7 +30,7 @@ public class TracingDebugView extends AbstractView
 	{
 		super.initialize(app);
 
-		_debugDrawer = new TileImageDrawer(app, 3);
+		_debugDrawer = new TileImageDrawer(app, 2);
 		String t1 = "../data/tracing/TestPerson_png.png";
 		String t2 = "../data/tracing/Cube.png";
 		String p1 = "../data/tracing/RealPerson_1.png";
@@ -39,8 +39,8 @@ public class TracingDebugView extends AbstractView
 		String p4 = "../data/tracing/RealPerson_4.png";
 		String p5 = "../data/tracing/RealPerson_5.png";
 
-		PImage p = getApp().loadImage("../data/subtraction/debug-image-1252438725312.png");// app.loadImage(p1);
-		//PImage p = getApp().loadImage("../data/tracing/RealPerson_5.png");// app.loadImage(p1);
+		//PImage p = getApp().loadImage("../data/subtraction/debug-image-1252438725312.png");// app.loadImage(p1);
+		PImage p = getApp().loadImage("../data/tracing/RealPerson_2.png");// app.loadImage(p1);
 		p.loadPixels();
 
 		__imageAnalysis = new ImageAnalysis(app);

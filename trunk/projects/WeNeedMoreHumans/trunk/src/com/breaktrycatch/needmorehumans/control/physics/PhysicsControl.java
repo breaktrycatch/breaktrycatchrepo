@@ -12,6 +12,7 @@ import processing.core.PImage;
 
 import com.breaktrycatch.lib.display.DisplayObject;
 import com.breaktrycatch.lib.display.ImageFrame;
+import com.breaktrycatch.needmorehumans.model.BodyVO;
 import com.breaktrycatch.needmorehumans.model.PhysicsShapeDefVO;
 import com.breaktrycatch.needmorehumans.model.PolyVO;
 import com.breaktrycatch.needmorehumans.tracing.ImageAnalysis;
@@ -105,7 +106,9 @@ public class PhysicsControl extends DisplayObject
 		sprite.isHuman = true;
 		
 		ImageAnalysis imageAnalysis = new ImageAnalysis(getApp());
-		ArrayList<PolyVO> polyData = imageAnalysis.analyzeImage(sprite.getDisplay());
+		BodyVO analyzedBody = imageAnalysis.analyzeImage(sprite.getDisplay());
+		ArrayList<PolyVO> polyData = analyzedBody.polyDefs;
+		//TODO: Mike to get extremities simply access analyzedBody.extremities (ArrayList<Vec2>)
 
 		//DisplayObject castSprite = (DisplayObject) sprite;
 		Body human = _physWorld.createPolyHuman(polyData, new PhysicsShapeDefVO(), sprite.x + sprite.width /2, sprite.y + sprite.height / 2, -sprite.rotationRad);
