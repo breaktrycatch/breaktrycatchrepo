@@ -93,10 +93,10 @@ public class HumanProcessorControl
 		// addPlugin(_postFilterPipeline, SobelEdgeDetectionPlugin.class,
 		// edgeDetect);
 
-		HashMap<String, Comparable<?>> contractBack = new HashMap<String, Comparable<?>>();
-		contractBack.put(ErosionPlugin.INVERTED, false);
-		contractBack.put(ErosionPlugin.NUM_PASSES, 2);
-		addPlugin(_postFilterPipeline, ErosionPlugin.class, contractBack);
+//		HashMap<String, Comparable<?>> contractBack = new HashMap<String, Comparable<?>>();
+//		contractBack.put(ErosionPlugin.INVERTED, false);
+//		contractBack.put(ErosionPlugin.NUM_PASSES, 2);
+//		addPlugin(_postFilterPipeline, ErosionPlugin.class, contractBack);
 	}
 
 	private void configurePipeline()
@@ -214,14 +214,17 @@ public class HumanProcessorControl
 
 			if (_subtractor.totalBackgrounds() > _numBackgrounds)
 			{
+				PApplet.println("COMPLETE CAPTURE BACKGROUNDS");
 				_subtractor.averageBackgrounds();
 				_captureBackgrounds = false;
+				PApplet.println("AVERAGE COMPLETE");
 			}
 		}
 
 		// we want this to follow through if we just average the backgrounds.
 		if (!_captureBackgrounds && _processingEnabled)
 		{
+			
 			_rawFrame = _capture.getFrame();
 			debugDraw(_rawFrame);
 			_rawFrame.pixels = _prePipeline.process(_rawFrame.pixels, _rawFrame.width, _rawFrame.height);
@@ -244,6 +247,7 @@ public class HumanProcessorControl
 
 	public PImage getProcessedImage()
 	{
+		PApplet.println("GET PROCESSED IMAGE " + _captureBackgrounds);
 		if (!_captureBackgrounds)
 		{
 			_rawFrame = _capture.getFrame();

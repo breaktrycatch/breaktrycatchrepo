@@ -4,6 +4,8 @@ import java.awt.Rectangle;
 import java.awt.geom.Point2D.Float;
 import java.io.File;
 
+import org.jbox2d.common.MathUtils;
+
 import processing.core.PApplet;
 import processing.core.PImage;
 
@@ -24,9 +26,6 @@ import com.esotericsoftware.controller.device.Button;
 
 public class GameView extends AbstractView
 {
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	private CaptureControl _capControl;
 	private PhysicsControl _physControl;
@@ -47,7 +46,7 @@ public class GameView extends AbstractView
 		// creates the environment
 		PApplet app = getApp();
 		_background = new ParallaxBackground(app, _physControl.width * 3, _physControl.height);
-		DisplayObject background = _background.addVerticalTilingLayer(app.loadImage("../data/world/large-background.png"), 0);
+		DisplayObject background = _background.addTilingLayer(app.loadImage("../data/world/large-background.png"), 0);
 		DisplayObject trees = _background.addHorizontalTilingLayer(app.loadImage("../data/world/trees.png"), .5f);
 		DisplayObject windmill = _background.addLayer(new Windmill(app), .7f);
 		DisplayObject ground = _background.addHorizontalTilingLayer(app.loadImage("../data/world/ground.png"), 1);
@@ -81,13 +80,13 @@ public class GameView extends AbstractView
 
 	private void createCaptureControl()
 	{
-		// PApplet app = getApp();
-		// _capControl = new CaptureControl(app);
-		// _capControl.x = (app.width / 2);
-		// _capControl.width = (app.width / 2);
-		// _capControl.height = (app.height);
-		// _capControl.setDebugMode(true);
-		// add(_capControl);
+		 PApplet app = getApp();
+		 _capControl = new CaptureControl(app);
+		 _capControl.x = (app.width / 2);
+		 _capControl.width = (app.width / 2);
+		 _capControl.height = (app.height);
+		 _capControl.setDebugMode(true);
+		 add(_capControl);
 	}
 
 	@Override
@@ -174,9 +173,9 @@ public class GameView extends AbstractView
 		public void execute()
 		{
 			LogRepository.getInstance().getPaulsLogger().info("Countdown complete, processing image.");
-			if (_capControl != null)
+			final PImage img = _capControl.getProcessedImage();
+			if (img != null)
 			{
-				final PImage img = _capControl.getProcessedImage();
 				if (img.width > 0 && img.height > 0)
 				{
 					beginPlacement(img);
@@ -192,7 +191,7 @@ public class GameView extends AbstractView
 				}
 			} else
 			{
-				 beginPlacement(getApp().loadImage(_debugFilename));
+				beginPlacement(getApp().loadImage(_debugFilename));
 			}
 
 			_physControl.remove(_countdown);
@@ -220,8 +219,7 @@ public class GameView extends AbstractView
 		Rectangle imageBounds = new Rectangle(0, 0, (int) (_physControl.width - sprite.width), (int) (_physControl.height - sprite.height));
 		sprite.setScrollBounds(imageBounds);
 
-		// on update check if our sprite is near the edges and scroll
-		// the
+		// on update check if our sprite is near the edges and scroll the
 		// view port so we never lose it.
 		sprite.setUpdatedCallback(new ISimpleCallback()
 		{
@@ -240,19 +238,23 @@ public class GameView extends AbstractView
 
 				if (localToGlobal.y < margin)
 				{
+					float jumpAmt = (margin - localToGlobal.y);
 					_physControl.y += margin - localToGlobal.y;
-					// _zoomContainer.scaleX = _zoomContainer.scaleY -= (margin
-					// - localToGlobal.y) / _physControl.height;
-					// _zoomContainer.y -= _physControl.height * .01f;
+					float scaleAmt = (jumpAmt / _physControl.height) * 3;
+					_zoomContainer.scaleX -= scaleAmt;
+					_zoomContainer.scaleY -= scaleAmt;
 
 				} else if (localToGlobal.y > app.height - img.height - margin)
 				{
+					float jumpAmt = (localToGlobal.y - app.height + img.height) + margin;
 					_physControl.y -= (localToGlobal.y - app.height + img.height) + margin;
-					// _zoomContainer.scaleX = _zoomContainer.scaleY +=
-					// ((localToGlobal.y - app.height + img.height) + margin) /
-					// _physControl.height;
-					// _zoomContainer.y += _physControl.height * .01f;
+					float scaleAmt = (jumpAmt / _physControl.height) * 3;
+					_zoomContainer.scaleX += scaleAmt;
+					_zoomContainer.scaleY += scaleAmt;
 				}
+
+				_zoomContainer.scaleX = MathUtils.clamp(_zoomContainer.scaleX, .37f, 1f);
+				_zoomContainer.scaleY = MathUtils.clamp(_zoomContainer.scaleY, .37f, 1f);
 
 				_physControl.constrainToBounds();
 				sprite.constrainToBounds();
