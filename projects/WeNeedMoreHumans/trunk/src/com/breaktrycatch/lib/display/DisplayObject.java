@@ -28,7 +28,8 @@ public class DisplayObject extends ArrayList<DisplayObject>
 	public float scaleX = 1;
 	public float scaleY = 1;
 	public float rotationRad = 0;
-
+	public boolean isHuman = false;
+	
 	private PApplet _app;
 	private DisplayObject _parent;
 	private boolean _rotateAroundCenter;

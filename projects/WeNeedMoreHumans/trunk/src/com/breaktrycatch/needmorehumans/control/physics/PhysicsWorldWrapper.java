@@ -3,6 +3,7 @@ package com.breaktrycatch.needmorehumans.control.physics;
 import java.util.ArrayList;
 
 import org.jbox2d.collision.AABB;
+import org.jbox2d.collision.ContactID;
 import org.jbox2d.collision.PolygonDef;
 import org.jbox2d.collision.ShapeDef;
 import org.jbox2d.common.Vec2;
@@ -10,6 +11,10 @@ import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.BodyDef;
 import org.jbox2d.dynamics.DebugDraw;
 import org.jbox2d.dynamics.World;
+import org.jbox2d.dynamics.contacts.ContactPoint;
+import org.jbox2d.dynamics.joints.DistanceJoint;
+import org.jbox2d.dynamics.joints.DistanceJointDef;
+import org.jbox2d.dynamics.joints.Joint;
 import org.jbox2d.testbed.ProcessingDebugDraw;
 
 import processing.core.PApplet;
@@ -17,12 +22,12 @@ import processing.core.PApplet;
 import com.breaktrycatch.lib.display.DisplayObject;
 import com.breaktrycatch.needmorehumans.model.PhysicsShapeDefVO;
 import com.breaktrycatch.needmorehumans.model.PolyVO;
+import com.breaktrycatch.needmorehumans.utils.LogRepository;
 
 public class PhysicsWorldWrapper {
 
 	private final float PHYS_TIMESTEP = 1.0f/60.0f;
-	private final int PHYS_ITERATIONS = 10;
-	
+	private final int PHYS_ITERATIONS = 10;	
 	
 	private World _world;
 	private ProcessingDebugDraw _debugDraw;
@@ -31,10 +36,17 @@ public class PhysicsWorldWrapper {
 	private float _physScale;
 	private Vec2 _screenHalfSize;
 	private boolean _wakeAllOnNextTick = false;
+	private ArrayList<ContactPoint> _reportedContacts = new ArrayList<ContactPoint>();
+	
 	
 	public PhysicsWorldWrapper(float screenWidth, float screenHeight) 
 	{
 		this(screenWidth, screenHeight, 0.01f);
+	}
+	
+	public void reportHumanContact(ContactPoint contact)
+	{
+		_reportedContacts.add(contact);
 	}
 	
 	public PhysicsWorldWrapper(float screenWidth, float screenHeight, float physScale) 
@@ -57,6 +69,7 @@ public class PhysicsWorldWrapper {
 		
 		_world = new World(_worldAABB, _gravity, true);
 		
+		_world.setContactListener(new HumanContactListener(this));
 	}
 	
 	public void step()
@@ -76,7 +89,7 @@ public class PhysicsWorldWrapper {
 				else
 					continue;
 			}
-
+			
 			DisplayObject actor = (DisplayObject)body.getUserData();
 			if(actor != null)
 			{
@@ -94,10 +107,56 @@ public class PhysicsWorldWrapper {
 			
 		}
 		
+		
+		processContacts();
 
 		
-//		_world.drawDebugData();
+		_world.drawDebugData();
 			
+	}
+	
+	private void processContacts()
+	{
+		//Track Dups
+		ArrayList<ContactID> handledContacts = new ArrayList<ContactID>();
+		
+		final float _JOINT_SIZE = 0.10f;
+		
+		for(int i=0; i<_reportedContacts.size(); i++)
+		{
+			ContactPoint contact = _reportedContacts.get(i);
+			
+			//Check if this contact has already been eval'd
+			if(containsDupElement(handledContacts, contact.id)){ continue;	}
+			handledContacts.add(contact.id);
+			
+			Vec2 jointHalfLength = contact.normal.mul(_JOINT_SIZE);
+			//Create a joint between the two objects
+			DistanceJointDef jd = new DistanceJointDef();
+			jd.collideConnected = true;
+			jd.initialize(contact.shape1.getBody(), contact.shape2.getBody(), contact.position.sub(jointHalfLength), contact.position.add(jointHalfLength));
+//			jd.initialize(contact.shape1.getBody(), contact.shape2.getBody(), contact.normal.mul(_JOINT_SIZE), contact.normal.mul(_JOINT_SIZE));
+//			contact.shape1.getBody().setXForm(new Vec2(0,0), 0);
+			Joint joint = _world.createJoint(jd);
+			
+			
+			LogRepository.getInstance().getMikesLogger().info("JOINT CREATED! " + joint);
+			//break;
+		}
+		
+		_reportedContacts.clear();
+	}
+	
+	private boolean containsDupElement(ArrayList<ContactID> handledList, ContactID id)
+	{
+		for (ContactID contactID : handledList) {
+			if(contactID.isEqual(id))
+			{
+				return true;
+			}
+		}
+		
+		return false;
 	}
 	
 	
