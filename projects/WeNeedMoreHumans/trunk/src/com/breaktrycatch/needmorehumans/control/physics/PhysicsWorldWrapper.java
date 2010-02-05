@@ -124,6 +124,10 @@ public class PhysicsWorldWrapper {
 		{
 			ContactPoint contact = _reportedContacts.get(i);
 			
+//			if(breakhumanjoints)
+//			{
+//				detatchBody(body)
+//			}
 			//Check if this contact has already been eval'd
 			if(containsDupElement(handledContacts, contact.id)){ continue;	}
 			handledContacts.add(contact.id);
@@ -147,6 +151,14 @@ public class PhysicsWorldWrapper {
 		}
 		
 		_reportedContacts.clear();
+	}
+	
+	private void detatchBody(Body body)
+	{
+		for (JointEdge joint = body.getJointList(); joint != null; joint = joint.next)
+		{
+			_world.destroyJoint(joint.joint);
+		}
 	}
 	
 	private boolean containsDupElement(ArrayList<ContactID> handledList, ContactID id)
