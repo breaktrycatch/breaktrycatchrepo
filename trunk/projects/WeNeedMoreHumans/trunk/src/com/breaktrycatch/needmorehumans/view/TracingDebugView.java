@@ -40,7 +40,7 @@ public class TracingDebugView extends AbstractView
 		String p5 = "../data/tracing/RealPerson_5.png";
 
 		//PImage p = getApp().loadImage("../data/subtraction/debug-image-1252438725312.png");// app.loadImage(p1);
-		PImage p = getApp().loadImage("../data/tracing/RealPerson_2.png");// app.loadImage(p1);
+		PImage p = getApp().loadImage("../data/tracing/RealPerson_3.png");// app.loadImage(p1);
 		p.loadPixels();
 
 		__imageAnalysis = new ImageAnalysis(app);

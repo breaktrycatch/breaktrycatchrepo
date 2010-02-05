@@ -27,6 +27,7 @@ public class ImageAnalysis
 	private ArrayList<PixelVO> culledSimplePixelOutline;
 	
 	private ArrayList<PixelVO> extremities;
+	private Vec2[] extremitiesArray;
 
 	private ArrayList<EdgeVO> edges;
 	private ArrayList<EdgeVO> culledEdges;
@@ -66,6 +67,7 @@ public class ImageAnalysis
 		maybeCulledPolygons = 0;
 		validPixels = 0;
 		extremities = new ArrayList<PixelVO>();
+		extremitiesArray = new Vec2[4];
 	}
 
 	private void debugDrawPoints(ArrayList<PixelVO> points, int color)
@@ -222,14 +224,9 @@ public class ImageAnalysis
 		LogRepository.getInstance().getJonsLogger().info("MAYBE COULD BE CULLED POLYGONS BECAUSE AREA IS LESS THAN " + areaEpsilon + " UNITS : " + maybeCulledPolygons);
 		
 		BodyVO body = new BodyVO();
-		ArrayList<Vec2> ext = new ArrayList<Vec2>();
 		
 		body.polyDefs = polyDefs;
-		
-		for (int i = 0; i < extremities.size(); i++) {
-			ext.add(new Vec2(extremities.get(i).x, extremities.get(i).y));
-		}
-		body.extremities = ext;
+		body.extremities = extremitiesArray;
 		
 		return body;
 	}
@@ -526,6 +523,11 @@ public class ImageAnalysis
 					{
 						currentEdge.markForCulling = true;
 					}
+					else {
+//						if (currentEdge.length < 10) {
+//							currentEdge.markForCulling = true;
+//						}
+					}
 				}
 			}
 
@@ -598,6 +600,8 @@ public class ImageAnalysis
 		
 		//Now look for the next furthest pixel
 		
+		PixelVO lastFurthest;
+		
 		double upperBoundsFar;
 		double lowerBoundsFar;
 		   
@@ -607,39 +611,35 @@ public class ImageAnalysis
 		   for (int j = 0; j < 3; j++) {
 			   //last added pixel is the farthest pixel
 			   activePixel = furthestPixel;
+			   lastFurthest = furthestPixel;
 //			   PApplet.println("Current Angle " + tempPixel.angle);
 			   //generate upper and lower bounds to search in
-			   upperBoundsFar = activePixel.angle + 157.5; //135
-			   lowerBoundsFar = activePixel.angle + 22.5;
-//			   PApplet.println("UpperBounds " + upperBounds);
-//			   PApplet.println("LowerBounds " + lowerBounds);
-			   //validate bounds
-			   if (upperBoundsFar > 360) {
-				   upperBoundsFar -= 360;
-			   }
-			   if (lowerBoundsFar < 0) {
-				   lowerBoundsFar = 360 - lowerBoundsFar;
-			   }
-//			   PApplet.println("Validated UpperBounds " + upperBounds);
-//			   PApplet.println("Validated LowerBounds " + lowerBounds);
-			   //start at the beginning of the list
+			   //upperBoundsFar = activePixel.angle + 157.5; //135
+			   //lowerBoundsFar = activePixel.angle + 22.5;
+			   upperBoundsFar = 146.25; //135
+			   lowerBoundsFar = 33.75;
+
 			   furthestPixel = culledPoints.get(0);
+			   
+			   double normalizedAngle;
+			   
 			   for (int i = 1; i < culledPoints.size(); i++) {
 				   activePixel = culledPoints.get(i);
+				   
+				   normalizedAngle = Math.abs(activePixel.angle - lastFurthest.angle);
+				   
+				   //Find the smallest angle between
+				   if (normalizedAngle > 180) {
+					   normalizedAngle = 360 - normalizedAngle;
+				   }
 				   
 				   //difference = Math.abs(pTest.angle - tempPixel.angle);
 				   boolean inRangeFar = false;
 				   
-				   if (lowerBoundsFar > upperBoundsFar) {
-					   if ((activePixel.angle >= lowerBoundsFar && activePixel.angle <= 360) || (activePixel.angle <= upperBoundsFar && activePixel.angle >= 0)) {
-						   inRangeFar = true;
-//						   PApplet.println("Overlap in Range " + pTest.angle);
-					   }
-				   }
-				   else if (activePixel.angle >= lowerBoundsFar && activePixel.angle <= upperBoundsFar){
+				   if (normalizedAngle >= lowerBoundsFar && normalizedAngle <= upperBoundsFar) {
 					   inRangeFar = true;
-//					   PApplet.println("Regualr in Range " + pTest.angle);
 				   }
+				   
 				   
 				   
 				   if (inRangeFar) {
@@ -788,9 +788,10 @@ public class ImageAnalysis
 				}
 			}
 			
+			
+			
 			for (int q = 0; q < extremities.size(); q++) {
-				extremities.get(q).x -= shiftX;
-				extremities.get(q).y -= shiftY;
+				extremitiesArray[q] = new Vec2(extremities.get(q).x - shiftX, extremities.get(q).y - shiftY);
 			}
 			
 			//p_body.setMassFromShapes();
