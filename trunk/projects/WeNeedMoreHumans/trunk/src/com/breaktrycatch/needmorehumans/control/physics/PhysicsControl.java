@@ -57,8 +57,13 @@ public class PhysicsControl extends DisplayObject
 		vo.density = 0.0f;
 		vo.friction = 1.0f;
 		//_physWorld.createRect(0, height + 10, width, height, vo);
-		_physWorld.createHollowBox(width/2.0f, height/2.0f, width, height, 15.0f, vo);
-
+//		PhysicsUserDataVO userData = new PhysicsUserDataVO();
+//		userData.breaksHumanJoints = true;
+		Body[] bounds = _physWorld.createHollowBox(width/2.0f, height/2.0f, width, height, 15.0f, vo);
+//		bounds[1].setUserData(userData);
+//		bounds[2].setUserData(userData);
+//		bounds[3].setUserData(userData);
+		
 		addDebugSmileBoxes();
 		// addDebugPolyHuman();
 		// _physWorld.createRect(50, 150, 150, 250, new PhysicsShapeDefVO());
