@@ -1,5 +1,7 @@
 package com.breaktrycatch.lib.display;
 
+import com.breaktrycatch.needmorehumans.utils.LogRepository;
+
 import processing.core.PApplet;
 import processing.core.PImage;
 
@@ -31,7 +33,17 @@ public class ImageFrame extends DisplayObject
 
 		if (_img != null)
 		{
+			
 			getApp().image(_img, 0, 0);
+			
+			if (externalRenderTarget != null) {
+				LogRepository.getInstance().getJonsLogger().info("Drawing to external");
+				//this.x -= externalRenderTargetOffsetX;
+				//this.y -= externalRenderTargetOffsetY;
+				externalRenderTarget.image(_img,0,0);
+				//this.x += externalRenderTargetOffsetX;
+				//this.y += externalRenderTargetOffsetY;
+			}
 		}
 	}
 

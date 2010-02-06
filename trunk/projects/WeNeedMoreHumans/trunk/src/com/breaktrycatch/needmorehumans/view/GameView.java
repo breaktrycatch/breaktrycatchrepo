@@ -3,10 +3,12 @@ package com.breaktrycatch.needmorehumans.view;
 import java.awt.Rectangle;
 import java.awt.geom.Point2D.Float;
 import java.io.File;
+import java.util.ArrayList;
 
 import org.jbox2d.common.MathUtils;
 
 import processing.core.PApplet;
+import processing.core.PGraphics;
 import processing.core.PImage;
 
 import com.breaktrycatch.lib.component.KeyboardManager;
@@ -36,9 +38,150 @@ public class GameView extends AbstractView
 	{ "../data/tracing/RealPerson_1.png", "../data/tracing/RealPerson_3.png", "../data/tracing/RealPerson_4.png", "../data/tracing/RealPerson_5.png" };
 
 	private String _debugFilename = _spriteLookup[0];
+	
+	
+	//SAVING METHODS
+	private File __towerDirectory;
+	private File __towerPublishDirectory;
+	private File __towerSourceDirectory;
+	private int __towerNumber;
+	private int __publishNumber;
+	private int __sourceNumber;
+	
+	private ArrayList<XBoxControllableSprite> sprites;
 
 	public GameView()
 	{
+		
+	}
+	
+	private String leadingSpaces(int _int) {
+		String str;
+		if (_int < 10) {
+			str = "0000" + _int;
+		}
+		else if (_int < 100) {
+			str = "000" + _int;
+		}
+		else if (_int < 1000) {
+			str = "00" + _int;
+		}
+		else if (_int < 10000) {
+			str = "0" + _int;
+		}
+		else {
+			str = "" + _int;
+		}
+		return str;
+	}
+	
+	private void constructTowerPaths() {
+		
+		File tempFile = new File("");
+		String path = tempFile.getAbsolutePath() + tempFile.separator + "data" + tempFile.separator + "towers";
+		
+		__towerDirectory = new File(path);
+		__towerNumber = __towerDirectory.list().length;
+		LogRepository.getInstance().getJonsLogger().info("IS DIRECTORY " + __towerDirectory.isDirectory() + " length " + __towerNumber);
+		
+		String strTowerNumber = leadingSpaces(__towerNumber);
+		
+		
+		File newTowerDirectory = new File(path + tempFile.separator + "tower_" + strTowerNumber);
+		
+		if (!newTowerDirectory.exists()) {
+			newTowerDirectory.mkdir();
+		}
+		else {
+			LogRepository.getInstance().getJonsLogger().info("FILE " + newTowerDirectory.getPath() + " already exists!");
+		}
+		
+		__towerPublishDirectory = new File(newTowerDirectory.getPath() + tempFile.separator + "publish");
+		if (!__towerPublishDirectory.exists()) {
+			__towerPublishDirectory.mkdir();
+		}
+		else {
+			LogRepository.getInstance().getJonsLogger().info("FILE " + __towerPublishDirectory.getPath() + " already exists!");
+		}
+		
+		__towerSourceDirectory = new File(newTowerDirectory.getPath() + tempFile.separator + "source");
+		if (!__towerSourceDirectory.exists()) {
+			__towerSourceDirectory.mkdir();
+		}
+		else {
+			LogRepository.getInstance().getJonsLogger().info("FILE " + __towerSourceDirectory.getPath() + " already exists!");
+		}
+	
+	}
+	
+	private void saveSourceImage(final PImage img) {
+		
+		__sourceNumber = __towerSourceDirectory.list().length;
+		String strSourceNumber = leadingSpaces(__sourceNumber);
+		
+		String path = __towerSourceDirectory.getAbsolutePath() + "/source_" + strSourceNumber + ".png";
+		img.save(path);
+	}
+	
+	private void saveTowerImage() {
+		LogRepository.getInstance().getJonsLogger().info("SAVING TOWER IMAGE");
+	
+		__publishNumber = __towerPublishDirectory.list().length;
+		String strPublishNumber = leadingSpaces(__publishNumber);
+		
+		String path = __towerPublishDirectory.getAbsolutePath() + "/publish_" + strPublishNumber + ".png";
+		
+		XBoxControllableSprite s = sprites.get(0);
+		Rectangle screenBounds = s.getScreenBounds();
+		float minX = screenBounds.x;
+		float minY = screenBounds.y;
+		float maxX = screenBounds.x + screenBounds.width;
+		float maxY = screenBounds.y + screenBounds.height;
+		
+		
+		for (int i = 0; i < sprites.size(); i++) {
+			s = sprites.get(i);
+			screenBounds = s.getScreenBounds();
+			
+			if (screenBounds.x < minX) {
+				minX = screenBounds.x;
+			}
+			if (screenBounds.y < minY) {
+				minY = screenBounds.y;
+			}
+			if ((screenBounds.x + screenBounds.width) > maxX) {
+				maxX = screenBounds.x + screenBounds.width;
+			}
+			if ((screenBounds.y + screenBounds.height) > maxY) {
+				maxY = screenBounds.y + screenBounds.height;
+			}
+			
+		}
+		
+		Rectangle imageBounds = new Rectangle();
+		imageBounds.x = (int) minX;
+		imageBounds.y = (int) minY;
+		imageBounds.width = (int) Math.abs(maxX - minX);
+		imageBounds.height = (int) Math.abs(maxY - minY);
+		LogRepository.getInstance().getJonsLogger().info("IMAGE BOUNDS " + imageBounds);
+		
+		PApplet app = getApp();
+		PGraphics drawBuffer = app.createGraphics((int)(minX + maxX),(int)(minY + maxY), PApplet.JAVA2D);
+		drawBuffer.beginCamera();
+		drawBuffer.beginDraw();
+		drawBuffer.noFill();
+		
+		for (int i = 0; i < sprites.size(); i++) {
+			s = sprites.get(i);
+			s.enableExternalRenderTarget(drawBuffer, 0, 0);
+			s.preDraw();
+			s.draw();
+			s.postDraw();
+			s.disableExternalRenderTarget();
+		}
+		drawBuffer.endDraw();
+		drawBuffer.endCamera();
+		drawBuffer.save(path);
 	}
 
 	private void createEnvironment()
@@ -93,6 +236,10 @@ public class GameView extends AbstractView
 	public void initialize(PApplet app)
 	{
 		super.initialize(app);
+		
+		
+		sprites = new ArrayList<XBoxControllableSprite>();
+		constructTowerPaths();
 
 		_zoomContainer = new DisplayObject(app);
 		add(_zoomContainer);
@@ -166,6 +313,14 @@ public class GameView extends AbstractView
 				_countdownCallback.execute();
 			}
 		});
+		
+		keyboardManager.registerKeyOnce('j', new ISimpleCallback()
+		{
+			public void execute()
+			{
+				saveTowerImage();
+			}
+		});
 	}
 
 	private ISimpleCallback _countdownCallback = new ISimpleCallback()
@@ -205,10 +360,10 @@ public class GameView extends AbstractView
 		final XBoxControllerManager controllerManager = (XBoxControllerManager) ManagerLocator.getManager(XBoxControllerManager.class);
 		final KeyboardManager keyboardManager = (KeyboardManager) ManagerLocator.getManager(KeyboardManager.class);
 		// final PImage img = getApp().loadImage(_debugFilename);
+		
+		saveSourceImage(img);
 
-		String path = new File("").getAbsolutePath() + "debug-image" + System.nanoTime() + ".png";
-		LogRepository.getInstance().getPaulsLogger().info("Saving Debug Image " + path);
-		img.save(path);
+		
 
 		final XBoxControllableSprite sprite = new XBoxControllableSprite(getApp());
 		sprite.setRotateAroundCenter(true);
@@ -218,6 +373,8 @@ public class GameView extends AbstractView
 
 		Rectangle imageBounds = new Rectangle(0, 0, (int) (_physControl.width - sprite.width), (int) (_physControl.height - sprite.height));
 		sprite.setScrollBounds(imageBounds);
+		
+		sprites.add(sprite);
 
 		// on update check if our sprite is near the edges and scroll the
 		// view port so we never lose it.
