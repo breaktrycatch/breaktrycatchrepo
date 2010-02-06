@@ -4,6 +4,7 @@ import java.awt.Rectangle;
 import java.util.ArrayList;
 
 import processing.core.PApplet;
+import processing.core.PGraphics;
 import processing.core.PImage;
 
 import com.breaktrycatch.lib.component.ManagerLocator;
@@ -45,6 +46,25 @@ public class Sprite extends ImageFrame
 			long diff = tManager.getGameTimeDiff();
 			_elapsedFrames += (((float)_fps * (float)diff) / 1000);
 			_frame = (int)_elapsedFrames % _timeline.size();
+		}
+	}
+	
+	@Override
+	public void enableExternalRenderTarget(PGraphics _externalRenderTarget, int _ertoX, int _ertoY) {
+		// TODO Auto-generated method stub
+		super.enableExternalRenderTarget(_externalRenderTarget, _ertoX, _ertoY);
+		
+		for (int i = 0; i < _timeline.size(); i++) {
+			_timeline.get(i).enableExternalRenderTarget(_externalRenderTarget, _ertoX, _ertoY);
+		}
+	}
+	
+	@Override
+	public void disableExternalRenderTarget() {
+		// TODO Auto-generated method stub
+		super.disableExternalRenderTarget();
+		for (int i = 0; i < _timeline.size(); i++) {
+			_timeline.get(i).disableExternalRenderTarget();
 		}
 	}
 	

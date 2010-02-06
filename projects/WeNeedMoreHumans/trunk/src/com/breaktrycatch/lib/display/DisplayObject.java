@@ -10,7 +10,10 @@ import megamu.shapetween.Tween;
 
 import org.jbox2d.p5.PhysicsUtils;
 
+import com.breaktrycatch.needmorehumans.utils.LogRepository;
+
 import processing.core.PApplet;
+import processing.core.PGraphics;
 
 public class DisplayObject extends ArrayList<DisplayObject>
 {
@@ -35,6 +38,10 @@ public class DisplayObject extends ArrayList<DisplayObject>
 	protected ArrayList<ItemToAdd> _addList;
 
 	private boolean _scaleAroundCenter;
+	
+	protected PGraphics externalRenderTarget;
+	protected int externalRenderTargetOffsetX;
+	protected int externalRenderTargetOffsetY;
 
 	public DisplayObject(PApplet app)
 	{
@@ -42,6 +49,17 @@ public class DisplayObject extends ArrayList<DisplayObject>
 		_activeTweens = new ArrayList<ITween>();
 		_removeList = new ArrayList<DisplayObject>();
 		_addList = new ArrayList<ItemToAdd>();
+	}
+	
+	public void enableExternalRenderTarget(PGraphics _externalRenderTarget, int _ertoX, int _ertoY) {
+		externalRenderTarget = _externalRenderTarget;
+		externalRenderTargetOffsetX = _ertoX;
+		externalRenderTargetOffsetY = _ertoY;
+		LogRepository.getInstance().getJonsLogger().info("Render Target Set");
+	}
+	
+	public void disableExternalRenderTarget() {
+		externalRenderTarget = null;
 	}
 
 	public void slideTo(int x, int y, float duration)
@@ -66,35 +84,69 @@ public class DisplayObject extends ArrayList<DisplayObject>
 
 	public void preDraw()
 	{
-		getApp().pushMatrix();
+		if (externalRenderTarget == null) {
+			getApp().pushMatrix();
+	
+			getApp().translate(x, y);
+			
+			if (getScaleAroundCenter())
+			{
+				getApp().translate(width / 2, height / 2);
+			}
+			getApp().scale(scaleX, scaleY);
+			if (getScaleAroundCenter())
+			{
+				getApp().translate(-width / 2, -height / 2);
+			}
+			
+			if (getRotateAroundCenter())
+			{
+				getApp().translate(width / 2, height / 2);
+			}
+			getApp().rotate(rotationRad);
+			if (getRotateAroundCenter())
+			{
+				getApp().translate(-width / 2, -height / 2);
+			}
+		}
+		else {
+		
+			LogRepository.getInstance().getJonsLogger().info("ushing and Poppu");
+			externalRenderTarget.pushMatrix();
 
-		getApp().translate(x, y);
-		
-		if (getScaleAroundCenter())
-		{
-			getApp().translate(width / 2, height / 2);
-		}
-		getApp().scale(scaleX, scaleY);
-		if (getScaleAroundCenter())
-		{
-			getApp().translate(-width / 2, -height / 2);
-		}
-		
-		if (getRotateAroundCenter())
-		{
-			getApp().translate(width / 2, height / 2);
-		}
-		getApp().rotate(rotationRad);
-		if (getRotateAroundCenter())
-		{
-			getApp().translate(-width / 2, -height / 2);
+			externalRenderTarget.translate(x, y);
+			
+			if (getScaleAroundCenter())
+			{
+				externalRenderTarget.translate(width / 2, height / 2);
+			}
+			externalRenderTarget.scale(scaleX, scaleY);
+			if (getScaleAroundCenter())
+			{
+				externalRenderTarget.translate(-width / 2, -height / 2);
+			}
+			
+			if (getRotateAroundCenter())
+			{
+				externalRenderTarget.translate(width / 2, height / 2);
+			}
+			externalRenderTarget.rotate(rotationRad);
+			if (getRotateAroundCenter())
+			{
+				externalRenderTarget.translate(-width / 2, -height / 2);
+			}
 		}
 
 	}
 
 	public void postDraw()
 	{
-		getApp().popMatrix();
+		if (externalRenderTarget == null) {
+			getApp().popMatrix();
+		}
+		else {
+			externalRenderTarget.popMatrix();
+		}
 	}
 
 	public void draw()
@@ -293,6 +345,22 @@ public class DisplayObject extends ArrayList<DisplayObject>
 	public Rectangle getBounds()
 	{
 		return new Rectangle((int) x, (int) y, (int) (width * scaleX), (int) (height * scaleY));
+	}
+	
+	public Rectangle getScreenBounds() {
+		Rectangle bounds = getBounds();
+		Rectangle rec = new Rectangle();
+		
+		rec.x = bounds.x;
+		rec.y = bounds.y;
+		rec.width = (int) (bounds.width * Math.cos(rotationRad) + bounds.height * Math.sin(rotationRad));
+		rec.height = (int) (bounds.height * Math.cos(rotationRad) + bounds.width * Math.sin(rotationRad));
+		
+		//Normalize to actual shape in screen coordinates because object is center reffed
+		rec.x -= (rec.width/2);
+		rec.y -= (rec.height/2);
+		
+		return rec;
 	}
 	
 	public float getRotationDeg()
