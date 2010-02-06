@@ -36,17 +36,14 @@ public class PhysicsWorldWrapper {
 	private float _physScale;
 	private Vec2 _screenHalfSize;
 	private boolean _wakeAllOnNextTick = false;
-	private ArrayList<ContactPoint> _reportedContacts = new ArrayList<ContactPoint>();
+	private ArrayList<ContactPoint> _reportedHumanHumanContacts = new ArrayList<ContactPoint>();
+	private ArrayList<ContactPoint> _reportedHumanBreakerContacts = new ArrayList<ContactPoint>();
 	private Body _activeHuman;
+	
 	
 	public PhysicsWorldWrapper(float screenWidth, float screenHeight) 
 	{
 		this(screenWidth, screenHeight, 0.01f);
-	}
-	
-	public void reportHumanContact(ContactPoint contact)
-	{
-		_reportedContacts.add(contact);
 	}
 	
 	public PhysicsWorldWrapper(float screenWidth, float screenHeight, float physScale) 
@@ -88,11 +85,12 @@ public class PhysicsWorldWrapper {
 					continue;
 			}
 			
-			DisplayObject actor = (DisplayObject)body.getUserData();
-			if(actor != null)
+			if(body.getUserData() != null)
 			{
+				DisplayObject actor = (body.getUserData() instanceof PhysicsUserDataVO) ? ((PhysicsUserDataVO)body.getUserData()).display : (DisplayObject)body.getUserData();
 				Vec2 pos = worldToScreen(body.getPosition());
 				
+				//Maybe this is a lie
 				//TODO: THIS IS A TEMP HACK TO GET THE IMAGE TO ROUGHLY LINE UP WITH THE PHYSICS DATA
 				//THis will be fixed once we have proper alignment of the polydata
 				pos.x -= (actor.width/2.0f);
@@ -106,59 +104,127 @@ public class PhysicsWorldWrapper {
 		}
 		
 		
-		processContacts();
-
+		processHumanToHumanContacts();
+		processHumanToBreakerContacts();
 		
-		_world.drawDebugData();
-			
+//		_world.drawDebugData();
 	}
 	
-	private void processContacts()
+	private void processHumanToHumanContacts()
 	{
 		//Track Dups
 		ArrayList<ContactID> handledContacts = new ArrayList<ContactID>();
 		
 		final float _JOINT_SIZE = 0.05f;
+		final double _SNAP_RADIUS = 0.05;
 		
-		for(int i=0; i<_reportedContacts.size(); i++)
+		for(int i=0; i<_reportedHumanHumanContacts.size(); i++)
 		{
-			ContactPoint contact = _reportedContacts.get(i);
+			ContactPoint contact = _reportedHumanHumanContacts.get(i);
 			
-//			if(breakhumanjoints)
-//			{
-//				detatchBody(body)
-//			}
 			//Check if this contact has already been eval'd
 			if(containsDupElement(handledContacts, contact.id)){ continue;	}
 			handledContacts.add(contact.id);
 			
-			if(sharedJointExists(contact.shape1.getBody(), contact.shape2.getBody())){ continue; }
+			Body body1 = contact.shape1.getBody();
+			Body body2 = contact.shape2.getBody();
+			PhysicsUserDataVO data1 = (PhysicsUserDataVO)body1.getUserData();
+			PhysicsUserDataVO data2 = (PhysicsUserDataVO)body2.getUserData();
+			
+			//Find the actor points for the joint if any exist (may only exist on/near extremities)
+			Vec2 body1Anchor = findExtremityNearContact(data1.extremities, body1.getPosition(), contact.position, _SNAP_RADIUS);
+			Vec2 body2Anchor = findExtremityNearContact(data2.extremities, body2.getPosition(), contact.position, _SNAP_RADIUS);
+			
+			//Check to make sure two extremities were found
+			if(body1Anchor == null || body2Anchor == null) { continue; }
+			//Check to see if the two extremities already share a joint
+			if(sharedExtremityJointExists(body1, body1Anchor, body2Anchor)) { continue; }
+			//if(sharedJointExists(body1, body2)){ continue; }
+			
 			
 			Vec2 jointHalfLength = contact.normal.mul(_JOINT_SIZE);
 			//Create a joint between the two objects
 			DistanceJointDef jd = new DistanceJointDef();
 			jd.collideConnected = true;
-			jd.dampingRatio = 1.0f;
-			jd.initialize(contact.shape1.getBody(), contact.shape2.getBody(), contact.position.sub(jointHalfLength), contact.position.add(jointHalfLength));
-//			jd.initialize(contact.shape1.getBody(), contact.shape2.getBody(), contact.normal.mul(_JOINT_SIZE), contact.normal.mul(_JOINT_SIZE));
-//			contact.shape1.getBody().setXForm(new Vec2(0,0), 0);
+			jd.dampingRatio = 0.5f;
+			jd.initialize(body1, body2, body1Anchor, body2Anchor);
 			Joint joint = _world.createJoint(jd);
-			contact.shape1.setUserData(joint);
-			contact.shape2.setUserData(joint);
+			
+			
+			//OLD - Used for body/shape checking or no checking
+//			DistanceJointDef jd = new DistanceJointDef();
+//			jd.collideConnected = true;
+//			jd.dampingRatio = 1.0f;
+//			jd.initialize(contact.shape1.getBody(), contact.shape2.getBody(), contact.position.sub(jointHalfLength), contact.position.add(jointHalfLength));
+//			//jd.initialize(contact.shape1.getBody(), contact.shape2.getBody(), contact.normal.mul(_JOINT_SIZE), contact.normal.mul(_JOINT_SIZE));
+//			//contact.shape1.getBody().setXForm(new Vec2(0,0), 0);
+//			Joint joint = _world.createJoint(jd);
+//			contact.shape1.setUserData(joint);
+//			contact.shape2.setUserData(joint);
 			
 			LogRepository.getInstance().getMikesLogger().info("JOINT CREATED! " + joint);
 			//break;
 		}
 		
-		_reportedContacts.clear();
+		_reportedHumanHumanContacts.clear();
 	}
 	
+	private void processHumanToBreakerContacts()
+	{
+		//TODO: Implement/TEST this later
+
+//		//Track Dups
+//		ArrayList<ContactID> handledContacts = new ArrayList<ContactID>();
+//		
+//
+//		for(int i=0; i<_reportedHumanBreakerContacts.size(); i++)
+//		{
+//			ContactPoint contact = _reportedHumanHumanContacts.get(i);
+//			
+//			//Check if this contact has already been eval'd
+//			if(containsDupElement(handledContacts, contact.id)){ continue;	}
+//			handledContacts.add(contact.id);
+//			
+//			Body body1 = contact.shape1.getBody();
+//			Body body2 = contact.shape2.getBody();
+//			PhysicsUserDataVO data1 = (PhysicsUserDataVO)body1.getUserData();
+//			PhysicsUserDataVO data2 = (PhysicsUserDataVO)body2.getUserData();
+//			
+//			if(data1.breaksHumanJoints)
+//			{
+//				detatchBody(body2);
+//			}
+//			else if(data2.breaksHumanJoints)
+//			{
+//				detatchBody(body1);
+//			}
+//		}
+		
+		_reportedHumanBreakerContacts.clear();
+	}
+	
+	//Breaks all joints on a body
 	private void detatchBody(Body body)
 	{
 		for (JointEdge joint = body.getJointList(); joint != null; joint = joint.next)
 		{
 			_world.destroyJoint(joint.joint);
 		}
+	}
+	
+	//Try to find an extremity near the contact position.  The vector returned(if any) have been translated into world coordinates from a position relative to the body
+	private Vec2 findExtremityNearContact(Vec2[] extremities, Vec2 extremityParentPos, Vec2 contact, double searchDistance)
+	{
+		for (Vec2 extremity : extremities) {
+			//is the extremity within the snap radius of the contact point
+			Vec2 worldExtremity = extremity.add(extremityParentPos);
+			if(Math.sqrt(Math.pow(worldExtremity.x - contact.x, 2) + Math.pow(worldExtremity.y - contact.y, 2)) < searchDistance)
+			{
+				return extremity;
+			}
+		}
+		
+		return null;
 	}
 	
 	private boolean containsDupElement(ArrayList<ContactID> handledList, ContactID id)
@@ -173,11 +239,26 @@ public class PhysicsWorldWrapper {
 		return false;
 	}
 	
-	private boolean sharedJointExists(Body body1, Body body2)
+	//determins if two bodies share a joint
+//	private boolean sharedJointExists(Body body1, Body body2)
+//	{
+//		for (JointEdge joint = body1.getJointList(); joint != null; joint = joint.next)
+//		{
+//			if(joint.other.equals(body2))
+//			{
+//				return true;
+//			}
+//		}
+//		
+//		return false;
+//	}
+	
+	//Finds if two extremity points already share a joint given the two anchor points and one of the bodies
+	private boolean sharedExtremityJointExists(Body body, Vec2 anchor1, Vec2 anchor2)
 	{
-		for (JointEdge joint = body1.getJointList(); joint != null; joint = joint.next)
+		for (JointEdge joint = body.getJointList(); joint != null; joint = joint.next)
 		{
-			if(joint.other.equals(body2))
+			if((joint.joint.getAnchor1() == anchor1 && joint.joint.getAnchor2() == anchor2) ||(joint.joint.getAnchor1() == anchor2 && joint.joint.getAnchor2() == anchor1))
 			{
 				return true;
 			}
@@ -253,7 +334,7 @@ public class PhysicsWorldWrapper {
 		
 		if (settings.density > 0.0f) body.setMassFromShapes();
 		
-		PApplet.println("Calculating screenToWorld: " + screenX + " : " + screenY + " -> " + screenToWorld(screenX, screenY));
+		//PApplet.println("Calculating screenToWorld: " + screenX + " : " + screenY + " -> " + screenToWorld(screenX, screenY));
 		body.setXForm(screenToWorld(screenX, screenY), radRotation);
 		
 		_activeHuman = body;
@@ -357,6 +438,21 @@ public class PhysicsWorldWrapper {
 		return _activeHuman;
 	}
 	
+	public void reportHumanHumanContact(ContactPoint contact)
+	{
+		_reportedHumanHumanContacts.add(contact);
+	}
+	
+	public void reportHumanBreakerContact(ContactPoint contact)
+	{
+		_reportedHumanBreakerContacts.add(contact);
+	}
+	
+	public float getPhysScale()
+	{
+		return _physScale;
+	}
+	
 	
 	// ******** DEBUG *************//
 	public void enableDebugDraw(PApplet app)
@@ -371,8 +467,8 @@ public class PhysicsWorldWrapper {
 		_debugDraw.appendFlags(DebugDraw.e_pairBit);
 		_debugDraw.appendFlags(DebugDraw.e_centerOfMassBit);
 
-//		_debugDraw.setCamera(_screenHalfSize.x * _physScale ,0 , 1/_physScale);
-		_debugDraw.setCamera(0 ,0 , 1/_physScale);
+		_debugDraw.setCamera(-8.39f ,23.25f , 1/_physScale);
+//		_debugDraw.setCamera(0 ,0 , 1/_physScale);
 		
 		_world.setDebugDraw(_debugDraw);
 	}
