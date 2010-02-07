@@ -10,7 +10,6 @@ import processing.core.PImage;
 import com.breaktrycatch.lib.component.ManagerLocator;
 import com.breaktrycatch.lib.component.TimeManager;
 
-
 public class Sprite extends ImageFrame
 {
 	/**
@@ -29,7 +28,7 @@ public class Sprite extends ImageFrame
 	public Sprite(PApplet app)
 	{
 		super(app);
-		_fps = (int)app.frameRate;
+		_fps = (int) app.frameRate;
 		_timeline = new ArrayList<ImageFrame>();
 		_playing = true;
 	}
@@ -37,18 +36,21 @@ public class Sprite extends ImageFrame
 	@Override
 	public void draw()
 	{
-		DisplayObject displayObject = _timeline.get(_frame);
-		displayObject.draw();
-
-		if (_playing)
+		if (_timeline.size() > 0)
 		{
-			TimeManager tManager = (TimeManager)(ManagerLocator.getManager(TimeManager.class));
-			long diff = tManager.getGameTimeDiff();
-			_elapsedFrames += (((float)_fps * (float)diff) / 1000);
-			_frame = (int)_elapsedFrames % _timeline.size();
+			DisplayObject displayObject = _timeline.get(_frame);
+			displayObject.draw();
+
+			if (_playing)
+			{
+				TimeManager tManager = (TimeManager) (ManagerLocator.getManager(TimeManager.class));
+				long diff = tManager.getGameTimeDiff();
+				_elapsedFrames += (((float) _fps * (float) diff) / 1000);
+				_frame = (int) _elapsedFrames % _timeline.size();
+			}
 		}
 	}
-	
+
 	@Override
 	public void enableExternalRenderTarget(PGraphics _externalRenderTarget, int _ertoX, int _ertoY) {
 		// TODO Auto-generated method stub
@@ -72,18 +74,18 @@ public class Sprite extends ImageFrame
 	{
 		_playing = false;
 	}
-	
+
 	public void play()
 	{
 		_playing = true;
 	}
-	
+
 	public void goToAndPlay(int frame)
 	{
 		_frame = frame;
 		_playing = true;
 	}
-	
+
 	public int getTotalFrames()
 	{
 		return _timeline.size();
@@ -95,7 +97,6 @@ public class Sprite extends ImageFrame
 		invalidateDimensions();
 	}
 
-
 	@Override
 	public PImage getDisplay()
 	{
@@ -104,39 +105,39 @@ public class Sprite extends ImageFrame
 
 	public void addFrames(ArrayList<PImage> images)
 	{
-		for(PImage img : images)
+		for (PImage img : images)
 		{
 			_timeline.add(new ImageFrame(getApp(), img));
 		}
 		invalidateDimensions();
 	}
-	
+
 	public int getFPS()
 	{
 		return _fps;
 	}
-	
+
 	public void setFPS(int fps)
 	{
 		_fps = fps;
 	}
-	
+
 	private void invalidateDimensions()
 	{
 		Rectangle bounds = new Rectangle();
-		for(DisplayObject obj : _timeline)
+		for (DisplayObject obj : _timeline)
 		{
-			if(obj.x + obj.width > bounds.width)
+			if (obj.x + obj.width > bounds.width)
 			{
-				bounds.width = (int)(obj.x + obj.width);
+				bounds.width = (int) (obj.x + obj.width);
 			}
-			
-			if(obj.y + obj.height > bounds.height)
+
+			if (obj.y + obj.height > bounds.height)
 			{
-				bounds.height = (int)(obj.y + obj.height);
+				bounds.height = (int) (obj.y + obj.height);
 			}
 		}
-		
+
 		width = bounds.width;
 		height = bounds.height;
 	}

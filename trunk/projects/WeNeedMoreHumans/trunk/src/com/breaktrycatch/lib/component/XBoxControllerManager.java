@@ -369,8 +369,6 @@ class XBoxControllerFacade
 
 	public boolean unregisterAxis(Axis axis, IFloatCallback callback)
 	{
-		PApplet.println("Do I contain this axis? " +_axisMap.containsKey(axis));
-		
 		if (_axisMap.containsKey(axis))
 		{
 			return _axisMap.get(axis).remove(callback);

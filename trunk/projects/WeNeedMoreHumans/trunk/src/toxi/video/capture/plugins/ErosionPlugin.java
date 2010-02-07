@@ -24,43 +24,53 @@ import java.util.HashMap;
 import toxi.image.util.Filter8bit;
 import toxi.video.capture.ProcessorPipeline;
 
-public class ErosionPlugin extends ProcessorPlugin {
+public class ErosionPlugin extends ProcessorPlugin
+{
 
 	public static final String NUM_PASSES = "libcv.plugin.erosion.num_passes";
 	public static final String INVERTED = "libcv.plugin.erosion.inverted";
-	
+
 	private int numPasses = 1;
 	private boolean isInverted = false;
-	
+
 	/**
 	 * @param p
 	 * @param id
 	 */
-	public ErosionPlugin(ProcessorPipeline p, String id) {
+	public ErosionPlugin(ProcessorPipeline p, String id)
+	{
 		super(p, id);
 	}
 
-	public void configure(HashMap<String, Comparable<?>> conf) {
+	public void configure(HashMap<String, Object> conf)
+	{
 		numPasses = ((Integer) conf.get(NUM_PASSES)).intValue();
 		isInverted = ((Boolean) conf.get(INVERTED)).booleanValue();
 	}
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see toxi.video.capture.plugins.ProcessorPlugin#getConfig()
 	 */
-	public HashMap<String, Comparable<?>> getConfig() {
+	public HashMap<String, Comparable<?>> getConfig()
+	{
 		HashMap<String, Comparable<?>> config = new HashMap<String, Comparable<?>>();
 		config.put(NUM_PASSES, new Integer(numPasses));
 		config.put(INVERTED, new Boolean(isInverted));
 		return config;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see toxi.video.capture.plugins.ProcessorPlugin#process(int[], int, int)
 	 */
-	public int[] process(int[] pixels, int w, int h) {
-		for(int i=0; i<numPasses; i++) {
-			pixels=Filter8bit.erodePixels(pixels, w, h, isInverted);
+	public int[] process(int[] pixels, int w, int h)
+	{
+		for (int i = 0; i < numPasses; i++)
+		{
+			pixels = Filter8bit.erodePixels(pixels, w, h, isInverted);
 		}
 		return pixels;
 	}

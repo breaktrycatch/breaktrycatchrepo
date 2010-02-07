@@ -41,7 +41,7 @@ public class GapFillPlugin extends ProcessorPlugin
 	}
 
 	@Override
-	public void configure(HashMap<String, Comparable<?>> conf)
+	public void configure(HashMap<String, Object> conf)
 	{
 		gapFillSize = ((Integer) conf.get(GAP_FILL)).intValue();
 		startThreshold = ((Integer) conf.get(START_THRESHOLD)).intValue();

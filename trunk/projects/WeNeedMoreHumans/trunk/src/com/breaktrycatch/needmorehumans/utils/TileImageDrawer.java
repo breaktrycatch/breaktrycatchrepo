@@ -1,9 +1,12 @@
 package com.breaktrycatch.needmorehumans.utils;
 
+import java.util.ArrayList;
+
 import processing.core.PApplet;
 import processing.core.PImage;
 
 import com.breaktrycatch.lib.display.DisplayObject;
+import com.breaktrycatch.lib.display.ImageFrame;
 
 public class TileImageDrawer extends DisplayObject
 {
@@ -17,20 +20,29 @@ public class TileImageDrawer extends DisplayObject
 	private int _dY;
 	private int _yJump;
 	private float _scale = 1;
+	private float _maxWidth;
+	private ArrayList<ImageToDraw> _imagesToDraw;
 
 	private boolean _enabled = true;
-
-	private int ctr;
 
 	public TileImageDrawer(PApplet app)
 	{
 		super(app);
+		_maxWidth = app.width;
+		_imagesToDraw = new ArrayList<ImageToDraw>();
 	}
 
 	public TileImageDrawer(PApplet app, float scale)
 	{
 		this(app);
+
 		_scale = scale;
+	}
+
+	public TileImageDrawer(PApplet app, float scale, float maxWidth)
+	{
+		this(app, scale);
+		_maxWidth = maxWidth;
 	}
 
 	public void drawImage(int[] image, int w, int h)
@@ -47,7 +59,6 @@ public class TileImageDrawer extends DisplayObject
 
 	public void drawImage(PImage image)
 	{
-		ctr++;
 		if (!_enabled)
 		{
 			return;
@@ -59,21 +70,38 @@ public class TileImageDrawer extends DisplayObject
 			image.resize((int) (image.width * _scale), (int) (image.height * _scale));
 		}
 
+		_imagesToDraw.add(new ImageToDraw(image, _dX, _dY));
+		
 		if (image.height > _yJump)
 		{
 			_yJump = image.height;
 		}
 
-		if (image.width + _dX > getApp().width - x)
+		if (image.width + _dX > _maxWidth)
 		{
 			_dX = 0;
 			_dY += _yJump;
 			_yJump = 0;
 		}
-
-		getApp().image(image, _dX, _dY);
-
 		_dX += image.width;
+
+	}
+
+	@Override
+	public void draw()
+	{
+		for (ImageToDraw toDraw : _imagesToDraw)
+		{
+			getApp().image(toDraw.img, toDraw.x, toDraw.y);
+		}
+		super.draw();
+	}
+
+	@Override
+	public void postDraw()
+	{
+		super.postDraw();
+		_imagesToDraw.clear();
 	}
 
 	public void reset()
@@ -81,8 +109,6 @@ public class TileImageDrawer extends DisplayObject
 		_dX = 0;
 		_dY = 0;
 		_yJump = 0;
-
-		ctr = 0;
 	}
 
 	public void setEnabled(boolean enabled)
@@ -93,5 +119,19 @@ public class TileImageDrawer extends DisplayObject
 	public boolean getEnabled()
 	{
 		return _enabled;
+	}
+}
+
+class ImageToDraw
+{
+	public PImage img;
+	public float x;
+	public float y;
+
+	public ImageToDraw(PImage img, float x, float y)
+	{
+		this.img = img;
+		this.x = x;
+		this.y = y;
 	}
 }

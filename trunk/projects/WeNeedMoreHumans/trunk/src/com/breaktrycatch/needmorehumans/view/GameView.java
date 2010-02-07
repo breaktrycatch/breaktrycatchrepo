@@ -1,11 +1,8 @@
 package com.breaktrycatch.needmorehumans.view;
 
 import java.awt.Rectangle;
-import java.awt.geom.Point2D.Float;
 import java.io.File;
 import java.util.ArrayList;
-
-import org.jbox2d.common.MathUtils;
 
 import processing.core.PApplet;
 import processing.core.PGraphics;
@@ -17,13 +14,18 @@ import com.breaktrycatch.lib.component.XBoxControllerManager;
 import com.breaktrycatch.lib.display.DisplayObject;
 import com.breaktrycatch.lib.util.callback.ISimpleCallback;
 import com.breaktrycatch.lib.view.AbstractView;
+import com.breaktrycatch.needmorehumans.control.camera.Simple2DCamera;
 import com.breaktrycatch.needmorehumans.control.display.Countdown;
 import com.breaktrycatch.needmorehumans.control.display.ParallaxBackground;
+import com.breaktrycatch.needmorehumans.control.display.SkyObject;
 import com.breaktrycatch.needmorehumans.control.display.Windmill;
 import com.breaktrycatch.needmorehumans.control.display.XBoxControllableSprite;
 import com.breaktrycatch.needmorehumans.control.physics.PhysicsControl;
 import com.breaktrycatch.needmorehumans.control.webcam.CaptureControl;
+import com.breaktrycatch.needmorehumans.control.webcam.CaptureValidator;
+import com.breaktrycatch.needmorehumans.control.webcam.callback.ICaptureCallback;
 import com.breaktrycatch.needmorehumans.utils.LogRepository;
+import com.breaktrycatch.needmorehumans.utils.RectUtils;
 import com.esotericsoftware.controller.device.Button;
 
 public class GameView extends AbstractView
@@ -34,6 +36,7 @@ public class GameView extends AbstractView
 	protected Countdown _countdown;
 	private ParallaxBackground _background;
 	private DisplayObject _zoomContainer;
+	private Simple2DCamera _camera;
 	private String[] _spriteLookup = new String[]
 	{ "../data/tracing/RealPerson_1.png", "../data/tracing/RealPerson_3.png", "../data/tracing/RealPerson_4.png", "../data/tracing/RealPerson_5.png" };
 
@@ -77,7 +80,7 @@ public class GameView extends AbstractView
 	
 	private void constructTowerPaths() {
 		
-		File tempFile = new File("");
+		File tempFile = new File("../");
 		String path = tempFile.getAbsolutePath() + tempFile.separator + "data" + tempFile.separator + "towers";
 		
 		__towerDirectory = new File(path);
@@ -189,7 +192,8 @@ public class GameView extends AbstractView
 		// creates the environment
 		PApplet app = getApp();
 		_background = new ParallaxBackground(app, _physControl.width * 3, _physControl.height);
-		DisplayObject background = _background.addTilingLayer(app.loadImage("../data/world/large-background.png"), 0);
+		DisplayObject background = _background.addTilingLayer(app.loadImage("../data/world/large-background.png"), .05f);
+		DisplayObject city = _background.addHorizontalTilingLayer(app.loadImage("../data/world/city.png"), .2f);
 		DisplayObject trees = _background.addHorizontalTilingLayer(app.loadImage("../data/world/trees.png"), .5f);
 		DisplayObject windmill = _background.addLayer(new Windmill(app), .7f);
 		DisplayObject ground = _background.addHorizontalTilingLayer(app.loadImage("../data/world/ground.png"), 1);
@@ -197,7 +201,18 @@ public class GameView extends AbstractView
 		ground.y = _physControl.height - 7; // 7 is half the thickness of the
 		// physics ground plane
 		windmill.y = ground.y - windmill.height + 20;
+		city.y = ground.y - city.height;
 		trees.y = ground.y - trees.height;
+
+		for (int i = 0; i < 20; i++)
+		{
+			int cloudType = (int) (Math.floor(Math.random() * 2)) + 1;
+			SkyObject cloud = new SkyObject(app, new Rectangle(0, 0, (int) _physControl.width, (int) _physControl.height));
+			cloud.addFrame(app.loadImage("../data/world/cloud" + cloudType + ".png"));
+			cloud.setSpritePosition((int) (Math.random() * _physControl.width), (int) (Math.random() * (_physControl.height - 400)));
+			cloud.setVelocity(-((float)(Math.random() / 2) + .5f), 0);
+			_background.addLayer(cloud, .2f);
+		}
 
 		_zoomContainer.add(_background);
 	}
@@ -208,28 +223,18 @@ public class GameView extends AbstractView
 		_physControl = new PhysicsControl(app);
 		_physControl.width = app.width * 2;
 		_physControl.height = app.height * 6;
-
-		_physControl.x = -_physControl.width / 2 + app.width / 2;
-		_physControl.y = -_physControl.height + app.height - 25; // (40 is the
-		// height of
-		// the
-		// ground
-		// image)
-
-		Rectangle rect = new Rectangle((int) -_physControl.width / 2, (int) _physControl.y, (int) _physControl.width - app.width, (int) _physControl.height);
-		_physControl.setScrollBounds(rect);
 		_physControl.init();
 	}
 
 	private void createCaptureControl()
 	{
-		 PApplet app = getApp();
-		 _capControl = new CaptureControl(app);
-		 _capControl.x = (app.width / 2);
-		 _capControl.width = (app.width / 2);
-		 _capControl.height = (app.height);
-		 _capControl.setDebugMode(true);
-		 add(_capControl);
+		PApplet app = getApp();
+		_capControl = new CaptureControl(app);
+		_capControl.x = (app.width / 2);
+		_capControl.width = (app.width / 2);
+		_capControl.height = (app.height);
+		_capControl.setDebugMode(true);
+		add(_capControl);
 	}
 
 	@Override
@@ -247,6 +252,9 @@ public class GameView extends AbstractView
 		createPhysicsControl();
 		createEnvironment();
 
+		_camera = new Simple2DCamera(app, new Rectangle(0, 0, app.width, app.height), new Rectangle(0, 0, (int) _physControl.width, (int) _physControl.height));
+		_camera.lookAt(_physControl.width / 2, _physControl.height);
+
 		// add after we create the environment!
 		_zoomContainer.add(_physControl);
 
@@ -263,10 +271,9 @@ public class GameView extends AbstractView
 				if (_countdown == null)
 				{
 					_countdown = new Countdown(getApp(), _countdownCallback);
-
 					_countdown.x = _physControl.width / 2 - _countdown.width / 2;
 					_countdown.y = _physControl.height - getApp().height / 2;
-					_countdown.setCountFrom(1);
+					_countdown.setCountFrom(3);
 					_countdown.start();
 					_physControl.add(_countdown);
 				}
@@ -283,7 +290,7 @@ public class GameView extends AbstractView
 			public void execute()
 			{
 				_debugFilename = _spriteLookup[0];
-				_countdownCallback.execute();
+				_captureCallback.execute(null);
 			}
 		});
 
@@ -292,7 +299,7 @@ public class GameView extends AbstractView
 			public void execute()
 			{
 				_debugFilename = _spriteLookup[1];
-				_countdownCallback.execute();
+				_captureCallback.execute(null);
 			}
 		});
 
@@ -301,7 +308,7 @@ public class GameView extends AbstractView
 			public void execute()
 			{
 				_debugFilename = _spriteLookup[2];
-				_countdownCallback.execute();
+				_captureCallback.execute(null);
 			}
 		});
 
@@ -310,10 +317,17 @@ public class GameView extends AbstractView
 			public void execute()
 			{
 				_debugFilename = _spriteLookup[3];
-				_countdownCallback.execute();
+				_captureCallback.execute(null);
 			}
 		});
 		
+		keyboardManager.registerKeyOnce('-', new ISimpleCallback()
+		{
+			public void execute()
+			{
+				_physControl.addDebugSmileBoxes();
+			}
+		});
 		keyboardManager.registerKeyOnce('j', new ISimpleCallback()
 		{
 			public void execute()
@@ -323,43 +337,51 @@ public class GameView extends AbstractView
 		});
 	}
 
+	// once the countdown is complete we start capturing the image.
 	private ISimpleCallback _countdownCallback = new ISimpleCallback()
 	{
 		public void execute()
 		{
 			LogRepository.getInstance().getPaulsLogger().info("Countdown complete, processing image.");
-			final PImage img = _capControl.getProcessedImage();
-			if (img != null)
-			{
-				if (img.width > 0 && img.height > 0)
-				{
-					beginPlacement(img);
-				} else
-				{
-					// TODO: Trap images that are > 60% opaque. They
-					// are too big and we had a lighting glitch.
-					// TODO: Trap images that are < 10% opaque. They
-					// don't have a person in it!
-					// TODO: Inform user that no image was captured.
-
-					LogRepository.getInstance().getPaulsLogger().warn("Image was no good! Discarding.");
-				}
-			} else
-			{
-				beginPlacement(getApp().loadImage(_debugFilename));
-			}
 
 			_physControl.remove(_countdown);
 			_countdown = null;
 
+			_capControl.beginCapture(1, _captureCallback);
 		}
 	};
 
-	private void beginPlacement(final PImage img)
+	// once the capture is complete we place it in to the sim.
+	private ICaptureCallback _captureCallback = new ICaptureCallback()
 	{
+		@Override
+		public void execute(ArrayList<PImage> images)
+		{
+			if (images != null)
+			{
+				ArrayList<PImage> culledImages = CaptureValidator.validateList(images);
+				beginPlacement(culledImages);
+			} else
+			{
+				ArrayList<PImage> debugImage = new ArrayList<PImage>();
+				debugImage.add(getApp().loadImage(_debugFilename));
+				beginPlacement(debugImage);
+			}
+		}
+	};
+
+	private void beginPlacement(final ArrayList<PImage> images)
+	{
+		if (images.size() == 0)
+		{
+			// TODO: Inform user that no image was captured.
+			LogRepository.getInstance().getPaulsLogger().warn("No images returned from capture control!");
+			return;
+		}
+
 		final XBoxControllerManager controllerManager = (XBoxControllerManager) ManagerLocator.getManager(XBoxControllerManager.class);
 		final KeyboardManager keyboardManager = (KeyboardManager) ManagerLocator.getManager(KeyboardManager.class);
-		// final PImage img = getApp().loadImage(_debugFilename);
+		final PImage img = images.get(0);
 		
 		saveSourceImage(img);
 
@@ -367,7 +389,8 @@ public class GameView extends AbstractView
 
 		final XBoxControllableSprite sprite = new XBoxControllableSprite(getApp());
 		sprite.setRotateAroundCenter(true);
-		sprite.addFrame(img);
+		sprite.addFrames(images);
+		sprite.setFPS(3);
 		sprite.x = _physControl.width / 2 - sprite.width / 2;
 		sprite.y = _physControl.height - getApp().height / 2 - sprite.height / 2;
 
@@ -376,65 +399,73 @@ public class GameView extends AbstractView
 		
 		sprites.add(sprite);
 
-		// on update check if our sprite is near the edges and scroll the
-		// view port so we never lose it.
-		sprite.setUpdatedCallback(new ISimpleCallback()
+		sprite.enableController(false);
+		Rectangle lookAtBounds = RectUtils.expand(sprite.getBounds(), 700);
+		_camera.lookAt(lookAtBounds, .5f, new ISimpleCallback()
 		{
+			@Override
 			public void execute()
 			{
-				Float localToGlobal = sprite.localToGlobal();
-				float margin = 5;
-				PApplet app = getApp();
-				if (localToGlobal.x < margin)
+				sprite.enableController(true);
+				sprite.setUpdatedCallback(new ISimpleCallback()
 				{
-					_physControl.x += margin - localToGlobal.x;
-				} else if (localToGlobal.x > app.width - img.width - margin)
-				{
-					_physControl.x -= (localToGlobal.x - app.width + img.width) + margin;
-				}
-
-				if (localToGlobal.y < margin)
-				{
-					float jumpAmt = (margin - localToGlobal.y);
-					_physControl.y += margin - localToGlobal.y;
-					float scaleAmt = (jumpAmt / _physControl.height) * 3;
-					_zoomContainer.scaleX -= scaleAmt;
-					_zoomContainer.scaleY -= scaleAmt;
-
-				} else if (localToGlobal.y > app.height - img.height - margin)
-				{
-					float jumpAmt = (localToGlobal.y - app.height + img.height) + margin;
-					_physControl.y -= (localToGlobal.y - app.height + img.height) + margin;
-					float scaleAmt = (jumpAmt / _physControl.height) * 3;
-					_zoomContainer.scaleX += scaleAmt;
-					_zoomContainer.scaleY += scaleAmt;
-				}
-
-				_zoomContainer.scaleX = MathUtils.clamp(_zoomContainer.scaleX, .37f, 1f);
-				_zoomContainer.scaleY = MathUtils.clamp(_zoomContainer.scaleY, .37f, 1f);
-
-				_physControl.constrainToBounds();
-				sprite.constrainToBounds();
+					public void execute()
+					{
+						Rectangle lookAtBounds = sprite.getBounds();
+						lookAtBounds = RectUtils.expand(lookAtBounds, 700);
+						_camera.lookAt(lookAtBounds);
+						sprite.constrainToBounds();
+					}
+				});
 			}
 		});
+		
 		_physControl.add(sprite);
 
+		// place the human in to the sim
 		final ISimpleCallback placementCallback = new ISimpleCallback()
 		{
 			@Override
 			public void execute()
 			{
 				sprite.enableController(false);
-				_physControl.remove(sprite);
+				
+				//TODO: Zoom out to see the whole tower...
+				_camera.lookAt(new Rectangle((int)_physControl.width / 2 - 600, (int)_physControl.height, 1200,1200), 1f);
+				
 				_physControl.addHuman(sprite);
 				LogRepository.getInstance().getPaulsLogger().info("Placed Sprite in PhysicsControl.");
 				keyboardManager.unregisterKeyOnce('p', this);
 				controllerManager.registerButtonOnce(Button.a, this);
+
+				keyboardManager.unregisterKeyOnce('r', this);
+				controllerManager.registerButtonOnce(Button.b, this);
+			}
+		};
+
+		// remove the human from the sim since its a bad capture.
+		final ISimpleCallback removeCallback = new ISimpleCallback()
+		{
+			@Override
+			public void execute()
+			{
+				sprite.enableController(false);
+				_physControl.remove(sprite);
+				LogRepository.getInstance().getPaulsLogger().info("Removed Sprite.");
+
+				keyboardManager.unregisterKeyOnce('p', this);
+				controllerManager.registerButtonOnce(Button.a, this);
+
+				keyboardManager.unregisterKeyOnce('r', this);
+				controllerManager.registerButtonOnce(Button.b, this);
 			}
 		};
 
 		controllerManager.registerButtonOnce(Button.a, placementCallback);
 		keyboardManager.registerKeyOnce('p', placementCallback);
+
+		controllerManager.registerButtonOnce(Button.b, removeCallback);
+		keyboardManager.registerKeyOnce('r', removeCallback);
 
 		LogRepository.getInstance().getPaulsLogger().info("Captured image of size: " + img.width + ", " + img.height);
 	}
@@ -442,9 +473,9 @@ public class GameView extends AbstractView
 	@Override
 	public void draw()
 	{
-		_background.x = _physControl.x;
-		_background.y = _physControl.y;
-
+		// transforms the root container to the camera's viewport.
+		_camera.update();
+		_camera.setTransform(_zoomContainer);
 		super.draw();
 	}
 }

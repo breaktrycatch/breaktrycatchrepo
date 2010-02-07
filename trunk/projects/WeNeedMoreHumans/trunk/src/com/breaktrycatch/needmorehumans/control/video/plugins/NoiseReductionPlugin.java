@@ -28,7 +28,7 @@ public class NoiseReductionPlugin extends ProcessorPlugin
 	}
 
 	@Override
-	public void configure(HashMap<String, Comparable<?>> conf)
+	public void configure(HashMap<String, Object> conf)
 	{
 		kernel = ((Integer) conf.get(KERNEL)).intValue();
 		threshold = ((Integer) conf.get(THRESHOLD)).intValue();

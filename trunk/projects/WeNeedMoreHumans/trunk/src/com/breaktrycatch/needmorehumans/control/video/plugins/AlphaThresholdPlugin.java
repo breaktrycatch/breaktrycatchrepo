@@ -25,7 +25,7 @@ public class AlphaThresholdPlugin extends ProcessorPlugin
 	}
 
 	@Override
-	public void configure(HashMap<String, Comparable<?>> conf)
+	public void configure(HashMap<String, Object> conf)
 	{
 		alphaThreshold = ((Integer) conf.get(ALPHA_THRESHOLD)).intValue();
 	}
