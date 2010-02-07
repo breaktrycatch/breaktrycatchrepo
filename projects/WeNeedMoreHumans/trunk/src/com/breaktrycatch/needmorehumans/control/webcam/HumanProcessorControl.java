@@ -12,7 +12,9 @@ import toxi.video.capture.plugins.ErosionPlugin;
 import toxi.video.capture.plugins.ProcessorPlugin;
 
 import com.breaktrycatch.needmorehumans.control.video.plugins.ChannelThresholdPlugin;
+import com.breaktrycatch.needmorehumans.control.video.plugins.ContrastPlugin;
 import com.breaktrycatch.needmorehumans.control.video.plugins.GapFillPlugin;
+import com.breaktrycatch.needmorehumans.control.video.plugins.LargestBlobExtraction;
 import com.breaktrycatch.needmorehumans.utils.ImageUtils;
 import com.breaktrycatch.needmorehumans.utils.LogRepository;
 import com.breaktrycatch.needmorehumans.utils.TileImageDrawer;
@@ -31,9 +33,12 @@ public class HumanProcessorControl
 	private PImage _rawFrame;
 	private boolean _processingEnabled;
 	private boolean _debugMode = false;
+	private PApplet _app;
+	private ProcessorPlugin _gapFillPlugin;
 
 	public HumanProcessorControl(PApplet app, SimpleCapture capture)
 	{
+		_app = app;
 		_capture = capture;
 		_processingEnabled = true;
 
@@ -72,14 +77,13 @@ public class HumanProcessorControl
 
 	private void configurePrePipeline()
 	{
-		// HashMap<String, Comparable<?>> contrastConfig = new HashMap<String,
-		// Comparable<?>>();
-		// addPlugin(_prePipeline, ContrastPlugin.class, contrastConfig);
+//		HashMap<String, Object> contrastConfig = new HashMap<String, Object>();
+//		addPlugin(_prePipeline, ContrastPlugin.class, contrastConfig);
 	}
 
 	private void configurePostPipeline()
 	{
-		HashMap<String, Comparable<?>> contractBack = new HashMap<String, Comparable<?>>();
+		HashMap<String, Object> contractBack = new HashMap<String, Object>();
 		contractBack.put(ErosionPlugin.INVERTED, false);
 		contractBack.put(ErosionPlugin.NUM_PASSES, 2);
 		addPlugin(_postPipeline, ErosionPlugin.class, contractBack);
@@ -87,13 +91,13 @@ public class HumanProcessorControl
 
 	private void configurePostFilterPipeline()
 	{
-		// HashMap<String, Comparable<?>> edgeDetect = new HashMap<String,
-		// Comparable<?>>();
+		// HashMap<String, Object> edgeDetect = new HashMap<String,
+		// Object>();
 		// edgeDetect.put(SobelEdgeDetectionPlugin.TOLERANCE, 50);
 		// addPlugin(_postFilterPipeline, SobelEdgeDetectionPlugin.class,
 		// edgeDetect);
 
-//		HashMap<String, Comparable<?>> contractBack = new HashMap<String, Comparable<?>>();
+//		HashMap<String, Object> contractBack = new HashMap<String, Object>();
 //		contractBack.put(ErosionPlugin.INVERTED, false);
 //		contractBack.put(ErosionPlugin.NUM_PASSES, 2);
 //		addPlugin(_postFilterPipeline, ErosionPlugin.class, contractBack);
@@ -101,64 +105,77 @@ public class HumanProcessorControl
 
 	private void configurePipeline()
 	{
-		HashMap<String, Comparable<?>> alphaThresholdConfig = new HashMap<String, Comparable<?>>();
+		HashMap<String, Object> alphaThresholdConfig = new HashMap<String, Object>();
 		alphaThresholdConfig.put(ChannelThresholdPlugin.CHANNEL_THRESHOLD, 10);
 		alphaThresholdConfig.put(ChannelThresholdPlugin.CHANNEL, ChannelThresholdPlugin.BLUE);
 		addPlugin(_pipeline, ChannelThresholdPlugin.class, alphaThresholdConfig);
 
 		// get rid of the little things
-		HashMap<String, Comparable<?>> contractConfig = new HashMap<String, Comparable<?>>();
+		HashMap<String, Object> contractConfig = new HashMap<String, Object>();
 		contractConfig.put(ErosionPlugin.INVERTED, false);
 		contractConfig.put(ErosionPlugin.NUM_PASSES, 2);
 		addPlugin(_pipeline, ErosionPlugin.class, contractConfig);
 
-		HashMap<String, Comparable<?>> fillGaps = new HashMap<String, Comparable<?>>();
+		HashMap<String, Object> fillGaps = new HashMap<String, Object>();
 		fillGaps.put(GapFillPlugin.GAP_FILL, 8);
 		fillGaps.put(GapFillPlugin.START_THRESHOLD, 200);
 		fillGaps.put(GapFillPlugin.END_THRESHOLD, 50);
-		addPlugin(_pipeline, GapFillPlugin.class, fillGaps);
+		_gapFillPlugin = addPlugin(_pipeline, GapFillPlugin.class, fillGaps);
+		
+		
+
+//		HashMap<String, Object> removeBlobConfig = new HashMap<String, Object>();
+//		removeBlobConfig.put(LargestBlobExtraction.OPEN_CV, _subtractor.getOpenCV());
+//		removeBlobConfig.put(LargestBlobExtraction.PAPPLET, _app);
+//		addPlugin(_pipeline, LargestBlobExtraction.class, removeBlobConfig);
+		
+		
 
 		// blow it up huuuuuuge to fill in the holes
-		HashMap<String, Comparable<?>> expandConfig = new HashMap<String, Comparable<?>>();
+		HashMap<String, Object> expandConfig = new HashMap<String, Object>();
 		expandConfig.put(ErosionPlugin.INVERTED, true);
 		expandConfig.put(ErosionPlugin.NUM_PASSES, 6);
 		addPlugin(_pipeline, ErosionPlugin.class, expandConfig);
+		
+		
 
-		// HashMap<String, Comparable<?>> adaptiveThreshold = new
-		// HashMap<String, Comparable<?>>();
+		// HashMap<String, Object> adaptiveThreshold = new
+		// HashMap<String, Object>();
 		// adaptiveThreshold.put(AdaptiveThresholdPlugin.FILTER_CONSTANT, 3);
 		// adaptiveThreshold.put(AdaptiveThresholdPlugin.KERNEL_SIZE, 5);
 		// addPlugin(_pipeline, AdaptiveThresholdPlugin.class,
 		// adaptiveThreshold);
 
 		// // shrink it down to normal.
-		HashMap<String, Comparable<?>> contractBack = new HashMap<String, Comparable<?>>();
+		HashMap<String, Object> contractBack = new HashMap<String, Object>();
 		contractBack.put(ErosionPlugin.INVERTED, false);
 		contractBack.put(ErosionPlugin.NUM_PASSES, 3);
 		addPlugin(_pipeline, ErosionPlugin.class, contractBack);
 
-		// HashMap<String, Comparable<?>> noiseReduction = new HashMap<String,
-		// Comparable<?>>();
+		// HashMap<String, Object> noiseReduction = new HashMap<String,
+		// Object>();
 		// noiseReduction.put(NoiseReductionPlugin.KERNEL, 8);
 		// noiseReduction.put(NoiseReductionPlugin.THRESHOLD, 200);
 		// addPlugin(_pipeline, NoiseReductionPlugin.class, noiseReduction);
 
-		// HashMap<String, Comparable<?>> contractBack = new HashMap<String,
-		// Comparable<?>>();
+		// HashMap<String, Object> contractBack = new HashMap<String,
+		// Object>();
 		// contractBack.put(ErosionPlugin.INVERTED, false);
 		// contractBack.put(ErosionPlugin.NUM_PASSES, 1);
 		// addPlugin(_pipeline, ErosionPlugin.class, contractBack);
 	}
 
-	private void addPlugin(ProcessorPipeline pipeline, Class<?> c, HashMap<String, Comparable<?>> map)
+	private ProcessorPlugin addPlugin(ProcessorPipeline pipeline, Class<?> c, HashMap<String, Object> map)
 	{
 		try
 		{
 			ProcessorPlugin plugin = pipeline.addPlugin(c, Integer.toString(pipeline.list().size()));
 			plugin.configure(map);
+			return plugin;
 		} catch (InvocationTargetException e)
 		{
 			e.printStackTrace();
+			return null;
 		}
 	}
 
@@ -187,7 +204,7 @@ public class HumanProcessorControl
 		PImage maskedFrame = _subtractor.applyDifferenceMask(foreground, mask);
 
 		_subtractor.extractLargestBlob(maskedFrame);
-		// _subtractor.removeShadows(maskedFrame);
+//		 _subtractor.removeShadows(maskedFrame);
 
 		maskedFrame = ImageUtils.trimTransparency(maskedFrame);
 		
@@ -242,12 +259,12 @@ public class HumanProcessorControl
 	public PImage getRawCameraImage()
 	{
 		_rawFrame = _capture.getFrame();
+		_rawFrame.pixels = _prePipeline.process(_rawFrame.pixels, _rawFrame.width, _rawFrame.height);
 		return _rawFrame;
 	}
 
 	public PImage getProcessedImage()
 	{
-		PApplet.println("GET PROCESSED IMAGE " + _captureBackgrounds);
 		if (!_captureBackgrounds)
 		{
 			_rawFrame = _capture.getFrame();

@@ -26,7 +26,7 @@ public class SobelEdgeDetectionPlugin extends ProcessorPlugin
 	}
 
 	@Override
-	public void configure(HashMap<String, Comparable<?>> conf)
+	public void configure(HashMap<String, Object> conf)
 	{
 		tolerance = ((Integer) conf.get(TOLERANCE)).intValue();
 	}

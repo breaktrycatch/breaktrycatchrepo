@@ -2,6 +2,7 @@ package com.breaktrycatch.lib.display;
 
 import java.awt.Rectangle;
 import java.awt.geom.Point2D;
+import java.awt.geom.Point2D.Float;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -14,6 +15,8 @@ import com.breaktrycatch.needmorehumans.utils.LogRepository;
 
 import processing.core.PApplet;
 import processing.core.PGraphics;
+
+import com.breaktrycatch.lib.util.callback.ISimpleCallback;
 
 public class DisplayObject extends ArrayList<DisplayObject>
 {
@@ -30,7 +33,7 @@ public class DisplayObject extends ArrayList<DisplayObject>
 	public float scaleX = 1;
 	public float scaleY = 1;
 	public float rotationRad = 0;
-	
+
 	private PApplet _app;
 	private DisplayObject _parent;
 	private boolean _rotateAroundCenter;
@@ -42,6 +45,8 @@ public class DisplayObject extends ArrayList<DisplayObject>
 	protected PGraphics externalRenderTarget;
 	protected int externalRenderTargetOffsetX;
 	protected int externalRenderTargetOffsetY;
+
+	private Float _scalePoint;
 
 	public DisplayObject(PApplet app)
 	{
@@ -62,33 +67,101 @@ public class DisplayObject extends ArrayList<DisplayObject>
 		externalRenderTarget = null;
 	}
 
-	public void slideTo(int x, int y, float duration)
+	public void scaleTo(float x, float y, float duration)
 	{
-		_activeTweens.add(new SlideTo(getApp(), this, x, y, duration));
+		addTween(new ScaleTo(getApp(), this, x, y, duration));
 	}
 
-	public void slideTo(int x, int y, float duration, Class<Shaper> shape)
+	public void scaleTo(float x, float y, float duration, Object shape)
 	{
-		_activeTweens.add(new SlideTo(getApp(), this, x, y, duration, shape));
+		addTween(new ScaleTo(getApp(), this, x, y, duration, shape));
+	}
+
+	public void scaleTo(float x, float y, float duration, Object shape, ISimpleCallback completeCallback)
+	{
+		addTween(new ScaleTo(getApp(), this, x, y, duration, shape, completeCallback));
+	}
+
+	public void slideTo(int x, int y, float duration)
+	{
+		addTween(new SlideTo(getApp(), this, x, y, duration));
+	}
+
+	public void slideTo(int x, int y, float duration, Object shape)
+	{
+		addTween(new SlideTo(getApp(), this, x, y, duration, shape));
+	}
+
+	public void slideTo(int x, int y, float duration, Object shape, ISimpleCallback completeCallback)
+	{
+		addTween(new SlideTo(getApp(), this, x, y, duration, shape, completeCallback));
 	}
 
 	public void rotateTo(float rot, float duration)
 	{
-		_activeTweens.add(new SlideTo(getApp(), this, x, y, duration));
+		addTween(new RotateTo(getApp(), this, rot, duration));
 	}
 
-	public void rotateTo(float rot, float duration, Class<Shaper> shape)
+	public void rotateTo(float rot, float duration, Object shape)
 	{
-		_activeTweens.add(new SlideTo(getApp(), this, x, y, duration, shape));
+		addTween(new RotateTo(getApp(), this, rot, duration, shape));
+	}
+
+	public void rotateTo(float rot, float duration, Object shape, ISimpleCallback completeCallback)
+	{
+		addTween(new RotateTo(getApp(), this, rot, duration, shape, completeCallback));
+	}
+	
+	public void cancelTweens()
+	{
+		_activeTweens.clear();
+	}
+
+	private void addTween(ITween item)
+	{
+		for (int i = _activeTweens.size() - 1; i >= 0; i--)
+		{
+			ITween existing = _activeTweens.get(i);
+			if (item.getClass() == existing.getClass())
+			{
+				_activeTweens.remove(i);
+			}
+		}
+		
+		_activeTweens.add(item);
+	}
+
+	private void updateTweens()
+	{
+		for (int i = _activeTweens.size() - 1; i >= 0; i--)
+		{
+			ITween tween = _activeTweens.get(i);
+			tween.update();
+			
+			if (tween.isComplete())
+			{
+				tween.finalizeTween();
+				_activeTweens.remove(i);
+			}
+		}
 	}
 
 	public void preDraw()
 	{
+		updateTweens();
 		if (externalRenderTarget == null) {
-			getApp().pushMatrix();
-	
-			getApp().translate(x, y);
-			
+		getApp().pushMatrix();
+
+		getApp().translate(x, y);
+
+		if (getScaleAroundPoint() != null)
+		{
+			Point2D.Float pt = getScaleAroundPoint();
+			getApp().translate(pt.x / 2, pt.y / 2);
+			getApp().scale(scaleX, scaleY);
+			getApp().translate(-pt.x / 2, -pt.y / 2);
+		} else
+		{
 			if (getScaleAroundCenter())
 			{
 				getApp().translate(width / 2, height / 2);
@@ -98,19 +171,10 @@ public class DisplayObject extends ArrayList<DisplayObject>
 			{
 				getApp().translate(-width / 2, -height / 2);
 			}
-			
-			if (getRotateAroundCenter())
-			{
-				getApp().translate(width / 2, height / 2);
-			}
-			getApp().rotate(rotationRad);
-			if (getRotateAroundCenter())
-			{
-				getApp().translate(-width / 2, -height / 2);
-			}
+		}
 		}
 		else {
-		
+
 			LogRepository.getInstance().getJonsLogger().info("ushing and Poppu");
 			externalRenderTarget.pushMatrix();
 
@@ -151,16 +215,6 @@ public class DisplayObject extends ArrayList<DisplayObject>
 
 	public void draw()
 	{
-		for (int i = _activeTweens.size() - 1; i >= 0; i--)
-		{
-			ITween tween = _activeTweens.get(i);
-			tween.update();
-
-			if (tween.isComplete())
-			{
-				_activeTweens.remove(i);
-			}
-		}
 	}
 
 	public void drawChildren()
@@ -182,7 +236,7 @@ public class DisplayObject extends ArrayList<DisplayObject>
 	{
 
 	}
-	
+
 	private void executeRemoves()
 	{
 		for (DisplayObject item : _removeList)
@@ -196,15 +250,14 @@ public class DisplayObject extends ArrayList<DisplayObject>
 	{
 		for (ItemToAdd item : _addList)
 		{
-			if(item.index == -1)
+			if (item.index == -1)
 			{
 				super.add(item.element);
-			}
-			else
+			} else
 			{
 				super.add(item.index, item.element);
 			}
-			
+
 		}
 		_addList.clear();
 	}
@@ -212,24 +265,24 @@ public class DisplayObject extends ArrayList<DisplayObject>
 	private void addToRemovalList(DisplayObject item)
 	{
 		item.setParent(null);
-		if(_addList.contains(item))
+		if (_addList.contains(item))
 		{
 			_addList.remove(item);
 		}
 		_removeList.add(item);
 	}
-	
+
 	private void addToAddList(DisplayObject item, int index)
 	{
 		item.setParent(this);
-		if(_removeList.contains(item))
+		if (_removeList.contains(item))
 		{
 			_removeList.remove(item);
 		}
-		
+
 		_addList.add(new ItemToAdd(item, index));
 	}
-	
+
 	private void addToAddList(DisplayObject item)
 	{
 		addToAddList(item, -1);
@@ -330,7 +383,6 @@ public class DisplayObject extends ArrayList<DisplayObject>
 	{
 		return _rotateAroundCenter;
 	}
-	
 
 	public void setScaleAroundCenter(boolean scaleAroundCenter)
 	{
@@ -342,11 +394,21 @@ public class DisplayObject extends ArrayList<DisplayObject>
 		return _scaleAroundCenter;
 	}
 
+	public void setScaleAroundPoint(Point2D.Float scalePoint)
+	{
+		_scalePoint = scalePoint;
+	}
+
+	public Point2D.Float getScaleAroundPoint()
+	{
+		return _scalePoint;
+	}
+
 	public Rectangle getBounds()
 	{
 		return new Rectangle((int) x, (int) y, (int) (width * scaleX), (int) (height * scaleY));
 	}
-	
+
 	public Rectangle getScreenBounds() {
 		Rectangle bounds = getBounds();
 		Rectangle rec = new Rectangle();
@@ -367,20 +429,19 @@ public class DisplayObject extends ArrayList<DisplayObject>
 	{
 		return PhysicsUtils.radToDeg(rotationRad);
 	}
-	
+
 	public void setRotationDeg(float deg)
 	{
 		rotationRad = PhysicsUtils.degToRad(deg);
 	}
-	
+
 	public Point2D.Float localToGlobal()
 	{
-		if(getParent() != null)
+		if (getParent() != null)
 		{
 			Point2D.Float parent = getParent().localToGlobal();
 			return new Point2D.Float(x + parent.x, y + parent.y);
-		}
-		else
+		} else
 		{
 			return new Point2D.Float(x, y);
 		}
@@ -409,18 +470,30 @@ interface ITween
 	public void update();
 
 	public boolean isComplete();
+
+	public void finalizeTween();
 }
 
-class AbstractTween
+abstract class AbstractTween
 {
-
 	protected Tween _tween;
 	protected DisplayObject _target;
+	protected ISimpleCallback _completeCallback;
 
 	public boolean isComplete()
 	{
 		return !_tween.isTweening();
 	}
+
+	public void finalizeTween()
+	{
+		if (_completeCallback != null)
+		{
+			_completeCallback.execute();
+		}
+	}
+
+	abstract public void update();
 }
 
 class SlideTo extends AbstractTween implements ITween
@@ -430,7 +503,7 @@ class SlideTo extends AbstractTween implements ITween
 	private float _startX;
 	private float _startY;
 
-	private void init(PApplet app, DisplayObject target, float x, float y)
+	public SlideTo(PApplet app, DisplayObject target, float x, float y, float duration, Object shape, ISimpleCallback completeCallback)
 	{
 		_target = target;
 
@@ -439,18 +512,24 @@ class SlideTo extends AbstractTween implements ITween
 
 		_targetX = x;
 		_targetY = y;
+
+		_completeCallback = completeCallback;
+		_tween = new Tween(app, duration, Tween.SECONDS, shape);
 	}
 
-	public SlideTo(PApplet app, DisplayObject target, float x, float y, float duration, Class<Shaper> shape)
+	public SlideTo(PApplet app, DisplayObject target, float x, float y, float duration, ISimpleCallback completeCallback)
 	{
-		init(app, target, x, y);
-		_tween = new Tween(app, duration, Tween.SECONDS, shape);
+		this(app, target, x, y, duration, null, completeCallback);
+	}
+
+	public SlideTo(PApplet app, DisplayObject target, float x, float y, float duration, Object shape)
+	{
+		this(app, target, x, y, duration, shape, null);
 	}
 
 	public SlideTo(PApplet app, DisplayObject target, float x, float y, float duration)
 	{
-		init(app, target, x, y);
-		_tween = new Tween(app, duration, Tween.SECONDS);
+		this(app, target, x, y, duration, null, null);
 	}
 
 	public void update()
@@ -461,12 +540,73 @@ class SlideTo extends AbstractTween implements ITween
 
 			_target.x = _startX + (int) ((_targetX - _startX) * amt);
 			_target.y = _startY + (int) ((_targetY - _startY) * amt);
+			
+			PApplet.println("Sliding to: "+  _target.x + " : " + _target.y);
 		}
 	}
 
-	public boolean isComplete()
+	@Override
+	public void finalizeTween()
 	{
-		return !_tween.isTweening();
+		_target.x = _targetX;
+		_target.y = _targetY;
+		super.finalizeTween();
+	}
+}
+
+class ScaleTo extends AbstractTween implements ITween
+{
+	private float _targetX;
+	private float _targetY;
+	private float _startX;
+	private float _startY;
+
+	public ScaleTo(PApplet app, DisplayObject target, float x, float y, float duration, Object shape, ISimpleCallback completeCallback)
+	{
+		_target = target;
+
+		_startX = target.scaleX;
+		_startY = target.scaleY;
+
+		_targetX = x;
+		_targetY = y;
+
+		_completeCallback = completeCallback;
+		_tween = new Tween(app, duration, Tween.SECONDS, shape);
+	}
+
+	public ScaleTo(PApplet app, DisplayObject target, float x, float y, float duration, ISimpleCallback completeCallback)
+	{
+		this(app, target, x, y, duration, null, completeCallback);
+	}
+
+	public ScaleTo(PApplet app, DisplayObject target, float x, float y, float duration, Object shape)
+	{
+		this(app, target, x, y, duration, shape, null);
+	}
+
+	public ScaleTo(PApplet app, DisplayObject target, float x, float y, float duration)
+	{
+		this(app, target, x, y, duration, null, null);
+	}
+
+	public void update()
+	{
+		if (_tween.isTweening())
+		{
+			float amt = _tween.time() * _tween.position();
+
+			_target.scaleX = _startX + ((_targetX - _startX) * amt);
+			_target.scaleY = _startY + ((_targetY - _startY) * amt);
+		}
+	}
+
+	@Override
+	public void finalizeTween()
+	{
+		_target.scaleX = _targetX;
+		_target.scaleY = _targetY;
+		super.finalizeTween();
 	}
 }
 
@@ -475,24 +615,30 @@ class RotateTo extends AbstractTween implements ITween
 	private float _targetRotation;
 	private float _startRotation;
 
-	private void init(PApplet app, DisplayObject target, float rot)
+	public RotateTo(PApplet app, DisplayObject target, float rot, float duration, Object shape, ISimpleCallback completeCallback)
 	{
 		_target = target;
 
 		_startRotation = target.rotationRad;
 		_targetRotation = rot;
+
+		_completeCallback = completeCallback;
+		_tween = new Tween(app, duration, Tween.SECONDS, shape);
 	}
 
-	public RotateTo(PApplet app, DisplayObject target, float rot, float duration, Class<Shaper> shape)
+	public RotateTo(PApplet app, DisplayObject target, float rot, float duration, ISimpleCallback completeCallback)
 	{
-		init(app, target, rot);
-		_tween = new Tween(app, duration, Tween.SECONDS, shape);
+		this(app, target, rot, duration, null, completeCallback);
+	}
+
+	public RotateTo(PApplet app, DisplayObject target, float rot, float duration, Object shape)
+	{
+		this(app, target, rot, duration, shape, null);
 	}
 
 	public RotateTo(PApplet app, DisplayObject target, float rot, float duration)
 	{
-		init(app, target, rot);
-		_tween = new Tween(app, duration, Tween.SECONDS);
+		this(app, target, rot, duration, null, null);
 	}
 
 	public void update()
@@ -502,5 +648,12 @@ class RotateTo extends AbstractTween implements ITween
 			float amt = _tween.time() * _tween.position();
 			_target.rotationRad = _startRotation + ((_targetRotation - _startRotation) * amt);
 		}
+	}
+
+	@Override
+	public void finalizeTween()
+	{
+		_target.rotationRad = _targetRotation;
+		super.finalizeTween();
 	}
 }

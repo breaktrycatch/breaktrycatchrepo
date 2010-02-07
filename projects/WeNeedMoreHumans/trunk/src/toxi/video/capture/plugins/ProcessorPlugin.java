@@ -60,7 +60,7 @@ public abstract class ProcessorPlugin {
 	 * 
 	 * @param conf
 	 */
-	public void configure(HashMap<String, Comparable<?>> conf) {
+	public void configure(HashMap<String, Object> conf) {
 
 	}
 

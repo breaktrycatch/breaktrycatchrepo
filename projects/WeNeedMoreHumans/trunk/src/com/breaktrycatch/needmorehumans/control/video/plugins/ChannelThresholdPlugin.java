@@ -34,7 +34,7 @@ public class ChannelThresholdPlugin extends ProcessorPlugin
 	}
 
 	@Override
-	public void configure(HashMap<String, Comparable<?>> conf)
+	public void configure(HashMap<String, Object> conf)
 	{
 		channelThreshold = ((Integer) conf.get(CHANNEL_THRESHOLD)).intValue();
 		channel = ((Integer) conf.get(CHANNEL)).intValue();

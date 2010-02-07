@@ -42,7 +42,7 @@ public class BorderPlugin extends ProcessorPlugin {
 	 * 
 	 * @see toxi.video.capture.plugins.ProcessorPlugin#configure(java.util.HashMap)
 	 */
-	public void configure(HashMap<String, Comparable<?>> conf) {
+	public void configure(HashMap<String, Object> conf) {
 		color = ((Integer) conf.get(BORDER_color)).intValue();
 		color |= 0xff000000;
 	}

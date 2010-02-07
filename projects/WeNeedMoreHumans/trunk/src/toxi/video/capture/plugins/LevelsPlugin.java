@@ -54,7 +54,7 @@ public class LevelsPlugin extends ProcessorPlugin {
 		super(p, id);
 	}
 
-	public void configure(HashMap<String, Comparable<?>> conf) {
+	public void configure(HashMap<String, Object> conf) {
 		low = ((Integer) conf.get(LOW)).intValue();
 		high = ((Integer) conf.get(HIGH)).intValue();
 	}

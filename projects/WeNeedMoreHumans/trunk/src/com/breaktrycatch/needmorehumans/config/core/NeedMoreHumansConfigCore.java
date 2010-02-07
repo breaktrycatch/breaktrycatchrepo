@@ -12,6 +12,7 @@ import com.breaktrycatch.needmorehumans.control.video.PS3EyeCapture;
 import com.breaktrycatch.needmorehumans.control.webcam.HumanProcessorControl;
 import com.breaktrycatch.needmorehumans.utils.ConfigTools;
 import com.breaktrycatch.needmorehumans.utils.ImageUtils;
+import com.breaktrycatch.needmorehumans.utils.TileImageDrawer;
 
 import controlP5.CheckBox;
 import controlP5.ControlEvent;
@@ -38,13 +39,14 @@ public class NeedMoreHumansConfigCore extends Stage
 	private int _cameraWidth;
 	private int _cameraHeight;
 	private static final String CAPTURE = "capture";
+	private TileImageDrawer tileImageDrawer;
 
 	public NeedMoreHumansConfigCore(PApplet app)
 	{
 		super(app);
 
 		app.frameRate(60);
-		app.size(ConfigTools.getInt(CAPTURE, "cameraWidth") + 50, ConfigTools.getInt(CAPTURE, "cameraHeight") + 400, PApplet.P2D);
+		app.size(ConfigTools.getInt(CAPTURE, "cameraWidth") + 350, ConfigTools.getInt(CAPTURE, "cameraHeight") + 400, PApplet.P2D);
 		createUI(app);
 		createCamera(app);
 	}
@@ -65,6 +67,12 @@ public class NeedMoreHumansConfigCore extends Stage
 		_control.setScale(ConfigTools.getFloat(CAPTURE, "subtractionScale"));
 		_control.setShadowThreshold(ConfigTools.getFloat(CAPTURE, "shadowThreshold"));
 		_control.setProcessingEnabled(false);
+
+		tileImageDrawer = new TileImageDrawer(app, .4f, 300);
+		tileImageDrawer.x = 300;
+		add(tileImageDrawer);
+		_control.setDebugDrawer(tileImageDrawer);
+
 	}
 
 	private void createUI(PApplet app)
@@ -176,7 +184,7 @@ public class NeedMoreHumansConfigCore extends Stage
 	@Override
 	public void draw()
 	{
-
+		tileImageDrawer.reset();
 		getApp().background(0);
 		super.draw();
 
@@ -184,12 +192,6 @@ public class NeedMoreHumansConfigCore extends Stage
 		{
 			control.draw(getApp());
 		}
-
-		_controlP5.draw();
-		_capture.read();
-		_control.update();
-		
-		PApplet.println("USE SUB> " + System.nanoTime());
 
 		if (!_useSubtractor)
 		{
@@ -199,13 +201,18 @@ public class NeedMoreHumansConfigCore extends Stage
 			if (!_control.isCapturingBackgrounds())
 			{
 				PImage masked = _control.getProcessedImage();
-				
+
 				ImageUtils.tint(masked, 0xff0000, 1);
-				
+
 				getApp().image(_control.getRawCameraImage(), (getApp().width - _cameraWidth) / 2, getApp().height - _cameraHeight - 20);
 				getApp().image(masked, (getApp().width - _cameraWidth) / 2, getApp().height - _cameraHeight - 20);
 			}
 		}
+
+		_controlP5.draw();
+		_capture.read();
+		_control.update();
+
 	}
 
 	@Override

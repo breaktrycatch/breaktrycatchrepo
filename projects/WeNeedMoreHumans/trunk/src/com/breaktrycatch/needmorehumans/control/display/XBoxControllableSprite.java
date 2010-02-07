@@ -19,9 +19,6 @@ import com.esotericsoftware.controller.device.Axis;
 
 public class XBoxControllableSprite extends Sprite
 {
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 
 	private Vec2D _velocity;
@@ -39,7 +36,7 @@ public class XBoxControllableSprite extends Sprite
 		public void execute(float value)
 		{
 			_updatedRot = true;
-			_rotation += value;
+			_rotation += value / 2;
 			_rotation = MathUtils.clamp(_rotation, -MAX_ROT, MAX_ROT);
 		}
 	};
@@ -49,7 +46,7 @@ public class XBoxControllableSprite extends Sprite
 		public void execute(float value)
 		{
 			_updatedRot = true;
-			_rotation -= value;
+			_rotation -= value / 2;
 			_rotation = MathUtils.clamp(_rotation, -MAX_ROT, MAX_ROT);
 		}
 	};
@@ -69,7 +66,7 @@ public class XBoxControllableSprite extends Sprite
 		public void execute(float value)
 		{
 			_updatedVel = true;
-			_velocity.y += value;
+			_velocity.y -= value;
 			_velocity.y = MathUtils.clamp(_velocity.y, -MAX_VEL, MAX_VEL);
 		}
 	};
@@ -110,7 +107,7 @@ public class XBoxControllableSprite extends Sprite
 	{
 		public void execute()
 		{
-			rightTrigger.execute(.3f);
+			rightTrigger.execute(.01f);
 		}
 	};
 
@@ -118,7 +115,7 @@ public class XBoxControllableSprite extends Sprite
 	{
 		public void execute()
 		{
-			leftTrigger.execute(.3f);
+			leftTrigger.execute(.01f);
 		}
 	};
 
@@ -199,7 +196,9 @@ public class XBoxControllableSprite extends Sprite
 			}
 
 			x += _velocity.x;
-			y -= _velocity.y;
+			y += _velocity.y;
+			
+			PApplet.println("VEL X : " + x + " : " + _velocity.x);
 
 			_updatedVel = false;
 			_updatedRot = false;
@@ -243,6 +242,7 @@ public class XBoxControllableSprite extends Sprite
 		if (_scrollBounds != null)
 		{
 			Point2D.Float pt = RectUtils.constrain(new Point2D.Float((int) x, (int) y), _scrollBounds);
+			
 			this.x = pt.x;
 			this.y = pt.y;
 		}

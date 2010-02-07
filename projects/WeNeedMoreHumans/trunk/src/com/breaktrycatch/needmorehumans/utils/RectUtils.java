@@ -35,12 +35,46 @@ public class RectUtils
 
 		return pt;
 	}
-	
+
 	public static DisplayObject constrainDisplayObject(DisplayObject obj, Rectangle bounds)
 	{
 		Point2D.Float pt = RectUtils.constrain(new Point2D.Float((int) obj.x, (int) obj.y), bounds);
 		obj.x = pt.x;
 		obj.y = pt.y;
 		return obj;
+	}
+
+	public static float getRectRatio(Rectangle target, float targetSize)
+	{
+		float ratio = 1;
+		if (target.width > target.height)
+			ratio = targetSize / target.width;
+		else if (target.height > target.width)
+			ratio = targetSize / target.height;
+		else if (target.height == target.width)
+			ratio = targetSize / target.height;
+		return ratio;
+	}
+
+	public static Rectangle expand(Rectangle rect, int expansionAmt)
+	{
+		rect.x -= expansionAmt / 2;
+		rect.width += expansionAmt;
+
+		rect.y -= expansionAmt / 2;
+		rect.height += expansionAmt;
+		
+		return rect;
+	}
+	
+	public static Rectangle expand(Rectangle rect, int expandWidth, int expandHeight)
+	{
+		rect.x -= expandWidth / 2;
+		rect.width += expandWidth;
+
+		rect.y -= expandHeight / 2;
+		rect.height += expandHeight;
+		
+		return rect;
 	}
 }

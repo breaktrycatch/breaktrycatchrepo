@@ -471,4 +471,9 @@ public class ImageSubstractionController
 	{
 		return (foreground.width == _backgroundImage.width && foreground.height == _backgroundImage.height);
 	}
+	
+	public OpenCV getOpenCV()
+	{
+		return _cv;
+	}
 }

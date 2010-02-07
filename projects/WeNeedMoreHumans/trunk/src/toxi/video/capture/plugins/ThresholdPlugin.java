@@ -43,7 +43,7 @@ public class ThresholdPlugin extends ProcessorPlugin {
 	 * 
 	 * @see toxi.video.capture.plugins.ProcessorPlugin#configure(java.util.HashMap)
 	 */
-	public void configure(HashMap<String, Comparable<?>> conf) {
+	public void configure(HashMap<String, Object> conf) {
 		threshold = ((Integer) conf.get(THRESHOLD)).intValue();
 	}
 

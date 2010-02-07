@@ -1,5 +1,7 @@
 package com.breaktrycatch.needmorehumans.control.webcam;
 
+import java.util.ArrayList;
+
 import processing.core.PApplet;
 import processing.core.PImage;
 import toxi.video.capture.SimpleCapture;
@@ -9,6 +11,7 @@ import com.breaktrycatch.lib.component.ManagerLocator;
 import com.breaktrycatch.lib.display.DisplayObject;
 import com.breaktrycatch.lib.util.callback.ISimpleCallback;
 import com.breaktrycatch.needmorehumans.control.video.PS3EyeCapture;
+import com.breaktrycatch.needmorehumans.control.webcam.callback.ICaptureCallback;
 import com.breaktrycatch.needmorehumans.utils.ConfigTools;
 import com.breaktrycatch.needmorehumans.utils.TileImageDrawer;
 
@@ -27,6 +30,12 @@ public class CaptureControl extends DisplayObject
 	private HumanProcessorControl _processor;
 	private TileImageDrawer _debugDrawer;
 	private boolean _initialized;
+	private boolean _capturing;
+	private ArrayList<PImage> _capturedImages;
+
+	private ICaptureCallback _captureCompleteCallback;
+
+	private int _imagesToCapture;
 
 	private static final String CAPTURE = "capture";
 
@@ -98,6 +107,16 @@ public class CaptureControl extends DisplayObject
 		if (_initialized)
 		{
 			_processor.update();
+
+			if (_capturing)
+			{
+				_capturedImages.add(_processor.getProcessedImage());
+				if (_capturedImages.size() >= _imagesToCapture)
+				{
+					executeCaptureCallback();
+				}
+			}
+
 			_debugDrawer.reset();
 		}
 	}
@@ -107,5 +126,25 @@ public class CaptureControl extends DisplayObject
 		_debugDrawer.setEnabled(debug);
 		_debugDrawer.width = width;
 		_debugDrawer.height = height;
+	}
+
+	public void beginCapture(int imagesToCapture, ICaptureCallback iCaptureCallback)
+	{
+		if (_initialized)
+		{
+			_imagesToCapture = imagesToCapture;
+			_captureCompleteCallback = iCaptureCallback;
+			_capturedImages = new ArrayList<PImage>();
+			_capturing = true;
+		} else
+		{
+			_captureCompleteCallback.execute(null);
+		}
+	}
+
+	private void executeCaptureCallback()
+	{
+		_capturing = false;
+		_captureCompleteCallback.execute(_capturedImages);
 	}
 }

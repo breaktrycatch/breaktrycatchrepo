@@ -49,7 +49,7 @@ public class AdaptiveThresholdPlugin extends ProcessorPlugin
 	 * 
 	 * @see toxi.video.capture.plugins.ProcessorPlugin#configure(java.util.HashMap)
 	 */
-	public void configure(HashMap<String, Comparable<?>> conf)
+	public void configure(HashMap<String, Object> conf)
 	{
 		kernelSize = ((Integer) conf.get(KERNEL_SIZE)).intValue();
 		filterConst = ((Integer) conf.get(FILTER_CONSTANT)).intValue();

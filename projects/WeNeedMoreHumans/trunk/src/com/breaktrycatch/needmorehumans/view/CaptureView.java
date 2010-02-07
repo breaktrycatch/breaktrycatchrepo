@@ -133,13 +133,8 @@ public class CaptureView extends AbstractView
 				_imageCaptured = true;
 				_processor.setProcessingEnabled(false);
 				
-				
 				app.key = 'q';
-				
-
-				
 			}
-
 		}
 
 		if (_imageAnalysis != null)
