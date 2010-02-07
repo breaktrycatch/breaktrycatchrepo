@@ -23,6 +23,7 @@ import com.breaktrycatch.lib.display.DisplayObject;
 import com.breaktrycatch.needmorehumans.model.PhysicsShapeDefVO;
 import com.breaktrycatch.needmorehumans.model.PolyVO;
 import com.breaktrycatch.needmorehumans.utils.LogRepository;
+import com.breaktrycatch.needmorehumans.utils.PhysicsUtils;
 
 public class PhysicsWorldWrapper {
 
@@ -85,29 +86,44 @@ public class PhysicsWorldWrapper {
 					continue;
 			}
 			
-			if(body.getUserData() != null)
-			{
-				DisplayObject actor = (body.getUserData() instanceof PhysicsUserDataVO) ? ((PhysicsUserDataVO)body.getUserData()).display : (DisplayObject)body.getUserData();
-				Vec2 pos = worldToScreen(body.getPosition());
-				
-				//Maybe this is a lie
-				//TODO: THIS IS A TEMP HACK TO GET THE IMAGE TO ROUGHLY LINE UP WITH THE PHYSICS DATA
-				//THis will be fixed once we have proper alignment of the polydata
-				pos.x -= (actor.width/2.0f);
-				pos.y -= (actor.height/2.0f);
-				
-				actor.x = (int)pos.x;
-				actor.y = (int)pos.y;
-				actor.rotationRad = -body.getAngle();
-			}
+			DisplayObject actor = getDisplayFromUserData(body.getUserData());
+			if(actor == null) { continue; }
 			
+			
+			Vec2 pos = worldToScreen(body.getPosition());
+			
+			//Maybe this is a lie
+			//TODO: THIS IS A TEMP HACK TO GET THE IMAGE TO ROUGHLY LINE UP WITH THE PHYSICS DATA
+			//THis will be fixed once we have proper alignment of the polydata
+			pos.x -= (actor.width/2.0f);
+			pos.y -= (actor.height/2.0f);
+			
+			actor.x = (int)pos.x;
+			actor.y = (int)pos.y;
+			actor.rotationRad = -body.getAngle();
 		}
 		
 		
-		processHumanToHumanContacts();
-		processHumanToBreakerContacts();
+		//processHumanToHumanContacts();
+		//processHumanToBreakerContacts();
+		_reportedHumanBreakerContacts.clear();
+		_reportedHumanHumanContacts.clear();
 		
 //		_world.drawDebugData();
+	}
+	
+	private DisplayObject getDisplayFromUserData(Object userData)
+	{
+		if(userData instanceof PhysicsUserDataVO)
+		{
+			return ((PhysicsUserDataVO)userData).display;
+		}
+		else if(userData instanceof DisplayObject)
+		{
+			return (DisplayObject)userData;
+		}
+		
+		return null;
 	}
 	
 	private void processHumanToHumanContacts()
@@ -116,7 +132,7 @@ public class PhysicsWorldWrapper {
 		ArrayList<ContactID> handledContacts = new ArrayList<ContactID>();
 		
 		final float _JOINT_SIZE = 0.05f;
-		final double _SNAP_RADIUS = 0.05;
+		final double _SNAP_RADIUS = 0.10;
 		
 		for(int i=0; i<_reportedHumanHumanContacts.size(); i++)
 		{
@@ -132,8 +148,11 @@ public class PhysicsWorldWrapper {
 			PhysicsUserDataVO data2 = (PhysicsUserDataVO)body2.getUserData();
 			
 			//Find the actor points for the joint if any exist (may only exist on/near extremities)
-			Vec2 body1Anchor = findExtremityNearContact(data1.extremities, body1.getPosition(), contact.position, _SNAP_RADIUS);
-			Vec2 body2Anchor = findExtremityNearContact(data2.extremities, body2.getPosition(), contact.position, _SNAP_RADIUS);
+			PhysicsControl.DEBUG_APP.stroke(0xFFFF0000);
+			Vec2 body1Anchor = findExtremityNearContact(data1.extremities, body1.getPosition(), body1.getAngle(), contact.position, _SNAP_RADIUS, data1.display);
+			PhysicsControl.DEBUG_APP.stroke(0x0000FF00);
+			Vec2 body2Anchor = findExtremityNearContact(data2.extremities, body2.getPosition(), body2.getAngle(), contact.position, _SNAP_RADIUS, data2.display);
+			//data2.display.x += 400;
 			
 			//Check to make sure two extremities were found
 			if(body1Anchor == null || body2Anchor == null) { continue; }
@@ -142,7 +161,7 @@ public class PhysicsWorldWrapper {
 			//if(sharedJointExists(body1, body2)){ continue; }
 			
 			
-			Vec2 jointHalfLength = contact.normal.mul(_JOINT_SIZE);
+			//Vec2 jointHalfLength = contact.normal.mul(_JOINT_SIZE);
 			//Create a joint between the two objects
 			DistanceJointDef jd = new DistanceJointDef();
 			jd.collideConnected = true;
@@ -213,12 +232,37 @@ public class PhysicsWorldWrapper {
 	}
 	
 	//Try to find an extremity near the contact position.  The vector returned(if any) have been translated into world coordinates from a position relative to the body
-	private Vec2 findExtremityNearContact(Vec2[] extremities, Vec2 extremityParentPos, Vec2 contact, double searchDistance)
+	private Vec2 findExtremityNearContact(Vec2[] extremities, Vec2 extremityParentPos, float extremityParentRot, Vec2 contact, double searchDistance, DisplayObject extremityParent)
 	{
+		PhysicsControl.DEBUG_APP.fill(0x990000FF);
+		Vec2 sContact = worldToScreen(contact.x, contact.y);
+		PhysicsControl.DEBUG_APP.rect(sContact.x-5, sContact.y-5, 10, 10);
+//		extremityParentRot = 0;
+//		x' = x * cosine(theta) + y * sine(theta)
+//		y' = x * sine(theta) - y * cosine(theta)
+		float sinRot = (float)Math.sin(extremityParentRot);
+		float cosRot = (float)Math.cos(extremityParentRot);
+		
 		for (Vec2 extremity : extremities) {
 			//is the extremity within the snap radius of the contact point
-			Vec2 worldExtremity = extremity.add(extremityParentPos);
-			if(Math.sqrt(Math.pow(worldExtremity.x - contact.x, 2) + Math.pow(worldExtremity.y - contact.y, 2)) < searchDistance)
+			float extremityToOrigin = extremity.length();
+			Vec2 worldExtremity = extremity.clone();
+//			worldExtremity.x = (float)(extremityToOrigin * Math.cos(extremityParentRot));
+//			worldExtremity.y = (float)(extremityToOrigin * Math.sin(extremityParentRot));
+			worldExtremity.x = (extremity.x * cosRot) + (extremity.y * sinRot);
+			worldExtremity.y = (extremity.x * sinRot) - (extremity.y * cosRot);
+			worldExtremity.addLocal(extremityParentPos);
+			
+			
+			
+			Vec2 sExtrem = worldToScreen(worldExtremity.x, worldExtremity.y);
+			PhysicsControl.DEBUG_APP.line(sContact.x, sContact.y, sExtrem.x, sExtrem.y);
+			//Vec2 sLocExtrem = PhysicsUtils.genericTransform(extremity, 1/_physScale, new Vec2(0,0), new Vec2(1, -1), false);
+			//extremityParent.ellipse((int)sLocExtrem.x, (int)sLocExtrem.y, (int)10, (int)10);
+			PhysicsControl.DEBUG_APP.ellipse(sExtrem.x, sExtrem.y, 10, 10);
+			
+			double distance = Math.sqrt(Math.pow(worldExtremity.x - contact.x, 2) + Math.pow(worldExtremity.y - contact.y, 2));
+			if(distance < searchDistance)
 			{
 				return extremity;
 			}

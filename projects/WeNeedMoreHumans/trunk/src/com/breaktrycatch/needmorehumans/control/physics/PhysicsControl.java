@@ -9,7 +9,6 @@ import org.jbox2d.dynamics.Body;
 
 import processing.core.PApplet;
 import processing.core.PImage;
-import quicktime.std.clocks.ExtremesCallBack;
 
 import com.breaktrycatch.lib.display.DisplayObject;
 import com.breaktrycatch.lib.display.ImageFrame;
@@ -26,6 +25,7 @@ public class PhysicsControl extends DisplayObject
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
+	public static PApplet DEBUG_APP;
 	private PhysicsWorldWrapper _physWorld;
 	private Point _lastMousePos;
 	private Rectangle _scrollBounds;
@@ -33,6 +33,7 @@ public class PhysicsControl extends DisplayObject
 	public PhysicsControl(PApplet app)
 	{
 		super(app);
+		DEBUG_APP = app;
 		_scrollBounds = new Rectangle(-Integer.MAX_VALUE / 2, -Integer.MAX_VALUE / 2, Integer.MAX_VALUE, Integer.MAX_VALUE);
 	}
 
@@ -120,10 +121,13 @@ public class PhysicsControl extends DisplayObject
 		
 		//Convert all of the extremity points to world space
 		Vec2 axisTransform = new Vec2(1, -1);
-		Vec2 offset = new Vec2(sprite.width/2.0f, sprite.height/2.0f);
+		//Vec2 offset = new Vec2(sprite.width/2.0f, sprite.height/2.0f);
+		Vec2 offset = new Vec2(0.0f, 0.0f);
 		
 		for (Vec2 extremity : analyzedBody.extremities) 
 		{
+			//extremity.mulLocal(_physWorld.getPhysScale());
+			//extremity.y *= -1.0f;
 			PhysicsUtils.genericTransform(extremity, _physWorld.getPhysScale(), offset, axisTransform, true);
 		}
 		
@@ -141,10 +145,11 @@ public class PhysicsControl extends DisplayObject
 	public void draw()
 	{
 		// TODO Auto-generated method stub
-		super.draw();
+		
 
 		getApp().fill(0x22000000);
 		getApp().rect(0, 0, width, height);
+		//getApp().tint(0,0,0,90);
 		if (getApp().mouseX > this.x && getApp().mouseX < this.width + this.x && getApp().mousePressed)
 		{
 			if (_lastMousePos != null)
@@ -161,6 +166,8 @@ public class PhysicsControl extends DisplayObject
 		
 		constrainToBounds();
 		_physWorld.step();
+		
+		super.draw();
 	}
 
 	public void constrainToBounds()
