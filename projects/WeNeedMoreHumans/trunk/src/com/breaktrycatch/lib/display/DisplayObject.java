@@ -6,12 +6,9 @@ import java.awt.geom.Point2D.Float;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import megamu.shapetween.Shaper;
 import megamu.shapetween.Tween;
 
 import org.jbox2d.p5.PhysicsUtils;
-
-import com.breaktrycatch.needmorehumans.utils.LogRepository;
 
 import processing.core.PApplet;
 import processing.core.PGraphics;
@@ -33,16 +30,18 @@ public class DisplayObject extends ArrayList<DisplayObject>
 	public float scaleX = 1;
 	public float scaleY = 1;
 	public float rotationRad = 0;
+	
+	protected PGraphics _drawTarget;
 
 	private PApplet _app;
 	private DisplayObject _parent;
 	private boolean _rotateAroundCenter;
 	private ArrayList<DisplayObject> _removeList;
-	protected ArrayList<ItemToAdd> _addList;
+	private ArrayList<ItemToAdd> _addList;
 
 	private boolean _scaleAroundCenter;
-	
-	protected PGraphics externalRenderTarget;
+
+	// protected PGraphics externalRenderTarget;
 	protected int externalRenderTargetOffsetX;
 	protected int externalRenderTargetOffsetY;
 
@@ -50,21 +49,23 @@ public class DisplayObject extends ArrayList<DisplayObject>
 
 	public DisplayObject(PApplet app)
 	{
-		_app = app;
+		setApp(app);
+
 		_activeTweens = new ArrayList<ITween>();
 		_removeList = new ArrayList<DisplayObject>();
 		_addList = new ArrayList<ItemToAdd>();
 	}
-	
-	public void enableExternalRenderTarget(PGraphics _externalRenderTarget, int _ertoX, int _ertoY) {
-		externalRenderTarget = _externalRenderTarget;
+
+	public void enableExternalRenderTarget(PGraphics _externalRenderTarget, int _ertoX, int _ertoY)
+	{
+		_drawTarget = _externalRenderTarget;
 		externalRenderTargetOffsetX = _ertoX;
 		externalRenderTargetOffsetY = _ertoY;
-		LogRepository.getInstance().getJonsLogger().info("Render Target Set");
 	}
-	
-	public void disableExternalRenderTarget() {
-		externalRenderTarget = null;
+
+	public void disableExternalRenderTarget()
+	{
+		_drawTarget = _app.g;
 	}
 
 	public void scaleTo(float x, float y, float duration)
@@ -111,7 +112,7 @@ public class DisplayObject extends ArrayList<DisplayObject>
 	{
 		addTween(new RotateTo(getApp(), this, rot, duration, shape, completeCallback));
 	}
-	
+
 	public void cancelTweens()
 	{
 		_activeTweens.clear();
@@ -127,7 +128,7 @@ public class DisplayObject extends ArrayList<DisplayObject>
 				_activeTweens.remove(i);
 			}
 		}
-		
+
 		_activeTweens.add(item);
 	}
 
@@ -137,7 +138,7 @@ public class DisplayObject extends ArrayList<DisplayObject>
 		{
 			ITween tween = _activeTweens.get(i);
 			tween.update();
-			
+
 			if (tween.isComplete())
 			{
 				tween.finalizeTween();
@@ -149,68 +150,43 @@ public class DisplayObject extends ArrayList<DisplayObject>
 	public void preDraw()
 	{
 		updateTweens();
-		if (externalRenderTarget == null) {
-		getApp().pushMatrix();
 
-		getApp().translate(x, y);
+		_drawTarget.pushMatrix();
+		_drawTarget.translate(x, y);
 
 		if (getScaleAroundPoint() != null)
 		{
 			Point2D.Float pt = getScaleAroundPoint();
-			getApp().translate(pt.x / 2, pt.y / 2);
-			getApp().scale(scaleX, scaleY);
-			getApp().translate(-pt.x / 2, -pt.y / 2);
+			_drawTarget.translate(pt.x / 2, pt.y / 2);
+			_drawTarget.scale(scaleX, scaleY);
+			_drawTarget.translate(-pt.x / 2, -pt.y / 2);
 		} else
 		{
 			if (getScaleAroundCenter())
 			{
-				getApp().translate(width / 2, height / 2);
+				_drawTarget.translate(width / 2, height / 2);
 			}
-			getApp().scale(scaleX, scaleY);
+			_drawTarget.scale(scaleX, scaleY);
 			if (getScaleAroundCenter())
 			{
-				getApp().translate(-width / 2, -height / 2);
+				_drawTarget.translate(-width / 2, -height / 2);
 			}
 		}
+		
+		if (getRotateAroundCenter())
+		{
+			_drawTarget.translate(width / 2, height / 2);
 		}
-		else {
-
-			LogRepository.getInstance().getJonsLogger().info("ushing and Poppu");
-			externalRenderTarget.pushMatrix();
-
-			externalRenderTarget.translate(x, y);
-			
-			if (getScaleAroundCenter())
-			{
-				externalRenderTarget.translate(width / 2, height / 2);
-			}
-			externalRenderTarget.scale(scaleX, scaleY);
-			if (getScaleAroundCenter())
-			{
-				externalRenderTarget.translate(-width / 2, -height / 2);
-			}
-			
-			if (getRotateAroundCenter())
-			{
-				externalRenderTarget.translate(width / 2, height / 2);
-			}
-			externalRenderTarget.rotate(rotationRad);
-			if (getRotateAroundCenter())
-			{
-				externalRenderTarget.translate(-width / 2, -height / 2);
-			}
+		_drawTarget.rotate(rotationRad);
+		if (getRotateAroundCenter())
+		{
+			_drawTarget.translate(-width / 2, -height / 2);
 		}
-
 	}
 
 	public void postDraw()
 	{
-		if (externalRenderTarget == null) {
-			getApp().popMatrix();
-		}
-		else {
-			externalRenderTarget.popMatrix();
-		}
+		_drawTarget.popMatrix();
 	}
 
 	public void draw()
@@ -329,6 +305,7 @@ public class DisplayObject extends ArrayList<DisplayObject>
 	protected void setApp(PApplet app)
 	{
 		_app = app;
+		_drawTarget = (app != null) ? (app.g) : (null);
 	}
 
 	@Override
@@ -409,22 +386,24 @@ public class DisplayObject extends ArrayList<DisplayObject>
 		return new Rectangle((int) x, (int) y, (int) (width * scaleX), (int) (height * scaleY));
 	}
 
-	public Rectangle getScreenBounds() {
+	public Rectangle getScreenBounds()
+	{
 		Rectangle bounds = getBounds();
 		Rectangle rec = new Rectangle();
-		
+
 		rec.x = bounds.x;
 		rec.y = bounds.y;
 		rec.width = (int) (bounds.width * Math.cos(rotationRad) + bounds.height * Math.sin(rotationRad));
 		rec.height = (int) (bounds.height * Math.cos(rotationRad) + bounds.width * Math.sin(rotationRad));
-		
-		//Normalize to actual shape in screen coordinates because object is center reffed
-		rec.x -= (rec.width/2);
-		rec.y -= (rec.height/2);
-		
+
+		// Normalize to actual shape in screen coordinates because object is
+		// center reffed
+		rec.x -= (rec.width / 2);
+		rec.y -= (rec.height / 2);
+
 		return rec;
 	}
-	
+
 	public float getRotationDeg()
 	{
 		return PhysicsUtils.radToDeg(rotationRad);
@@ -540,8 +519,8 @@ class SlideTo extends AbstractTween implements ITween
 
 			_target.x = _startX + (int) ((_targetX - _startX) * amt);
 			_target.y = _startY + (int) ((_targetY - _startY) * amt);
-			
-			PApplet.println("Sliding to: "+  _target.x + " : " + _target.y);
+
+			PApplet.println("Sliding to: " + _target.x + " : " + _target.y);
 		}
 	}
 
