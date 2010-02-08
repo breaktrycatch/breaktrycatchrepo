@@ -21,9 +21,13 @@ public class PhysicsControl extends DisplayObject
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	public static PApplet DEBUG_APP;
-	private PhysicsWorldWrapper _physWorld;
 
+	private PhysicsWorldWrapper _physWorld;
+	
+	//USED FOR DEBUG IN PHYSICSWORLDWRAPPER
+	public static PApplet DEBUG_APP;
+
+	
 	public PhysicsControl(PApplet app)
 	{
 		super(app);

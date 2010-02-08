@@ -32,7 +32,7 @@ public class HumanContactListener implements ContactListener {
 				//report only sprites which have user data, are human and involve a collision with the last dropped human
 				if(data1.isHuman && data2.isHuman && (point.shape1.getBody() == _reportTo.getActiveHuman() || point.shape2.getBody() == _reportTo.getActiveHuman()))
 				{
-					LogRepository.getInstance().getMikesLogger().info("WE HAVE HUMAN CONTACT!");
+//					LogRepository.getInstance().getMikesLogger().info("WE HAVE HUMAN CONTACT!");
 					_reportTo.reportHumanHumanContact(cloneContactPoint(point));
 				}
 				else if((data1.isHuman || data2.isHuman) && (data1.breaksHumanJoints || data2.breaksHumanJoints))
