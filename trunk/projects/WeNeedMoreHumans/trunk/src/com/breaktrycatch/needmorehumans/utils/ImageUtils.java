@@ -245,15 +245,15 @@ public class ImageUtils
 			int r = (col >> 16) & 0xFF;
 			int g = (col >> 8) & 0xFF;
 			int b = col & 0xFF;
-			
-			r = (int)(r * (amt - 1) + rt * (amt));
-			g = (int)(g * (amt - 1) + gt * (amt));
-			b = (int)(b * (amt - 1) + bt * (amt));
-			
+
+			r = (int) (r * (amt - 1) + rt * (amt));
+			g = (int) (g * (amt - 1) + gt * (amt));
+			b = (int) (b * (amt - 1) + bt * (amt));
+
 			masked.pixels[i] = (a << 24 | r << 16 | g << 8 | b);
 		}
 	}
-	
+
 	public static PImage trimTransparency(PImage source)
 	{
 		// treat the w and h of the rect as the far right left/right points.

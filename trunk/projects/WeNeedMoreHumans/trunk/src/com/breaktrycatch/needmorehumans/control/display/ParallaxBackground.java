@@ -64,9 +64,10 @@ public class ParallaxBackground extends DisplayObject
 
 	public void draw()
 	{
+		float globalX = localToGlobal().x;
 		for (ParallaxLayer layer : _layers)
 		{
-			layer.image.x = -(x * (1 - layer.movementAmt));
+			layer.image.x = -(globalX * (1 - layer.movementAmt));
 		}
 
 		super.draw();

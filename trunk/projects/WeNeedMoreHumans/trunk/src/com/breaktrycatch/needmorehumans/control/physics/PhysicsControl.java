@@ -12,6 +12,8 @@ import com.breaktrycatch.lib.display.ImageFrame;
 import com.breaktrycatch.needmorehumans.model.BodyVO;
 import com.breaktrycatch.needmorehumans.model.PhysicsShapeDefVO;
 import com.breaktrycatch.needmorehumans.tracing.ImageAnalysis;
+import com.breaktrycatch.needmorehumans.tracing.ThreadedImageAnalysis;
+import com.breaktrycatch.needmorehumans.tracing.callback.IThreadedImageAnalysisCallback;
 import com.breaktrycatch.needmorehumans.utils.PhysicsUtils;
 
 public class PhysicsControl extends DisplayObject
@@ -21,13 +23,9 @@ public class PhysicsControl extends DisplayObject
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-
-	private PhysicsWorldWrapper _physWorld;
-	
-	//USED FOR DEBUG IN PHYSICSWORLDWRAPPER
 	public static PApplet DEBUG_APP;
+	private PhysicsWorldWrapper _physWorld;
 
-	
 	public PhysicsControl(PApplet app)
 	{
 		super(app);
@@ -94,13 +92,43 @@ public class PhysicsControl extends DisplayObject
 		addHuman(sprite);
 	}
 
-	public void addHuman(ImageFrame sprite)
+	public void addHuman(final ImageFrame sprite)
 	{
 		sprite.setRotateAroundCenter(true);
 
+//		ThreadedImageAnalysis thread = new ThreadedImageAnalysis(getApp(), sprite);
+//		thread.start(new IThreadedImageAnalysisCallback()
+//		{
+//			@Override
+//			public void execute(BodyVO analyzedBody)
+//			{
+//				Body human = _physWorld.createPolyHuman(analyzedBody.polyDefs, new PhysicsShapeDefVO(), sprite.x + sprite.width /2.0f, sprite.y + sprite.height / 2.0f, -sprite.rotationRad);
+//				
+//				PhysicsUserDataVO userData = new PhysicsUserDataVO();
+//				userData.display = sprite;
+//				
+//				//Convert all of the extremity points to world space
+//				Vec2 axisTransform = new Vec2(1, -1);
+//				//Vec2 offset = new Vec2(sprite.width/2.0f, sprite.height/2.0f);
+//				Vec2 offset = new Vec2(0.0f, 0.0f);
+//				
+//				for (Vec2 extremity : analyzedBody.extremities) 
+//				{
+//					//extremity.mulLocal(_physWorld.getPhysScale());
+//					//extremity.y *= -1.0f;
+//					PhysicsUtils.genericTransform(extremity, _physWorld.getPhysScale(), offset, axisTransform, true);
+//				}
+//				
+//				userData.extremities = analyzedBody.extremities;
+//				
+//				userData.isHuman = true;
+//				human.setUserData(userData);
+//			}
+//		});
+		
 		ImageAnalysis imageAnalysis = new ImageAnalysis(getApp());
 		BodyVO analyzedBody = imageAnalysis.analyzeImage(sprite.getDisplay());
-
+		
 		Body human = _physWorld.createPolyHuman(analyzedBody.polyDefs, new PhysicsShapeDefVO(), sprite.x + sprite.width /2.0f, sprite.y + sprite.height / 2.0f, -sprite.rotationRad);
 		
 		PhysicsUserDataVO userData = new PhysicsUserDataVO();
@@ -122,21 +150,11 @@ public class PhysicsControl extends DisplayObject
 		
 		userData.isHuman = true;
 		human.setUserData(userData);
-
 	}
 	
-	
-
 	@Override
 	public void draw()
 	{
-		// TODO Auto-generated method stub
-		
-
-		getApp().fill(0x22000000);
-		getApp().rect(0, 0, width, height);
-
-
 		_physWorld.step();
 		
 		super.draw();

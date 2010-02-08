@@ -3,10 +3,7 @@ package com.breaktrycatch.needmorehumans.control.camera;
 import java.awt.Point;
 import java.awt.Rectangle;
 
-import megamu.shapetween.CircularShaper;
-import megamu.shapetween.LinearShaper;
 import megamu.shapetween.Shaper;
-
 import processing.core.PApplet;
 
 import com.breaktrycatch.lib.display.DisplayObject;
@@ -142,10 +139,8 @@ public class Simple2DCamera
 		float dScaleY = (float) _viewport.height / (float) rect.height;
 		float newScale = (dScaleX > dScaleY) ? dScaleY : dScaleX;
 
-//		CircularShaper circularShaper = new CircularShaper(Shaper.IN_OUT);
-		
-		_tweenObj.scaleTo(newScale, newScale, duration, new LinearShaper(Shaper.OUT));
-		_tweenObj.slideTo((int) (rect.x + rect.width / 2), (int) (rect.y + rect.height / 2), duration, new LinearShaper(Shaper.OUT), completeCallback);
+		_tweenObj.scaleTo(newScale, newScale, duration, Shaper.COSINE);
+		_tweenObj.slideTo((int) (rect.x + rect.width / 2), (int) (rect.y + rect.height / 2), duration, Shaper.COSINE, completeCallback);
 	}
 
 	public void lookAt(Rectangle rect, float duration)
@@ -182,7 +177,7 @@ public class Simple2DCamera
 	{
 		_tweenObj.cancelTweens();
 	
-		_tweenObj.slideTo((int) x, (int) y, duration, CircularShaper.class, completeCallback);
+		_tweenObj.slideTo((int) x, (int) y, duration, Shaper.COSINE, completeCallback);
 	}
 
 	/**

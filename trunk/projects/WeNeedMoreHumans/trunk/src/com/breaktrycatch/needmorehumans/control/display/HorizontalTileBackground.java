@@ -22,8 +22,6 @@ public class HorizontalTileBackground extends AbstractTileBackground
 		{
 			_images.get(i).x = _img.width * (i - 1);
 		}
-		
-		super.draw();
 	}
 
 	@Override
