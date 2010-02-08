@@ -20,17 +20,13 @@ package com.humans.buildings {
 			super(material, width, height, segmentsW, segmentsH);
 		}
 		
-		public function reposition():void {
-			//this.y = (mc.height/2);
-			
-		}
-		
 		public function get mc() : BuildingMC {
 			return __mc;
 		}
 		
 		public function set mc(_mc : BuildingMC) : void {
 			__mc = _mc;
+			__mc.y = (mc.height/2);
 		}
 		
 		public function loadBitmap(_path:String):void {
@@ -42,7 +38,7 @@ package com.humans.buildings {
 		protected function onBitmapLoaded(e:BitmapLoadedEvent):void {
 			__bitmap = new Bitmap(e.bitmapData, "auto", true);
 			__mc.addChild(__bitmap);
-			reposition();
+			__mc.y = (mc.height/2);
 		}
 	}
 }
