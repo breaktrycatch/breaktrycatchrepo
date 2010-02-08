@@ -30,8 +30,9 @@ public class DisplayObject extends ArrayList<DisplayObject>
 	public float scaleX = 1;
 	public float scaleY = 1;
 	public float rotationRad = 0;
-	
-	protected PGraphics _drawTarget;
+	public float alpha = 1;
+
+	protected PGraphics _renderTarget;
 
 	private PApplet _app;
 	private DisplayObject _parent;
@@ -58,14 +59,14 @@ public class DisplayObject extends ArrayList<DisplayObject>
 
 	public void enableExternalRenderTarget(PGraphics _externalRenderTarget, int _ertoX, int _ertoY)
 	{
-		_drawTarget = _externalRenderTarget;
+		_renderTarget = _externalRenderTarget;
 		externalRenderTargetOffsetX = _ertoX;
 		externalRenderTargetOffsetY = _ertoY;
 	}
 
 	public void disableExternalRenderTarget()
 	{
-		_drawTarget = _app.g;
+		_renderTarget = _app.g;
 	}
 
 	public void scaleTo(float x, float y, float duration)
@@ -112,6 +113,21 @@ public class DisplayObject extends ArrayList<DisplayObject>
 	{
 		addTween(new RotateTo(getApp(), this, rot, duration, shape, completeCallback));
 	}
+	
+	public void alphaTo(float alpha, float duration)
+	{
+		addTween(new AlphaTo(getApp(), this, alpha, duration));
+	}
+
+	public void alphaTo(float alpha, float duration, Object shape)
+	{
+		addTween(new AlphaTo(getApp(), this, alpha, duration, shape));
+	}
+
+	public void alphaTo(float alpha, float duration, Object shape, ISimpleCallback completeCallback)
+	{
+		addTween(new AlphaTo(getApp(), this, alpha, duration, shape, completeCallback));
+	}
 
 	public void cancelTweens()
 	{
@@ -151,46 +167,48 @@ public class DisplayObject extends ArrayList<DisplayObject>
 	{
 		updateTweens();
 
-		_drawTarget.pushMatrix();
-		_drawTarget.translate(x, y);
-
+		
+		_renderTarget.pushMatrix();
+		_renderTarget.tint(255, alpha * 255);
+		_renderTarget.translate(x, y);
 		if (getScaleAroundPoint() != null)
 		{
 			Point2D.Float pt = getScaleAroundPoint();
-			_drawTarget.translate(pt.x / 2, pt.y / 2);
-			_drawTarget.scale(scaleX, scaleY);
-			_drawTarget.translate(-pt.x / 2, -pt.y / 2);
+			_renderTarget.translate(pt.x / 2, pt.y / 2);
+			_renderTarget.scale(scaleX, scaleY);
+			_renderTarget.translate(-pt.x / 2, -pt.y / 2);
 		} else
 		{
 			if (getScaleAroundCenter())
 			{
-				_drawTarget.translate(width / 2, height / 2);
+				_renderTarget.translate(width / 2, height / 2);
 			}
-			_drawTarget.scale(scaleX, scaleY);
+			_renderTarget.scale(scaleX, scaleY);
 			if (getScaleAroundCenter())
 			{
-				_drawTarget.translate(-width / 2, -height / 2);
+				_renderTarget.translate(-width / 2, -height / 2);
 			}
 		}
-		
+
 		if (getRotateAroundCenter())
 		{
-			_drawTarget.translate(width / 2, height / 2);
+			_renderTarget.translate(width / 2, height / 2);
 		}
-		_drawTarget.rotate(rotationRad);
+		_renderTarget.rotate(rotationRad);
 		if (getRotateAroundCenter())
 		{
-			_drawTarget.translate(-width / 2, -height / 2);
+			_renderTarget.translate(-width / 2, -height / 2);
 		}
 	}
 
 	public void postDraw()
 	{
-		_drawTarget.popMatrix();
+		_renderTarget.popMatrix();
 	}
 
 	public void draw()
 	{
+		// override!
 	}
 
 	public void drawChildren()
@@ -210,7 +228,7 @@ public class DisplayObject extends ArrayList<DisplayObject>
 	// TODO: Make abstract?
 	public void dispose()
 	{
-
+		// override!
 	}
 
 	private void executeRemoves()
@@ -305,7 +323,7 @@ public class DisplayObject extends ArrayList<DisplayObject>
 	protected void setApp(PApplet app)
 	{
 		_app = app;
-		_drawTarget = (app != null) ? (app.g) : (null);
+		_renderTarget = (app != null) ? (app.g) : (null);
 	}
 
 	@Override
@@ -464,6 +482,11 @@ abstract class AbstractTween
 		return !_tween.isTweening();
 	}
 
+	protected float getTweenPosition()
+	{
+		return _tween.position();
+	}
+
 	public void finalizeTween()
 	{
 		if (_completeCallback != null)
@@ -515,12 +538,10 @@ class SlideTo extends AbstractTween implements ITween
 	{
 		if (_tween.isTweening())
 		{
-			float amt = _tween.time() * _tween.position();
+			float amt = getTweenPosition();
 
 			_target.x = _startX + (int) ((_targetX - _startX) * amt);
 			_target.y = _startY + (int) ((_targetY - _startY) * amt);
-
-			PApplet.println("Sliding to: " + _target.x + " : " + _target.y);
 		}
 	}
 
@@ -573,7 +594,7 @@ class ScaleTo extends AbstractTween implements ITween
 	{
 		if (_tween.isTweening())
 		{
-			float amt = _tween.time() * _tween.position();
+			float amt = getTweenPosition();
 
 			_target.scaleX = _startX + ((_targetX - _startX) * amt);
 			_target.scaleY = _startY + ((_targetY - _startY) * amt);
@@ -624,7 +645,7 @@ class RotateTo extends AbstractTween implements ITween
 	{
 		if (_tween.isTweening())
 		{
-			float amt = _tween.time() * _tween.position();
+			float amt = getTweenPosition();
 			_target.rotationRad = _startRotation + ((_targetRotation - _startRotation) * amt);
 		}
 	}
@@ -636,3 +657,53 @@ class RotateTo extends AbstractTween implements ITween
 		super.finalizeTween();
 	}
 }
+
+
+class AlphaTo extends AbstractTween implements ITween
+{
+	private float _targetAlpha;
+	private float _startAlpha;
+
+	public AlphaTo(PApplet app, DisplayObject target, float alpha, float duration, Object shape, ISimpleCallback completeCallback)
+	{
+		_target = target;
+
+		_startAlpha = target.alpha;
+		_targetAlpha = alpha;
+
+		_completeCallback = completeCallback;
+		_tween = new Tween(app, duration, Tween.SECONDS, shape);
+	}
+
+	public AlphaTo(PApplet app, DisplayObject target, float alpha, float duration, ISimpleCallback completeCallback)
+	{
+		this(app, target, alpha, duration, null, completeCallback);
+	}
+
+	public AlphaTo(PApplet app, DisplayObject target, float alpha, float duration, Object shape)
+	{
+		this(app, target, alpha, duration, shape, null);
+	}
+
+	public AlphaTo(PApplet app, DisplayObject target, float alpha, float duration)
+	{
+		this(app, target, alpha, duration, null, null);
+	}
+
+	public void update()
+	{
+		if (_tween.isTweening())
+		{
+			float amt = getTweenPosition();
+			_target.alpha = _startAlpha + ((_targetAlpha - _startAlpha) * amt);
+		}
+	}
+
+	@Override
+	public void finalizeTween()
+	{
+		_target.alpha = _targetAlpha;
+		super.finalizeTween();
+	}
+}
+

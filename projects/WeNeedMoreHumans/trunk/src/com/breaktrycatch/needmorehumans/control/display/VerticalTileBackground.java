@@ -22,8 +22,6 @@ public class VerticalTileBackground extends AbstractTileBackground
 		{
 			_images.get(i).y = _img.height * (i - 1);
 		}
-		
-		super.draw();
 	}
 
 	@Override

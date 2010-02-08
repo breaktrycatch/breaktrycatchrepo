@@ -198,8 +198,6 @@ public class XBoxControllableSprite extends Sprite
 			x += _velocity.x;
 			y += _velocity.y;
 			
-			PApplet.println("VEL X : " + x + " : " + _velocity.x);
-
 			_updatedVel = false;
 			_updatedRot = false;
 

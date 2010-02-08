@@ -42,6 +42,11 @@ public class ColorController extends DisplayObject
 		blue = b;
 		updateColor();
 	}
+	
+	public void setColor(int col)
+	{
+		this.col = col;
+	}
 
 	public float getRed()
 	{
@@ -60,17 +65,17 @@ public class ColorController extends DisplayObject
 
 	private void updateColor()
 	{
-		col = (255 << 24 | (int) (red * 255) << 16 | (int) (green * 255) << 8 | (int) (blue * 255));
+		col = ((int) (red * 255) << 16 | (int) (green * 255) << 8 | (int) (blue * 255));
 	}
 
 	@Override
 	public void draw()
 	{
-		super.draw();
+		_renderTarget.stroke(col, alpha * 255);
+		_renderTarget.fill(col, alpha * 255);
+		_renderTarget.rect(0, 0, width, height);
 
-		getApp().stroke(col);
-		getApp().fill(col);
-		getApp().rect(0,0, width, height);
+		PApplet.println("ALPHA: " + alpha + " COL: " + Integer.toHexString(col) + " R: " + red + " B: " + blue);
 	}
 
 }

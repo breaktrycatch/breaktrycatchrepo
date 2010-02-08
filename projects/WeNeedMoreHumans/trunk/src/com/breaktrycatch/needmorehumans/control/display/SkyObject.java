@@ -93,7 +93,5 @@ public class SkyObject extends Sprite
 	{
 		_internalSprite.x = x;
 		_internalSprite.y = y;
-		
-		PApplet.println("Setting y to: " + y);
 	}
 }
