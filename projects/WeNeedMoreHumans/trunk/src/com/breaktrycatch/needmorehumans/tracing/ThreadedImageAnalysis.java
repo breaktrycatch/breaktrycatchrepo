@@ -10,12 +10,12 @@ import processing.core.PApplet;
 
 import com.breaktrycatch.lib.display.ImageFrame;
 import com.breaktrycatch.needmorehumans.model.BodyVO;
-import com.breaktrycatch.needmorehumans.tracing.callback.IThreadedImageAnalysisCallback;
 
 public class ThreadedImageAnalysis
 {
 	private final PApplet _app;
 	private final ImageFrame _sprite;
+	private FutureTask<BodyVO> _future;
 
 	public ThreadedImageAnalysis(PApplet app, ImageFrame sprite)
 	{
@@ -23,10 +23,10 @@ public class ThreadedImageAnalysis
 		_sprite = sprite;
 	}
 
-	public void start(IThreadedImageAnalysisCallback completeCallback)
+	public void start()
 	{
 		ExecutorService newCachedThreadPool = Executors.newCachedThreadPool();
-		ImageAnalysisTask future = new ImageAnalysisTask(completeCallback, new Callable<BodyVO>()
+		_future = new FutureTask<BodyVO>(new Callable<BodyVO>()
 		{
 			public BodyVO call()
 			{
@@ -35,39 +35,31 @@ public class ThreadedImageAnalysis
 			}
 
 		});
-		newCachedThreadPool.execute(future);
-	}
-}
-
-class ImageAnalysisTask extends FutureTask<BodyVO>
-{
-	private final IThreadedImageAnalysisCallback _callback;
-
-	public ImageAnalysisTask(IThreadedImageAnalysisCallback callback, Callable<BodyVO> callable)
-	{
-		super(callable);
-		_callback = callback;
+		newCachedThreadPool.execute(_future);
 	}
 
-	@Override
-	protected void done()
+	public BodyVO get()
 	{
-		super.done();
-		
-		PApplet.println("Threaded Image Analysis DONE!");
-		
 		try
 		{
-			_callback.execute(get());
+			return _future.get();
 		} catch (InterruptedException e)
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (ExecutionException e)
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		return null;
 	}
 
+	public boolean isDone()
+	{
+		return _future.isDone();
+	}
+	
+	public ImageFrame getSprite()
+	{
+		return _sprite;
+	}
 }

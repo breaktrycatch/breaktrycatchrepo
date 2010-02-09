@@ -16,8 +16,10 @@ import com.breaktrycatch.lib.view.AbstractView;
 import com.breaktrycatch.needmorehumans.config.control.ColorController;
 import com.breaktrycatch.needmorehumans.control.camera.Simple2DCamera;
 import com.breaktrycatch.needmorehumans.control.display.Countdown;
+import com.breaktrycatch.needmorehumans.control.display.HeightMarker;
 import com.breaktrycatch.needmorehumans.control.display.ParallaxBackground;
 import com.breaktrycatch.needmorehumans.control.display.SkyObject;
+import com.breaktrycatch.needmorehumans.control.display.TallestPointTextField;
 import com.breaktrycatch.needmorehumans.control.display.Windmill;
 import com.breaktrycatch.needmorehumans.control.display.XBoxControllableSprite;
 import com.breaktrycatch.needmorehumans.control.physics.PhysicsControl;
@@ -38,6 +40,8 @@ public class GameView extends AbstractView
 	private ParallaxBackground _background;
 	private DisplayObject _zoomContainer;
 	private Simple2DCamera _camera;
+	private HeightMarker _heightMarker;
+	private TallestPointTextField _tallestPoint;
 	private boolean _isPlacing = false;
 	private String[] _spriteLookup = new String[]
 	{ "../data/tracing/RealPerson_1.png", "../data/tracing/RealPerson_3.png", "../data/tracing/RealPerson_4.png", "../data/tracing/RealPerson_5.png" };
@@ -78,6 +82,15 @@ public class GameView extends AbstractView
 		}
 
 		_zoomContainer.add(_background);
+
+		_heightMarker = new HeightMarker(app);
+		_heightMarker.setBounds(new Rectangle(0, 0, (int) _physControl.width, (int) _physControl.height));
+		_zoomContainer.add(_heightMarker);
+
+		_tallestPoint = new TallestPointTextField(app);
+		_tallestPoint.x = app.width - 250;
+		_tallestPoint.y = 25;
+		add(_tallestPoint);
 	}
 
 	private void createPhysicsControl()
@@ -375,17 +388,25 @@ public class GameView extends AbstractView
 	@Override
 	public void draw()
 	{
-		if (_debugController == null)
-		{
-			_debugController = new ColorController(getApp());
-			_debugController.setColor(0x33ff00ff);
-			_zoomContainer.add(_debugController);
-		}
+		// if (_debugController == null)
+		// {
+		// _debugController = new ColorController(getApp());
+		// _debugController.setColor(0x33ff00ff);
+		// _zoomContainer.add(_debugController);
+		// }
 
 		Rectangle r = _physControl.getTowerRect();
-		RectUtils.sizeTo(_debugController, r);
+		// RectUtils.sizeTo(_debugController, r);
 
-		// transforms the root container to the camera's viewport.
+		_heightMarker.y = (r.y == 0) ? (_physControl.height) : (r.y);
+		_heightMarker.x = r.x + r.width;
+		
+		
+		PApplet.println("RECT: " + r + " : " + _heightMarker.getDisplayValue());
+		
+		_tallestPoint.setValue(_heightMarker.getDisplayValue());
+
+		// transforms the root container to the camera's view port.
 		_camera.update();
 		_camera.setTransform(_zoomContainer);
 		super.draw();
