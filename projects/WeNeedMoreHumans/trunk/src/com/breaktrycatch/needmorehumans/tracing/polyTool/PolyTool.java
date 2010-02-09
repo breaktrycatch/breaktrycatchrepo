@@ -102,25 +102,32 @@ public class PolyTool {
 			points.add(new PixelVO(p_vertices.get(i).x, p_vertices.get(i).y, -1));
 		}
 		ArrayList<Triangle> triangles = Triangulator.triangulatePolygon(points);
-		ArrayList<Polygon> polys = Triangulator.polygonizeTriangles(triangles);
 		
-		// We want to return an Array<Array<Dynamic>>
-		ArrayList<ArrayList<PixelVO>> polyArray = new ArrayList<ArrayList<PixelVO>>();
-		if(polys != null) {
-			for(int i = 0; i < polys.size() - 1; i++) { // The last poly seem to always be a copy of the next last one for some reason.
-				ArrayList<PixelVO> poly = new ArrayList<PixelVO>();
-				if(polys.get(i) != null) {
-					for (int j = 0; j < polys.get(i).x.size(); j++) {
-						poly.add(new PixelVO(polys.get(i).x.get(j), polys.get(i).y.get(j), -1));
+		if (triangles != null) {
+		
+			ArrayList<Polygon> polys = Triangulator.polygonizeTriangles(triangles);
+			
+			// We want to return an Array<Array<Dynamic>>
+			ArrayList<ArrayList<PixelVO>> polyArray = new ArrayList<ArrayList<PixelVO>>();
+			if(polys != null) {
+				for(int i = 0; i < polys.size() - 1; i++) { // The last poly seem to always be a copy of the next last one for some reason.
+					ArrayList<PixelVO> poly = new ArrayList<PixelVO>();
+					if(polys.get(i) != null) {
+						for (int j = 0; j < polys.get(i).x.size(); j++) {
+							poly.add(new PixelVO(polys.get(i).x.get(j), polys.get(i).y.get(j), -1));
+						}
 					}
+					polyArray.add(poly);
 				}
-				polyArray.add(poly);
+			} else {
+				return null;
 			}
-		} else {
-			return null;
-		}
 		
-		return polyArray;
+			return polyArray;
+		}
+		else {
+			return new ArrayList<ArrayList<PixelVO>>();
+		}
 	}
 	
 	public PixelVO getCentroid(ArrayList<PixelVO> p_pa)

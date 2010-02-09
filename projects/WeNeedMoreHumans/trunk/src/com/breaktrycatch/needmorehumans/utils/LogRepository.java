@@ -27,7 +27,7 @@ public class LogRepository
 		paulsLogger.addAppender(ca);
 		
 		jonsLogger = Logger.getLogger("com.breaktrycatch.jon");
-		jonsLogger.setLevel(Level.ERROR);
+		jonsLogger.setLevel(Level.DEBUG);
 		jonsLogger.addAppender(ca);
 
 		mikesLogger = Logger.getLogger("com.breaktrycatch.mike");
