@@ -126,21 +126,24 @@ public class ImageAnalysis
 		debugCanvas = app.createGraphics(__originalImage.width, __originalImage.height, PApplet.P2D);
 		debugCanvas.beginDraw();
 		debugCanvas.stroke(0xff7700ff);
-		for (int i = 0; i < finalPoints.size(); i++)
-		{
-			for (int j = 0; j < finalPoints.get(i).size(); j++)
+		if (finalPoints != null) {
+			for (int i = 0; i < finalPoints.size(); i++)
 			{
-				int index = j + 1;
-				if (j + 1 >= finalPoints.get(i).size())
+				for (int j = 0; j < finalPoints.get(i).size(); j++)
 				{
-					index = 0;
+					int index = j + 1;
+					if (j + 1 >= finalPoints.get(i).size())
+					{
+						index = 0;
+					}
+					debugCanvas.line(finalPoints.get(i).get(j).x, finalPoints.get(i).get(j).y, finalPoints.get(i).get(index).x, finalPoints.get(i).get(index).y);
 				}
-				debugCanvas.line(finalPoints.get(i).get(j).x, finalPoints.get(i).get(j).y, finalPoints.get(i).get(index).x, finalPoints.get(i).get(index).y);
 			}
 		}
 		debugCanvas.fill(0xFFFF00FF);
 		debugCanvas.ellipse(centroid.x, centroid.y, 15, 15);
 		debugCanvas.fill(0xFF00FF00);
+		
 		for (int i = 0; i < culledPoints.size(); i++) {
 			debugCanvas.ellipse(culledPoints.get(i).x, culledPoints.get(i).y, 5, 5);
 		}
@@ -218,17 +221,25 @@ public class ImageAnalysis
 		determineExtremities();
 		
 		convertToPolys();
-		LogRepository.getInstance().getJonsLogger().info("BODIES CREATED " + bodyCount);
-		LogRepository.getInstance().getJonsLogger().info("POLYGONS CREATED " + polyDefs.size());
-		LogRepository.getInstance().getJonsLogger().info("CULLED POLYGONS BECAUSE AREA WAS INSIGNIFICANT " + culledPolygonsFromArea);
-		LogRepository.getInstance().getJonsLogger().info("MAYBE COULD BE CULLED POLYGONS BECAUSE AREA IS LESS THAN " + areaEpsilon + " UNITS : " + maybeCulledPolygons);
 		
-		BodyVO body = new BodyVO();
+		if (polyDefs != null) {
 		
-		body.polyDefs = polyDefs;
-		body.extremities = extremitiesArray;
+			LogRepository.getInstance().getJonsLogger().info("BODIES CREATED " + bodyCount);
+			LogRepository.getInstance().getJonsLogger().info("POLYGONS CREATED " + polyDefs.size());
+			LogRepository.getInstance().getJonsLogger().info("CULLED POLYGONS BECAUSE AREA WAS INSIGNIFICANT " + culledPolygonsFromArea);
+			LogRepository.getInstance().getJonsLogger().info("MAYBE COULD BE CULLED POLYGONS BECAUSE AREA IS LESS THAN " + areaEpsilon + " UNITS : " + maybeCulledPolygons);
 		
-		return body;
+			BodyVO body = new BodyVO();
+		
+			body.polyDefs = polyDefs;
+			body.extremities = extremitiesArray;
+		
+			return body;
+		}
+		else {
+			LogRepository.getInstance().getJonsLogger().info("IMAGE FAILED :: NO EAR");
+			return null;
+		}
 	}
 
 	private void determinePixelOutline()
@@ -649,7 +660,7 @@ public class ImageAnalysis
 					   float checkDistance;
 					   for (int k = 0; k < extremities.size(); k++) {
 						   checkDistance = (float) Math.sqrt(Math.pow(activePixel.x - extremities.get(k).x, 2) + Math.pow(activePixel.y - extremities.get(k).y, 2));
-						   LogRepository.getInstance().getJonsLogger().info("CHECK DISTANCE " + checkDistance);
+						   //LogRepository.getInstance().getJonsLogger().info("CHECK DISTANCE " + checkDistance);
 						   if (checkDistance < smallestDistance) {
 							   smallestDistance = checkDistance;
 						   }
@@ -697,7 +708,7 @@ public class ImageAnalysis
 		float minX = 999.0f;
 		float minY = 999.0f;
 		
-		if(polys != null) {
+		if(polys != null && polys.size() > 0) {
 			
 			finalPoints = polys;
 
@@ -797,8 +808,14 @@ public class ImageAnalysis
 			//p_body.setMassFromShapes();
 			bodyCount++;
 
-		} else
+		} else if (polys != null) {
+			LogRepository.getInstance().getJonsLogger().info("Image Failed... No Ear");
+			polyDefs = null;
+		}
+		else 
 		{
+			//Will this work? No idea...
+			LogRepository.getInstance().getJonsLogger().info("Rechecking...");
 			makeComplexBody(polyTool.getConvexPoly(p_vertices));
 		}
 	}

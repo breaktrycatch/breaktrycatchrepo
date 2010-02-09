@@ -14,6 +14,7 @@ import com.breaktrycatch.needmorehumans.model.PhysicsShapeDefVO;
 import com.breaktrycatch.needmorehumans.tracing.ImageAnalysis;
 import com.breaktrycatch.needmorehumans.tracing.ThreadedImageAnalysis;
 import com.breaktrycatch.needmorehumans.tracing.callback.IThreadedImageAnalysisCallback;
+import com.breaktrycatch.needmorehumans.utils.LogRepository;
 import com.breaktrycatch.needmorehumans.utils.PhysicsUtils;
 
 public class PhysicsControl extends DisplayObject
@@ -129,27 +130,33 @@ public class PhysicsControl extends DisplayObject
 		ImageAnalysis imageAnalysis = new ImageAnalysis(getApp());
 		BodyVO analyzedBody = imageAnalysis.analyzeImage(sprite.getDisplay());
 		
-		Body human = _physWorld.createPolyHuman(analyzedBody.polyDefs, new PhysicsShapeDefVO(), sprite.x + sprite.width /2.0f, sprite.y + sprite.height / 2.0f, -sprite.rotationRad);
+		if (analyzedBody != null) {
 		
-		PhysicsUserDataVO userData = new PhysicsUserDataVO();
-		userData.display = sprite;
-		
-		//Convert all of the extremity points to world space
-		Vec2 axisTransform = new Vec2(1, -1);
-		//Vec2 offset = new Vec2(sprite.width/2.0f, sprite.height/2.0f);
-		Vec2 offset = new Vec2(0.0f, 0.0f);
-		
-		for (Vec2 extremity : analyzedBody.extremities) 
-		{
-			//extremity.mulLocal(_physWorld.getPhysScale());
-			//extremity.y *= -1.0f;
-			PhysicsUtils.genericTransform(extremity, _physWorld.getPhysScale(), offset, axisTransform, true);
+			Body human = _physWorld.createPolyHuman(analyzedBody.polyDefs, new PhysicsShapeDefVO(), sprite.x + sprite.width /2.0f, sprite.y + sprite.height / 2.0f, -sprite.rotationRad);
+			
+			PhysicsUserDataVO userData = new PhysicsUserDataVO();
+			userData.display = sprite;
+			
+			//Convert all of the extremity points to world space
+			Vec2 axisTransform = new Vec2(1, -1);
+			//Vec2 offset = new Vec2(sprite.width/2.0f, sprite.height/2.0f);
+			Vec2 offset = new Vec2(0.0f, 0.0f);
+			
+			for (Vec2 extremity : analyzedBody.extremities) 
+			{
+				//extremity.mulLocal(_physWorld.getPhysScale());
+				//extremity.y *= -1.0f;
+				PhysicsUtils.genericTransform(extremity, _physWorld.getPhysScale(), offset, axisTransform, true);
+			}
+			
+			userData.extremities = analyzedBody.extremities;
+			
+			userData.isHuman = true;
+			human.setUserData(userData);
 		}
-		
-		userData.extremities = analyzedBody.extremities;
-		
-		userData.isHuman = true;
-		human.setUserData(userData);
+		else {
+			LogRepository.getInstance().getJonsLogger().error("BODY FAILED, NEED A NEW IMAGE!");
+		}
 	}
 	
 	@Override
