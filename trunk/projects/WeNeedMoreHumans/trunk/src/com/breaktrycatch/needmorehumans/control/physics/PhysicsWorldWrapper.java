@@ -110,8 +110,10 @@ public class PhysicsWorldWrapper {
 				{
 					affectVisual(actor, screenPos, body.getAngle());
 					
-					if(((PhysicsUserDataVO)body.getUserData()).isHuman)
+					PhysicsUserDataVO userData = (PhysicsUserDataVO)body.getUserData();
+					if(userData.isHuman && (body.getJointList() != null || userData.hasContacted))
 					{
+						userData.hasContacted = true;
 						float c = (float)Math.abs(Math.cos(body.getAngle()));
 						float s = (float)Math.abs(Math.sin(body.getAngle()));					
 						float x_radius = (actor.width * c + actor.height * s)/2.0f;
@@ -120,11 +122,13 @@ public class PhysicsWorldWrapper {
 						Vec2 max = new Vec2(screenPos.x + x_radius, screenPos.y + y_radius);
 						Rectangle bounds = new Rectangle((int)min.x, (int)min.y, (int)(max.x - min.x), (int)(max.y - min.y));						
 
-						PhysicsControl.DEBUG_APP.stroke(0xFFFF00FF);
-						PhysicsControl.DEBUG_APP.line(min.x, min.y, max.x, min.y);
-						PhysicsControl.DEBUG_APP.line(max.x, min.y, max.x, max.y);
-						PhysicsControl.DEBUG_APP.line(max.x, max.y, min.x, max.y);
-						PhysicsControl.DEBUG_APP.line(min.x, max.y, min.x, min.y);
+						// DEBUG
+//						PhysicsControl.DEBUG_APP.stroke(0xFFFF00FF);
+//						PhysicsControl.DEBUG_APP.line(min.x, min.y, max.x, min.y);
+//						PhysicsControl.DEBUG_APP.line(max.x, min.y, max.x, max.y);
+//						PhysicsControl.DEBUG_APP.line(max.x, max.y, min.x, max.y);
+//						PhysicsControl.DEBUG_APP.line(min.x, max.y, min.x, min.y);
+						
 						if(_towerRect == null)
 						{
 							_towerRect = bounds;
@@ -133,7 +137,6 @@ public class PhysicsWorldWrapper {
 						{
 							_towerRect = _towerRect.union(bounds);
 						}
-						
 					}
 				}				
 			}
@@ -141,8 +144,6 @@ public class PhysicsWorldWrapper {
 			{
 				affectVisual((DisplayObject)body.getUserData(), screenPos, body.getAngle());
 			}
-			
-			
 		}
 		
 		if(_towerRect == null)
@@ -150,18 +151,12 @@ public class PhysicsWorldWrapper {
 			_towerRect = new Rectangle();
 		}
 		
-		
 		processHumanToHumanContacts();
 		_reportedHumanHumanContacts.clear();
 		processHumanToBreakerContacts();
 		_reportedHumanBreakerContacts.clear();
 		
 //		_world.drawDebugData();
-	}
-	
-	private void checkTowerHeight(DisplayObject actor, float angle)
-	{
-		
 	}
 	
 	private void affectVisual(DisplayObject actor, Vec2 screenPosition, float rotation)

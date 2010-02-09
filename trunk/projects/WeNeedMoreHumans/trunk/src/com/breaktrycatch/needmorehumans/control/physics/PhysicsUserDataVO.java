@@ -9,6 +9,7 @@ public class PhysicsUserDataVO {
 	public DisplayObject display;
 	public Vec2[] extremities;
 	public boolean isHuman = false;
+	public boolean hasContacted = false;
 	public boolean breaksHumanJoints = false;
 	
 	public PhysicsUserDataVO() {
