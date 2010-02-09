@@ -7,6 +7,7 @@ import java.awt.geom.Point2D;
 import processing.core.PApplet;
 
 import com.breaktrycatch.lib.display.DisplayObject;
+import com.breaktrycatch.needmorehumans.config.control.ColorController;
 
 public class RectUtils
 {
@@ -76,5 +77,13 @@ public class RectUtils
 		rect.height += expandHeight;
 		
 		return rect;
+	}
+
+	public static void sizeTo(DisplayObject display, Rectangle r)
+	{
+		display.x = r.x;
+		display.y = r.y;
+		display.width = r.width;
+		display.height = r.height;
 	}
 }

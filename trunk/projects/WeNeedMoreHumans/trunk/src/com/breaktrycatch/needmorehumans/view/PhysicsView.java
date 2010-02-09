@@ -13,7 +13,6 @@ import processing.core.PApplet;
 import processing.core.PImage;
 
 import com.breaktrycatch.lib.view.AbstractView;
-import com.breaktrycatch.needmorehumans.tracing.ImageAnalysis;
 import com.breaktrycatch.needmorehumans.utils.LogRepository;
 
 public class PhysicsView extends AbstractView {
@@ -26,7 +25,6 @@ public class PhysicsView extends AbstractView {
 	private static final char CHANGE_SPRITE_KEY = '9';
 	
 	private Physics _physWorld;
-	private ImageAnalysis _imageAnalysis;
 	private ArrayList<PolygonDef> _polyHumanDef;
 	private String[] _spriteLookup  = new String[]
 	                                             {

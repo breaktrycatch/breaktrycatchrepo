@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import processing.core.PApplet;
-
 import com.breaktrycatch.lib.util.callback.IFloatCallback;
 import com.breaktrycatch.lib.util.callback.ISimpleCallback;
 import com.breaktrycatch.needmorehumans.utils.LogRepository;
@@ -454,7 +452,7 @@ class XBoxControllerFacade
 
 	private void executeList(ArrayList<ISimpleCallback> callbacks)
 	{
-		for(int i = callbacks.size() - 1; i >= 0; i--)
+		for (int i = callbacks.size() - 1; i >= 0; i--)
 		{
 			callbacks.get(i).execute();
 		}
@@ -462,7 +460,7 @@ class XBoxControllerFacade
 
 	private void executeFloatList(ArrayList<IFloatCallback> callbacks, float value)
 	{
-		for(int i = callbacks.size() - 1; i >= 0; i--)
+		for (int i = callbacks.size() - 1; i >= 0; i--)
 		{
 			callbacks.get(i).execute(value);
 		}

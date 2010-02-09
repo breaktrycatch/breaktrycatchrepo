@@ -11,7 +11,6 @@ import com.breaktrycatch.lib.component.KeyboardManager;
 import com.breaktrycatch.lib.component.ManagerLocator;
 import com.breaktrycatch.lib.component.XBoxControllerManager;
 import com.breaktrycatch.lib.display.DisplayObject;
-import com.breaktrycatch.lib.display.TextField;
 import com.breaktrycatch.lib.util.callback.ISimpleCallback;
 import com.breaktrycatch.lib.view.AbstractView;
 import com.breaktrycatch.needmorehumans.config.control.ColorController;
@@ -106,7 +105,7 @@ public class GameView extends AbstractView
 		PApplet app = getApp();
 		_camera = new Simple2DCamera(app, new Rectangle(0, 0, app.width, app.height), new Rectangle(0, 0, (int) _physControl.width, (int) _physControl.height));
 		_camera.lookAt(_physControl.width / 2, 0);
-		// _camera.lookAt(_physControl.width / 2, _physControl.height, 5f);
+		_camera.lookAt(_physControl.width / 2, _physControl.height, 5f);
 	}
 
 	@Override
@@ -225,17 +224,26 @@ public class GameView extends AbstractView
 		{
 			if (!_isPlacing)
 			{
-				showCameraFlash();
-
 				if (images != null)
 				{
 					ArrayList<PImage> culledImages = CaptureValidator.validateList(images);
-					beginPlacement(culledImages);
+
+					if (images.size() > 0)
+					{
+						beginPlacement(culledImages);
+						showCameraFlash();
+					} else
+					{
+						LogRepository.getInstance().getPaulsLogger().warn("No images returned from capture control!");
+						showCameraFlash(0xffff0000);
+					}
 				} else
 				{
 					ArrayList<PImage> debugImage = new ArrayList<PImage>();
 					debugImage.add(getApp().loadImage(_debugFilename));
 					beginPlacement(debugImage);
+
+					showCameraFlash();
 				}
 			}
 		}
@@ -243,9 +251,14 @@ public class GameView extends AbstractView
 
 	private void showCameraFlash()
 	{
+		showCameraFlash(0xffffffff);
+	}
+
+	private void showCameraFlash(int col)
+	{
 		// camera flash
 		final ColorController color = new ColorController(getApp(), 0, 0, getApp().width, getApp().height);
-		color.setColor(0xffffffff);
+		color.setColor(col);
 		add(color);
 		color.alphaTo(0, .5f, null, new ISimpleCallback()
 		{
@@ -258,13 +271,6 @@ public class GameView extends AbstractView
 
 	private void beginPlacement(final ArrayList<PImage> images)
 	{
-		if (images.size() == 0)
-		{
-			// TODO: Inform user that no image was captured.
-			LogRepository.getInstance().getPaulsLogger().warn("No images returned from capture control!");
-			return;
-		}
-
 		_isPlacing = true;
 
 		final XBoxControllerManager controllerManager = (XBoxControllerManager) ManagerLocator.getManager(XBoxControllerManager.class);
@@ -364,9 +370,21 @@ public class GameView extends AbstractView
 		LogRepository.getInstance().getPaulsLogger().info("Captured image of size: " + img.width + ", " + img.height);
 	}
 
+	private ColorController _debugController;
+
 	@Override
 	public void draw()
 	{
+		if (_debugController == null)
+		{
+			_debugController = new ColorController(getApp());
+			_debugController.setColor(0x33ff00ff);
+			_zoomContainer.add(_debugController);
+		}
+
+		Rectangle r = _physControl.getTowerRect();
+		RectUtils.sizeTo(_debugController, r);
+
 		// transforms the root container to the camera's viewport.
 		_camera.update();
 		_camera.setTransform(_zoomContainer);
