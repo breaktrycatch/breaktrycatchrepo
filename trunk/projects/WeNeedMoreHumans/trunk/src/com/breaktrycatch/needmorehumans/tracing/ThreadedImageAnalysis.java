@@ -14,24 +14,24 @@ import com.breaktrycatch.needmorehumans.model.BodyVO;
 public class ThreadedImageAnalysis
 {
 	private final PApplet _app;
-	private final ImageFrame _sprite;
+	private ImageFrame _sprite;
 	private FutureTask<BodyVO> _future;
 
-	public ThreadedImageAnalysis(PApplet app, ImageFrame sprite)
+	public ThreadedImageAnalysis(PApplet app)
 	{
 		_app = app;
-		_sprite = sprite;
 	}
 
-	public void start()
+	public void start(final ImageFrame sprite)
 	{
+		_sprite = sprite;
 		ExecutorService newCachedThreadPool = Executors.newCachedThreadPool();
 		_future = new FutureTask<BodyVO>(new Callable<BodyVO>()
 		{
 			public BodyVO call()
 			{
 				ImageAnalysis imageAnalysis = new ImageAnalysis(_app);
-				return imageAnalysis.analyzeImage(_sprite.getDisplay());
+				return imageAnalysis.analyzeImage(sprite.getDisplay());
 			}
 
 		});
@@ -57,7 +57,7 @@ public class ThreadedImageAnalysis
 	{
 		return _future.isDone();
 	}
-	
+
 	public ImageFrame getSprite()
 	{
 		return _sprite;

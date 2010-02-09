@@ -26,6 +26,8 @@ import com.breaktrycatch.needmorehumans.control.physics.PhysicsControl;
 import com.breaktrycatch.needmorehumans.control.webcam.CaptureControl;
 import com.breaktrycatch.needmorehumans.control.webcam.CaptureValidator;
 import com.breaktrycatch.needmorehumans.control.webcam.callback.ICaptureCallback;
+import com.breaktrycatch.needmorehumans.model.BodyVO;
+import com.breaktrycatch.needmorehumans.tracing.callback.IThreadedImageAnalysisCallback;
 import com.breaktrycatch.needmorehumans.utils.FileUtils;
 import com.breaktrycatch.needmorehumans.utils.LogRepository;
 import com.breaktrycatch.needmorehumans.utils.RectUtils;
@@ -44,7 +46,7 @@ public class GameView extends AbstractView
 	private TallestPointTextField _tallestPoint;
 	private boolean _isPlacing = false;
 	private String[] _spriteLookup = new String[]
-	{ "../data/tracing/RealPerson_1.png", "../data/tracing/RealPerson_3.png", "../data/tracing/RealPerson_4.png", "../data/tracing/RealPerson_5.png" };
+	{ "../data/no-ear.png", "../data/tracing/RealPerson_1.png", "../data/tracing/RealPerson_3.png", "../data/tracing/RealPerson_4.png", "../data/tracing/RealPerson_5.png" };
 
 	private String _debugFilename = _spriteLookup[0];
 
@@ -52,6 +54,26 @@ public class GameView extends AbstractView
 
 	public GameView()
 	{
+	}
+
+	@Override
+	public void initialize(PApplet app)
+	{
+		super.initialize(app);
+
+		_sprites = new ArrayList<XBoxControllableSprite>();
+		_zoomContainer = new DisplayObject(app);
+		add(_zoomContainer);
+
+		createPhysicsControl();
+		createEnvironment();
+		createCamera();
+
+		// add after we create the environment!
+		_zoomContainer.add(_physControl);
+
+		createCaptureControl();
+		createInputListeners();
 	}
 
 	private void createEnvironment()
@@ -109,6 +131,8 @@ public class GameView extends AbstractView
 		_capControl.x = (app.width / 2);
 		_capControl.width = (app.width / 2);
 		_capControl.height = (app.height);
+
+		// TODO: Hook this up to a config var...
 		_capControl.setDebugMode(true);
 		add(_capControl);
 	}
@@ -121,24 +145,8 @@ public class GameView extends AbstractView
 		_camera.lookAt(_physControl.width / 2, _physControl.height, 5f);
 	}
 
-	@Override
-	public void initialize(PApplet app)
+	private void createInputListeners()
 	{
-		super.initialize(app);
-
-		_sprites = new ArrayList<XBoxControllableSprite>();
-		_zoomContainer = new DisplayObject(app);
-		add(_zoomContainer);
-
-		createPhysicsControl();
-		createEnvironment();
-		createCamera();
-
-		// add after we create the environment!
-		_zoomContainer.add(_physControl);
-
-		createCaptureControl();
-
 		final XBoxControllerManager controllerManager = (XBoxControllerManager) ManagerLocator.getManager(XBoxControllerManager.class);
 		final KeyboardManager keyboardManager = (KeyboardManager) ManagerLocator.getManager(KeyboardManager.class);
 
@@ -146,17 +154,7 @@ public class GameView extends AbstractView
 		{
 			public void execute()
 			{
-				// don't start a count down if one is in progress.
-				if (_countdown == null && !_isPlacing)
-				{
-					_countdown = new Countdown(getApp(), _countdownCallback);
-					_countdown.x = getApp().width / 2;
-					_countdown.y = getApp().height / 2;
-					_countdown.setCountFrom(3);
-					_countdown.start();
-					add(_countdown);
-				}
-				LogRepository.getInstance().getPaulsLogger().info("Beginning count down");
+				startCountdown();
 			};
 		};
 
@@ -169,7 +167,7 @@ public class GameView extends AbstractView
 			public void execute()
 			{
 				_debugFilename = _spriteLookup[0];
-				_captureCallback.execute(null);
+				beginCapture(null);
 			}
 		});
 
@@ -178,7 +176,7 @@ public class GameView extends AbstractView
 			public void execute()
 			{
 				_debugFilename = _spriteLookup[1];
-				_captureCallback.execute(null);
+				beginCapture(null);
 			}
 		});
 
@@ -187,7 +185,7 @@ public class GameView extends AbstractView
 			public void execute()
 			{
 				_debugFilename = _spriteLookup[2];
-				_captureCallback.execute(null);
+				beginCapture(null);
 			}
 		});
 
@@ -196,7 +194,7 @@ public class GameView extends AbstractView
 			public void execute()
 			{
 				_debugFilename = _spriteLookup[3];
-				_captureCallback.execute(null);
+				beginCapture(null);
 			}
 		});
 
@@ -207,6 +205,7 @@ public class GameView extends AbstractView
 				_physControl.addDebugSmileBoxes();
 			}
 		});
+
 		keyboardManager.registerKeyOnce('j', new ISimpleCallback()
 		{
 			public void execute()
@@ -216,123 +215,88 @@ public class GameView extends AbstractView
 		});
 	}
 
-	// once the count down is complete we start capturing the image.
-	private ISimpleCallback _countdownCallback = new ISimpleCallback()
+	private void startCountdown()
 	{
-		public void execute()
+		// don't start a count down if one is in progress.
+		if (_countdown == null && !_isPlacing)
 		{
-			LogRepository.getInstance().getPaulsLogger().info("Countdown complete, processing image.");
+			LogRepository.getInstance().getPaulsLogger().info("Beginning count down");
 
-			remove(_countdown);
-			_countdown = null;
-			_capControl.beginCapture(1, _captureCallback);
-		}
-	};
-
-	// once the capture is complete we place it in to the sim.
-	private final ICaptureCallback _captureCallback = new ICaptureCallback()
-	{
-		@Override
-		public void execute(ArrayList<PImage> images)
-		{
-			if (!_isPlacing)
+			_countdown = new Countdown(getApp(), new ISimpleCallback()
 			{
-				if (images != null)
+				// once the count down is complete we start capturing the image.
+				public void execute()
 				{
-					ArrayList<PImage> culledImages = CaptureValidator.validateList(images);
-
-					if (images.size() > 0)
-					{
-						beginPlacement(culledImages);
-						showCameraFlash();
-					} else
-					{
-						LogRepository.getInstance().getPaulsLogger().warn("No images returned from capture control!");
-						showCameraFlash(0xffff0000);
-					}
-				} else
-				{
-					ArrayList<PImage> debugImage = new ArrayList<PImage>();
-					debugImage.add(getApp().loadImage(_debugFilename));
-					beginPlacement(debugImage);
-
-					showCameraFlash();
+					countdownComplete();
 				}
-			}
+			});
+			_countdown.x = getApp().width / 2;
+			_countdown.y = getApp().height / 2;
+			_countdown.setCountFrom(3);
+			_countdown.start();
+			add(_countdown);
 		}
-	};
-
-	private void showCameraFlash()
-	{
-		showCameraFlash(0xffffffff);
 	}
 
-	private void showCameraFlash(int col)
+	private void countdownComplete()
 	{
-		// camera flash
-		final ColorController color = new ColorController(getApp(), 0, 0, getApp().width, getApp().height);
-		color.setColor(col);
-		add(color);
-		color.alphaTo(0, .5f, null, new ISimpleCallback()
+		LogRepository.getInstance().getPaulsLogger().info("Countdown complete, processing image.");
+
+		remove(_countdown);
+		_countdown = null;
+		
+		_capControl.beginCapture(1, new ICaptureCallback()
 		{
-			public void execute()
+			// executes when the capture has completed.
+			public void execute(ArrayList<PImage> images)
 			{
-				remove(color);
+				beginCapture(images);
 			}
 		});
 	}
 
+	private void beginCapture(ArrayList<PImage> images)
+	{
+		if (!_isPlacing)
+		{
+			if (images != null)
+			{
+				ArrayList<PImage> culledImages = CaptureValidator.validateList(images);
+
+				if (images.size() > 0)
+				{
+					beginPlacement(culledImages);
+					showCameraFlash();
+				} else
+				{
+					LogRepository.getInstance().getPaulsLogger().warn("No images returned from capture control!");
+					errorCameraFlash();
+				}
+			} else
+			{
+				ArrayList<PImage> debugImage = new ArrayList<PImage>();
+				debugImage.add(getApp().loadImage(_debugFilename));
+				beginPlacement(debugImage);
+
+				showCameraFlash();
+			}
+		}
+	}
+	
 	private void beginPlacement(final ArrayList<PImage> images)
 	{
 		_isPlacing = true;
 
-		final XBoxControllerManager controllerManager = (XBoxControllerManager) ManagerLocator.getManager(XBoxControllerManager.class);
-		final KeyboardManager keyboardManager = (KeyboardManager) ManagerLocator.getManager(KeyboardManager.class);
 		final PImage img = images.get(0);
 
 		// save the file out for later.
 		FileUtils.saveSourceImage(img);
 
-		final XBoxControllableSprite sprite = new XBoxControllableSprite(getApp());
-		sprite.setRotateAroundCenter(true);
-		sprite.addFrames(images);
-		sprite.setFPS(3);
-		sprite.x = _physControl.width / 2 - sprite.width / 2;
-		sprite.y = _physControl.height - getApp().height / 2 - sprite.height / 2;
-
-		Rectangle imageBounds = new Rectangle(0, 0, (int) (_physControl.width - sprite.width), (int) (_physControl.height - sprite.height));
-		sprite.setScrollBounds(imageBounds);
-
-		_sprites.add(sprite);
-
-		sprite.enableController(false);
-		Rectangle lookAtBounds = RectUtils.expand(sprite.getBounds(), 700);
-
-		sprite.scaleX = sprite.scaleY = 0;
-		sprite.setScaleAroundCenter(true);
-		sprite.scaleTo(1, 1, .5f, Shaper.COSINE);
-
-		_camera.lookAt(lookAtBounds, .5f, new ISimpleCallback()
-		{
-			@Override
-			public void execute()
-			{
-				sprite.enableController(true);
-				sprite.setUpdatedCallback(new ISimpleCallback()
-				{
-					public void execute()
-					{
-						Rectangle lookAtBounds = sprite.getBounds();
-						lookAtBounds = RectUtils.expand(lookAtBounds, 700);
-						_camera.lookAt(lookAtBounds);
-						sprite.constrainToBounds();
-					}
-				});
-			}
-		});
-
-		_physControl.add(sprite);
-
+		final XBoxControllableSprite sprite = createPlacementSprite(images);
+		
+		final XBoxControllerManager controllerManager = (XBoxControllerManager) ManagerLocator.getManager(XBoxControllerManager.class);
+		final KeyboardManager keyboardManager = (KeyboardManager) ManagerLocator.getManager(KeyboardManager.class);
+		
 		// place the human in to the sim
 		final ISimpleCallback placementCallback = new ISimpleCallback()
 		{
@@ -344,7 +308,7 @@ public class GameView extends AbstractView
 				// TODO: Zoom out to see the whole tower...
 				_camera.lookAt(new Rectangle((int) _physControl.width / 2 - 600, (int) _physControl.height, 1200, 1200), 1f);
 
-				_physControl.addHuman(sprite);
+				_physControl.addCurrentBody();
 				LogRepository.getInstance().getPaulsLogger().info("Placed Sprite in PhysicsControl.");
 				keyboardManager.unregisterKeyOnce('p', this);
 				controllerManager.registerButtonOnce(Button.a, this);
@@ -379,8 +343,81 @@ public class GameView extends AbstractView
 
 		controllerManager.registerButtonOnce(Button.b, removeCallback);
 		keyboardManager.registerKeyOnce('r', removeCallback);
+		
+		// fire up the worker thread to process our guy.
+		_physControl.createBodyFromHuman(sprite, new IThreadedImageAnalysisCallback()
+		{
+			public void execute(BodyVO analyzedBody)
+			{
+				// if we didn't find an ear, throw it away!
+				if(analyzedBody == null)
+				{
+					sprite.enableController(false);
+					LogRepository.getInstance().getPaulsLogger().info("Removed Sprite.");
+
+					keyboardManager.unregisterKeyOnce('p', placementCallback);
+					controllerManager.registerButtonOnce(Button.a, placementCallback);
+
+					keyboardManager.unregisterKeyOnce('r', removeCallback);
+					controllerManager.registerButtonOnce(Button.b, removeCallback);
+					
+					errorCameraFlash();
+					
+					_isPlacing = false;
+				}
+				else
+				{
+					_sprites.add(sprite);
+					_physControl.add(sprite);
+					creationCameraZoom(sprite);
+					sprite.scaleX = sprite.scaleY = 0;
+					sprite.setScaleAroundCenter(true);
+					sprite.scaleTo(1, 1, .5f, Shaper.COSINE);
+				}
+			}
+		});
 
 		LogRepository.getInstance().getPaulsLogger().info("Captured image of size: " + img.width + ", " + img.height);
+	}
+	
+	private void creationCameraZoom(final XBoxControllableSprite sprite)
+	{
+		Rectangle lookAtBounds = RectUtils.expand(sprite.getBounds(), 700);
+		_camera.lookAt(lookAtBounds, .5f, new ISimpleCallback()
+		{
+			@Override
+			public void execute()
+			{
+				sprite.enableController(true);
+				sprite.setUpdatedCallback(new ISimpleCallback()
+				{
+					public void execute()
+					{
+						Rectangle lookAtBounds = sprite.getBounds();
+						lookAtBounds = RectUtils.expand(lookAtBounds, 700);
+						_camera.lookAt(lookAtBounds);
+						sprite.constrainToBounds();
+					}
+				});
+			}
+		});
+	}
+	
+	private XBoxControllableSprite createPlacementSprite(ArrayList<PImage> images)
+	{
+		final XBoxControllableSprite sprite = new XBoxControllableSprite(getApp());
+		sprite.setRotateAroundCenter(true);
+		sprite.addFrames(images);
+		sprite.setFPS(3);
+		sprite.x = _physControl.width / 2 - sprite.width / 2;
+		sprite.y = _physControl.height - getApp().height / 2 - sprite.height / 2;
+
+		Rectangle imageBounds = new Rectangle(0, 0, (int) (_physControl.width - sprite.width), (int) (_physControl.height - sprite.height));
+		sprite.setScrollBounds(imageBounds);
+		
+		sprite.enableController(false);
+		
+		return sprite;
 	}
 
 	private ColorController _debugController;
@@ -400,15 +437,39 @@ public class GameView extends AbstractView
 
 		_heightMarker.y = (r.y == 0) ? (_physControl.height) : (r.y);
 		_heightMarker.x = r.x + r.width;
-		
-		
-		PApplet.println("RECT: " + r + " : " + _heightMarker.getDisplayValue());
-		
+
 		_tallestPoint.setValue(_heightMarker.getDisplayValue());
 
 		// transforms the root container to the camera's view port.
 		_camera.update();
 		_camera.setTransform(_zoomContainer);
+
 		super.draw();
 	}
+	
+	private void errorCameraFlash()
+	{
+		showCameraFlash(0xffff0000);
+	}
+
+	private void showCameraFlash()
+	{
+		showCameraFlash(0xffffffff);
+	}
+
+	private void showCameraFlash(int col)
+	{
+		// camera flash
+		final ColorController color = new ColorController(getApp(), 0, 0, getApp().width, getApp().height);
+		color.setColor(col);
+		add(color);
+		color.alphaTo(0, .5f, null, new ISimpleCallback()
+		{
+			public void execute()
+			{
+				remove(color);
+			}
+		});
+	}
+
 }
