@@ -15,6 +15,7 @@ public class CaptureValidator
 			{
 				images.remove(img);
 			}
+			
 			// TODO: Trap images that are > 60% opaque. They
 			// are too big and we had a lighting glitch.
 			// TODO: Trap images that are < 10% opaque. They

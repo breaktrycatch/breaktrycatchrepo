@@ -120,7 +120,6 @@ public class CaptureView extends AbstractView
 		_processor.update();
 		if (!_imageCaptured)
 		{
-
 			// draw the background image.
 			app.image(_processor.getRawCameraImage(), getApp().width - _processor.getRawCameraImage().width * 2, getApp().height - _processor.getRawCameraImage().height);
 

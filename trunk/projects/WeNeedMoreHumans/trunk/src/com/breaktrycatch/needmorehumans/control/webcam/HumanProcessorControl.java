@@ -203,9 +203,11 @@ public class HumanProcessorControl
 		// apply the mask to our raw camera frame.
 		PImage maskedFrame = _subtractor.applyDifferenceMask(foreground, mask);
 
+		maskedFrame.resize(320, 240);
+
 		_subtractor.extractLargestBlob(maskedFrame);
 //		 _subtractor.removeShadows(maskedFrame);
-
+		
 		maskedFrame = ImageUtils.trimTransparency(maskedFrame);
 		
 		// post process to clean up the image.
@@ -220,7 +222,6 @@ public class HumanProcessorControl
 
 		if (_captureBackgrounds)
 		{
-			PApplet.println("CAPTURING BACKGROUNDS..........");
 			_rawFrame = _capture.getFrame();
 			debugDraw(_rawFrame);
 
@@ -234,7 +235,6 @@ public class HumanProcessorControl
 				PApplet.println("COMPLETE CAPTURE BACKGROUNDS");
 				_subtractor.averageBackgrounds();
 				_captureBackgrounds = false;
-				PApplet.println("AVERAGE COMPLETE");
 			}
 		}
 

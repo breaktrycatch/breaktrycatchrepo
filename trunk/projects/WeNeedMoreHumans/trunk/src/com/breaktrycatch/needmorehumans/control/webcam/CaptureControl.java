@@ -47,7 +47,7 @@ public class CaptureControl extends DisplayObject
 		_cameraWidth = ConfigTools.getInt(CAPTURE, "cameraWidth");
 		_cameraHeight = ConfigTools.getInt(CAPTURE, "cameraHeight");
 		_maxBackgrounds = ConfigTools.getInt(CAPTURE, "maxBackgrounds");
-
+		
 		_debugDrawer = new TileImageDrawer(app, .7f);
 		_debugDrawer.setEnabled(true);
 
@@ -110,7 +110,9 @@ public class CaptureControl extends DisplayObject
 
 			if (_capturing)
 			{
-				_capturedImages.add(_processor.getProcessedImage());
+				PImage img = _processor.getProcessedImage();
+				_capturedImages.add(img);
+				
 				if (_capturedImages.size() >= _imagesToCapture)
 				{
 					executeCaptureCallback();
@@ -130,10 +132,10 @@ public class CaptureControl extends DisplayObject
 
 	public void beginCapture(int imagesToCapture, ICaptureCallback iCaptureCallback)
 	{
+		_captureCompleteCallback = iCaptureCallback;
 		if (_initialized)
 		{
 			_imagesToCapture = imagesToCapture;
-			_captureCompleteCallback = iCaptureCallback;
 			_capturedImages = new ArrayList<PImage>();
 			_capturing = true;
 		} else

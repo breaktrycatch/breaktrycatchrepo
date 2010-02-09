@@ -120,19 +120,28 @@ public class PS3EyeCapture implements SimpleCapture
 
 	public void setExposure(float amt)
 	{
-		_cam.setCameraParam(CLCamera.CLEYE_EXPOSURE, (int) (amt * 511f));
+		if (_cam != null)
+		{
+			_cam.setCameraParam(CLCamera.CLEYE_EXPOSURE, (int) (amt * 511f));
+		}
 	}
 
 	public void setGain(float amt)
 	{
-		_cam.setCameraParam(CLCamera.CLEYE_GAIN, (int) (amt * 79f));
+		if (_cam != null)
+		{
+			_cam.setCameraParam(CLCamera.CLEYE_GAIN, (int) (amt * 79f));
+		}
 	}
 
 	public void setColorBalance(float r, float g, float b)
 	{
-		_cam.setCameraParam(CLCamera.CLEYE_WHITEBALANCE_RED, (int) (r * 255));
-		_cam.setCameraParam(CLCamera.CLEYE_WHITEBALANCE_GREEN, (int) (g * 255));
-		_cam.setCameraParam(CLCamera.CLEYE_WHITEBALANCE_BLUE, (int) (b * 255));
+		if (_cam != null)
+		{
+			_cam.setCameraParam(CLCamera.CLEYE_WHITEBALANCE_RED, (int) (r * 255));
+			_cam.setCameraParam(CLCamera.CLEYE_WHITEBALANCE_GREEN, (int) (g * 255));
+			_cam.setCameraParam(CLCamera.CLEYE_WHITEBALANCE_BLUE, (int) (b * 255));
+		}
 	}
 
 	public void blur(int amt)
