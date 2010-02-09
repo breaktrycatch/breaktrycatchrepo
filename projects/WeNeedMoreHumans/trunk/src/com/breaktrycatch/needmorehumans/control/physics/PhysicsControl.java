@@ -1,6 +1,5 @@
 package com.breaktrycatch.needmorehumans.control.physics;
 
-
 import java.awt.Rectangle;
 
 import org.jbox2d.common.Vec2;
@@ -14,6 +13,8 @@ import com.breaktrycatch.lib.display.ImageFrame;
 import com.breaktrycatch.needmorehumans.model.BodyVO;
 import com.breaktrycatch.needmorehumans.model.PhysicsShapeDefVO;
 import com.breaktrycatch.needmorehumans.tracing.ThreadedImageAnalysis;
+import com.breaktrycatch.needmorehumans.tracing.callback.IThreadedImageAnalysisCallback;
+import com.breaktrycatch.needmorehumans.utils.LogRepository;
 import com.breaktrycatch.needmorehumans.utils.PhysicsUtils;
 
 public class PhysicsControl extends DisplayObject
@@ -27,6 +28,10 @@ public class PhysicsControl extends DisplayObject
 	private PhysicsWorldWrapper _physWorld;
 	private ThreadedImageAnalysis _threadedAnalysis;
 	private boolean _isProcessingHuman;
+	private ImageFrame _currentSprite;
+	private BodyVO _currentBody;
+	private boolean _processingComplete;
+	private IThreadedImageAnalysisCallback _onCompleteCallback;
 
 	public PhysicsControl(PApplet app)
 	{
@@ -41,21 +46,89 @@ public class PhysicsControl extends DisplayObject
 	{
 		_physWorld = new PhysicsWorldWrapper((float) width, (float) height);
 		_physWorld.enableDebugDraw(getApp());
+		_threadedAnalysis = new ThreadedImageAnalysis(getApp());
 
 		PhysicsShapeDefVO vo = new PhysicsShapeDefVO();
 		vo.density = 0.0f;
 		vo.friction = 1.0f;
-		//_physWorld.createRect(0, height + 10, width, height, vo);
 		PhysicsUserDataVO userData = new PhysicsUserDataVO();
 		userData.breaksHumanJoints = true;
-		Body[] bounds = _physWorld.createHollowBox(width/2.0f, height/2.0f, width, height, 15.0f, vo);
+		Body[] bounds = _physWorld.createHollowBox(width / 2.0f, height / 2.0f, width, height, 15.0f, vo);
 		bounds[1].setUserData(userData);
 		bounds[2].setUserData(userData);
 		bounds[3].setUserData(userData);
-		
-		// addDebugSmileBoxes();
-		// addDebugPolyHuman();
-		// _physWorld.createRect(50, 150, 150, 250, new PhysicsShapeDefVO());
+	}
+
+	/**
+	 * Starts creating a body in a worker thread. When you're ready to put this
+	 * body in to the physics sim, call addCurrentBody().
+	 * 
+	 * @param sprite
+	 */
+	public void createBodyFromHuman(ImageFrame sprite, IThreadedImageAnalysisCallback onCompleteCallback)
+	{
+		_currentSprite = sprite;
+		_currentSprite.setRotateAroundCenter(true);
+
+		if (!_isProcessingHuman)
+		{
+			_onCompleteCallback = onCompleteCallback;
+			_isProcessingHuman = true;
+			_processingComplete = false;
+			_threadedAnalysis.start(sprite);
+		}
+	}
+
+	public void addCurrentBody()
+	{
+		if (_currentSprite == null)
+		{
+			LogRepository.getInstance().getPaulsLogger().warn("addCurrentBody must not be called before createBodyFromHuman()!");
+			return;
+		}
+
+		// check if we're done with the worker thread. If it has completed
+		// already, start creating the human.
+		if (_processingComplete)
+		{
+			if (_currentBody == null)
+			{
+				PApplet.println("NO EAR FOUND!");
+			} else
+			{
+				createHuman(_currentBody, _currentSprite);
+				_currentSprite = null;
+				_currentBody = null;
+			}
+		} else
+		{
+			// the user has placed the body before the analysis thread has
+			// completed. block until we get it and then call ourselves to try
+			// and add again.
+			_currentBody = _threadedAnalysis.get();
+			_processingComplete = true;
+			_isProcessingHuman = false;
+			
+			_onCompleteCallback.execute(_currentBody);
+			
+			addCurrentBody();
+		}
+	}
+
+	@Override
+	public void draw()
+	{
+		_physWorld.step();
+
+		if (_isProcessingHuman && _threadedAnalysis.isDone())
+		{
+			_processingComplete = true;
+			_isProcessingHuman = false;
+			_currentBody = _threadedAnalysis.get();
+			_onCompleteCallback.execute(_currentBody);
+		}
+
+		super.draw();
 	}
 
 	public void addDebugSmileBoxes()
@@ -81,99 +154,27 @@ public class PhysicsControl extends DisplayObject
 		}
 	}
 
-	private void addDebugPolyHuman()
-	{
-		PImage img = getApp().loadImage("../data/tracing/RealPerson_1.png");
-		img.loadPixels();
-
-		ImageFrame sprite = new ImageFrame(getApp(), img);
-		// sprite.setRotateAroundCenter(true);
-		sprite.x = 400;
-		sprite.y = 200;
-
-		addHuman(sprite);
-	}
-	
 	private void createHuman(BodyVO analyzedBody, ImageFrame sprite)
 	{
-		Body human = _physWorld.createPolyHuman(analyzedBody.polyDefs, new PhysicsShapeDefVO(), sprite.x + sprite.width /2.0f, sprite.y + sprite.height / 2.0f, -sprite.rotationRad);
-		
+		Body human = _physWorld.createPolyHuman(analyzedBody.polyDefs, new PhysicsShapeDefVO(), sprite.x + sprite.width / 2.0f, sprite.y + sprite.height / 2.0f, -sprite.rotationRad);
+
 		PhysicsUserDataVO userData = new PhysicsUserDataVO();
 		userData.display = sprite;
-		
-		//Convert all of the extremity points to world space
+
+		// Convert all of the extremity points to world space
 		Vec2 axisTransform = new Vec2(1, -1);
-		//Vec2 offset = new Vec2(sprite.width/2.0f, sprite.height/2.0f);
 		Vec2 offset = new Vec2(0.0f, 0.0f);
-		
-		for (Vec2 extremity : analyzedBody.extremities) 
+
+		for (Vec2 extremity : analyzedBody.extremities)
 		{
-			//extremity.mulLocal(_physWorld.getPhysScale());
-			//extremity.y *= -1.0f;
 			PhysicsUtils.genericTransform(extremity, _physWorld.getPhysScale(), offset, axisTransform, true);
 		}
-		
+
 		userData.extremities = analyzedBody.extremities;
-		
+
 		userData.isHuman = true;
 		human.setUserData(userData);
-	}
 
-	public void addHuman(final ImageFrame sprite)
-	{
-		sprite.setRotateAroundCenter(true);
-
-		if(!_isProcessingHuman)
-		{
-			_isProcessingHuman = true;
-			_threadedAnalysis = new ThreadedImageAnalysis(getApp(), sprite);
-			_threadedAnalysis.start();
-		}
-		
-//		ImageAnalysis imageAnalysis = new ImageAnalysis(getApp());
-//		BodyVO analyzedBody = imageAnalysis.analyzeImage(sprite.getDisplay());
-//		
-//		if (analyzedBody != null) {
-//		
-//			Body human = _physWorld.createPolyHuman(analyzedBody.polyDefs, new PhysicsShapeDefVO(), sprite.x + sprite.width /2.0f, sprite.y + sprite.height / 2.0f, -sprite.rotationRad);
-//			
-//			PhysicsUserDataVO userData = new PhysicsUserDataVO();
-//			userData.display = sprite;
-//			
-//			//Convert all of the extremity points to world space
-//			Vec2 axisTransform = new Vec2(1, -1);
-//			//Vec2 offset = new Vec2(sprite.width/2.0f, sprite.height/2.0f);
-//			Vec2 offset = new Vec2(0.0f, 0.0f);
-//			
-//			for (Vec2 extremity : analyzedBody.extremities) 
-//			{
-//				//extremity.mulLocal(_physWorld.getPhysScale());
-//				//extremity.y *= -1.0f;
-//				PhysicsUtils.genericTransform(extremity, _physWorld.getPhysScale(), offset, axisTransform, true);
-//			}
-//			
-//			userData.extremities = analyzedBody.extremities;
-//			
-//			userData.isHuman = true;
-//			human.setUserData(userData);
-//		}
-//		else {
-//			LogRepository.getInstance().getJonsLogger().error("BODY FAILED, NEED A NEW IMAGE!");
-//		}
-	}
-	
-	@Override
-	public void draw()
-	{
-		_physWorld.step();
-		
-		if(_isProcessingHuman && _threadedAnalysis.isDone())
-		{
-			_isProcessingHuman = false;
-			createHuman(_threadedAnalysis.get(), _threadedAnalysis.getSprite());
-		}
-		
-		super.draw();
 	}
 
 	@Override
@@ -183,7 +184,7 @@ public class PhysicsControl extends DisplayObject
 
 		super.dispose();
 	}
-	
+
 	public Rectangle getTowerRect()
 	{
 		return _physWorld.getTowerRect();
