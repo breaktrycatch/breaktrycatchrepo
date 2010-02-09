@@ -20,7 +20,6 @@
 
 package toxi.video.capture;
 
-import processing.core.PApplet;
 import processing.core.PImage;
 
 /**

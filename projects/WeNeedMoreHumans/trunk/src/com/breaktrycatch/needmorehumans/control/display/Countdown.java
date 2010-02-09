@@ -7,8 +7,10 @@ import processing.core.PApplet;
 import com.breaktrycatch.lib.component.ManagerLocator;
 import com.breaktrycatch.lib.component.TimeManager;
 import com.breaktrycatch.lib.display.DisplayObject;
+import com.breaktrycatch.lib.display.TextField;
 import com.breaktrycatch.lib.util.callback.ISimpleCallback;
 
+import controlP5.ControlP5;
 import controlP5.Textlabel;
 
 public class Countdown extends DisplayObject
@@ -23,7 +25,7 @@ public class Countdown extends DisplayObject
 	private int _currentCount = 0;
 	private double _ctr = 0;
 
-	private Textlabel _textlabel;
+	private TextField _textfield;
 	private ISimpleCallback _completeCallback;
 
 	private boolean _started;
@@ -32,14 +34,17 @@ public class Countdown extends DisplayObject
 	{
 		super(app);
 
-		_textlabel = new Textlabel(getApp(), "", 0, 0, getApp().width, 35);
+		_textfield = new TextField(app);
+		_textfield.setColor(0x000000);
+		_textfield.setFont(app.loadFont("DejaVuSansCondensed-Bold-82.vlw"));
+		add(_textfield);
+
 		_completeCallback = completeCallback;
 	}
 
 	@Override
 	public void draw()
 	{
-		super.draw();
 
 		if (_started)
 		{
@@ -50,16 +55,16 @@ public class Countdown extends DisplayObject
 				_currentCount = (int) Math.floor(_ctr);
 			}
 
-			int counter = (int)MathUtils.clamp(_countFrom - _currentCount, 1, Integer.MAX_VALUE);
-			_textlabel.setValue(String.valueOf(counter));
-			_textlabel.draw(getApp());
-
+			int counter = (int) MathUtils.clamp(_countFrom - _currentCount, 1, Integer.MAX_VALUE);
+			_textfield.setText(String.valueOf(counter));
+			
 			if (_currentCount == _countFrom)
 			{
 				_started = false;
 				_completeCallback.execute();
 			}
 		}
+		super.draw();
 	}
 
 	public void setCountFrom(int countFrom)

@@ -11,6 +11,7 @@ import com.breaktrycatch.lib.component.KeyboardManager;
 import com.breaktrycatch.lib.component.ManagerLocator;
 import com.breaktrycatch.lib.component.XBoxControllerManager;
 import com.breaktrycatch.lib.display.DisplayObject;
+import com.breaktrycatch.lib.display.TextField;
 import com.breaktrycatch.lib.util.callback.ISimpleCallback;
 import com.breaktrycatch.lib.view.AbstractView;
 import com.breaktrycatch.needmorehumans.config.control.ColorController;
@@ -134,14 +135,14 @@ public class GameView extends AbstractView
 			public void execute()
 			{
 				// don't start a count down if one is in progress.
-				if (_countdown == null)
+				if (_countdown == null && !_isPlacing)
 				{
 					_countdown = new Countdown(getApp(), _countdownCallback);
-					_countdown.x = _physControl.width / 2 - _countdown.width / 2;
-					_countdown.y = _physControl.height - getApp().height / 2;
+					_countdown.x = getApp().width / 2;
+					_countdown.y = getApp().height / 2;
 					_countdown.setCountFrom(3);
 					_countdown.start();
-					_physControl.add(_countdown);
+					add(_countdown);
 				}
 				LogRepository.getInstance().getPaulsLogger().info("Beginning count down");
 			};
@@ -203,14 +204,14 @@ public class GameView extends AbstractView
 		});
 	}
 
-	// once the countdown is complete we start capturing the image.
+	// once the count down is complete we start capturing the image.
 	private ISimpleCallback _countdownCallback = new ISimpleCallback()
 	{
 		public void execute()
 		{
 			LogRepository.getInstance().getPaulsLogger().info("Countdown complete, processing image.");
 
-			_physControl.remove(_countdown);
+			remove(_countdown);
 			_countdown = null;
 			_capControl.beginCapture(1, _captureCallback);
 		}

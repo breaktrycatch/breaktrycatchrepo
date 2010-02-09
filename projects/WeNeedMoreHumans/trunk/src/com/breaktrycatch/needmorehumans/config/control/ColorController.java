@@ -74,8 +74,6 @@ public class ColorController extends DisplayObject
 		_renderTarget.stroke(col, alpha * 255);
 		_renderTarget.fill(col, alpha * 255);
 		_renderTarget.rect(0, 0, width, height);
-
-		PApplet.println("ALPHA: " + alpha + " COL: " + Integer.toHexString(col) + " R: " + red + " B: " + blue);
 	}
 
 }
