@@ -1,6 +1,8 @@
 package com.breaktrycatch.needmorehumans.control.physics;
 
 
+import java.awt.Rectangle;
+
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 
@@ -12,8 +14,6 @@ import com.breaktrycatch.lib.display.ImageFrame;
 import com.breaktrycatch.needmorehumans.model.BodyVO;
 import com.breaktrycatch.needmorehumans.model.PhysicsShapeDefVO;
 import com.breaktrycatch.needmorehumans.tracing.ImageAnalysis;
-import com.breaktrycatch.needmorehumans.tracing.ThreadedImageAnalysis;
-import com.breaktrycatch.needmorehumans.tracing.callback.IThreadedImageAnalysisCallback;
 import com.breaktrycatch.needmorehumans.utils.LogRepository;
 import com.breaktrycatch.needmorehumans.utils.PhysicsUtils;
 
@@ -173,5 +173,10 @@ public class PhysicsControl extends DisplayObject
 		_physWorld.destroy();
 
 		super.dispose();
+	}
+	
+	public Rectangle getTowerRect()
+	{
+		return _physWorld.getTowerRect();
 	}
 }

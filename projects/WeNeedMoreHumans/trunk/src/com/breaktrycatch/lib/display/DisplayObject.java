@@ -411,13 +411,13 @@ public class DisplayObject extends ArrayList<DisplayObject>
 
 		rec.x = bounds.x;
 		rec.y = bounds.y;
-		rec.width = (int) (bounds.width * Math.cos(rotationRad) + bounds.height * Math.sin(rotationRad));
-		rec.height = (int) (bounds.height * Math.cos(rotationRad) + bounds.width * Math.sin(rotationRad));
+		rec.width = (int) (bounds.width * Math.abs(Math.cos(rotationRad)) + bounds.height * Math.abs(Math.sin(rotationRad)));
+		rec.height = (int) (bounds.height * Math.abs(Math.cos(rotationRad)) + bounds.width * Math.abs(Math.sin(rotationRad)));
 
 		// Normalize to actual shape in screen coordinates because object is
 		// center reffed
-		rec.x -= (rec.width / 2);
-		rec.y -= (rec.height / 2);
+		rec.x += (rec.width / 2);
+		rec.y += (rec.height / 2);
 
 		return rec;
 	}

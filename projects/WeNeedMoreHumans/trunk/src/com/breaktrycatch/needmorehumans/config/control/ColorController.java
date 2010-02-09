@@ -24,6 +24,11 @@ public class ColorController extends DisplayObject
 		this.width = w;
 		this.height = h;
 	}
+	
+	public ColorController(PApplet app)
+	{
+		super(app);
+	}
 
 	public void setRed(float r)
 	{

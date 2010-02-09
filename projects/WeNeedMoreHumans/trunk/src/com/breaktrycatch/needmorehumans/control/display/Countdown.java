@@ -10,9 +10,6 @@ import com.breaktrycatch.lib.display.DisplayObject;
 import com.breaktrycatch.lib.display.TextField;
 import com.breaktrycatch.lib.util.callback.ISimpleCallback;
 
-import controlP5.ControlP5;
-import controlP5.Textlabel;
-
 public class Countdown extends DisplayObject
 {
 
