@@ -41,7 +41,7 @@ public class PhysicsWorldWrapper {
 	private ArrayList<ContactPoint> _reportedHumanHumanContacts = new ArrayList<ContactPoint>();
 	private ArrayList<ContactPoint> _reportedHumanBreakerContacts = new ArrayList<ContactPoint>();
 	private Body _activeHuman;
-	
+	private int _towerTopY = Integer.MAX_VALUE;
 	
 	public PhysicsWorldWrapper(float screenWidth, float screenHeight) 
 	{
@@ -74,6 +74,7 @@ public class PhysicsWorldWrapper {
 //		_world.setWarmStarting(false);
 //		_world.setPositionCorrection(false);
 //		_world.setContinuousPhysics(true);
+		_towerTopY = Integer.MAX_VALUE;
 		
 		_world.step(PHYS_TIMESTEP, PHYS_ITERATIONS);
 		
@@ -99,41 +100,75 @@ public class PhysicsWorldWrapper {
 					continue;
 			}
 			
+			Vec2 screenPos = worldToScreen(body.getPosition());
+			if(body.getUserData() instanceof PhysicsUserDataVO)
+			{
+				DisplayObject actor = ((PhysicsUserDataVO)body.getUserData()).display;
+				if(actor != null)
+				{
+					affectVisual(actor, screenPos, body.getAngle());
+					
+					
+					if(((PhysicsUserDataVO)body.getUserData()).isHuman)
+					{
+						//Get AABB
+						float c = (float)Math.abs(Math.cos(body.getAngle()));
+						float s = (float)Math.abs(Math.sin(body.getAngle()));
+						
+						//If screenY is less then current top then record it
+						float screenY = screenPos.y - ((actor.width * s + actor.height * c)/2.0f);
+						if(screenY < _towerTopY)
+						{
+							_towerTopY = (int)screenY;
+						}
+						
+						//DEBUG						
+//						float x_radius = (actor.width * c + actor.height * s)/2.0f;
+//						float y_radius = (actor.width * s + actor.height * c)/2.0f;
+//						Vec2 min = new Vec2(screenPos.x - x_radius, screenPos.y - y_radius);
+//						Vec2 max = new Vec2(screenPos.x + x_radius, screenPos.y + y_radius);						
+//
+//						PhysicsControl.DEBUG_APP.stroke(0xFFFF00FF);
+//						PhysicsControl.DEBUG_APP.line(min.x, min.y, max.x, min.y);
+//						PhysicsControl.DEBUG_APP.line(max.x, min.y, max.x, max.y);
+//						PhysicsControl.DEBUG_APP.line(max.x, max.y, min.x, max.y);
+//						PhysicsControl.DEBUG_APP.line(min.x, max.y, min.x, min.y);
+						//END DEBUG
+					}
+				}				
+			}
+			else if(body.getUserData() instanceof DisplayObject)
+			{
+				affectVisual((DisplayObject)body.getUserData(), screenPos, body.getAngle());
+			}
 			
-			DisplayObject actor = getDisplayFromUserData(body.getUserData());
-			if(actor == null) { continue; }
 			
-			
-			Vec2 pos = worldToScreen(body.getPosition());
-			
-			pos.x -= (actor.width/2.0f);
-			pos.y -= (actor.height/2.0f);
-			
-			actor.x = (int)pos.x;
-			actor.y = (int)pos.y;
-			actor.rotationRad = -body.getAngle();
 		}
 		
 		
 		
 		processHumanToHumanContacts();
+		_reportedHumanHumanContacts.clear();
 		processHumanToBreakerContacts();
+		_reportedHumanBreakerContacts.clear();
 		
 //		_world.drawDebugData();
 	}
 	
-	private DisplayObject getDisplayFromUserData(Object userData)
+	private void checkTowerHeight(DisplayObject actor, float angle)
 	{
-		if(userData instanceof PhysicsUserDataVO)
-		{
-			return ((PhysicsUserDataVO)userData).display;
-		}
-		else if(userData instanceof DisplayObject)
-		{
-			return (DisplayObject)userData;
-		}
 		
-		return null;
+	}
+	
+	private void affectVisual(DisplayObject actor, Vec2 screenPosition, float rotation)
+	{
+		Vec2 pos = screenPosition.clone();
+		pos.x -= (actor.width/2.0f);
+		pos.y -= (actor.height/2.0f);
+		
+		actor.x = (int)pos.x;
+		actor.y = (int)pos.y;
+		actor.rotationRad = -rotation;
 	}
 	
 	private void processHumanToHumanContacts()
@@ -194,8 +229,6 @@ public class PhysicsWorldWrapper {
 			LogRepository.getInstance().getMikesLogger().info("JOINT CREATED! " + joint);
 			//break;
 		}
-		
-		_reportedHumanHumanContacts.clear();
 	}
 	
 	private void processHumanToBreakerContacts()
@@ -228,8 +261,6 @@ public class PhysicsWorldWrapper {
 //				detatchBody(body1);
 //			}
 //		}
-		
-		_reportedHumanBreakerContacts.clear();
 	}
 	
 	//Breaks all joints on a body
@@ -484,6 +515,10 @@ public class PhysicsWorldWrapper {
 		return _physScale;
 	}
 	
+	public int getTowerTopY()
+	{
+		return _towerTopY;
+	}
 	
 	// ******** DEBUG *************//
 	public void enableDebugDraw(PApplet app)
