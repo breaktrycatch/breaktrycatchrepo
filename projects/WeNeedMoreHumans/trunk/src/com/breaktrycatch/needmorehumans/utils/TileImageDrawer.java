@@ -59,7 +59,6 @@ public class TileImageDrawer extends DisplayObject
 
 	public void drawImage(PImage image)
 	{
-		PApplet.println("Drawing image....." + _enabled);
 		if (!_enabled)
 		{
 			return;
