@@ -4,11 +4,15 @@ import java.awt.Rectangle;
 import java.io.File;
 import java.util.ArrayList;
 
+import org.jbox2d.common.Vec2;
+
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PImage;
 
 import com.breaktrycatch.lib.display.DisplayObject;
+import com.breaktrycatch.needmorehumans.control.physics.PhysicsControl;
+import com.breaktrycatch.needmorehumans.view.GameView;
 
 public class FileUtils
 {
@@ -25,21 +29,33 @@ public class FileUtils
 	{
 		constructTowerPaths();
 	}
-
-	public static void saveImage(PApplet app, ArrayList<? extends DisplayObject> sprites)
+	
+	public static void saveTowerImage(PImage img)
 	{
 		LogRepository.getInstance().getJonsLogger().info("SAVING TOWER IMAGE");
-
 		int publishNumber = __towerPublishDirectory.list().length;
 		String strPublishNumber = leadingSpaces(publishNumber);
-		String path = __towerPublishDirectory.getAbsolutePath() + "/publish_" + strPublishNumber + ".png";
-
-		Rectangle screenBounds = new Rectangle();
+		String path = __towerPublishDirectory.getAbsolutePath() + File.separator + "publish_" + strPublishNumber + ".png";
+		
+		LogRepository.getInstance().getJonsLogger().info("Saving tower to: " + path);
+		img.save(path);
+	}
+	
+	public static PImage createTowerImage(PApplet app, ArrayList<? extends DisplayObject> sprites)
+	{
+		Rectangle screenBounds = null;
 		for (int i = 0; i < sprites.size(); i++)
 		{
-			DisplayObject s = sprites.get(i);
-			Rectangle spriteBounds = s.getScreenBounds();
-			screenBounds = screenBounds.union(spriteBounds);
+			DisplayObject sprite = sprites.get(i);
+			
+			float c = (float)Math.abs(Math.cos(sprite.rotationRad));
+			float s = (float)Math.abs(Math.sin(sprite.rotationRad));					
+			float x_radius = (sprite.width * c + sprite.height * s)/2.0f;
+			float y_radius = (sprite.width * s + sprite.height * c)/2.0f;
+			Vec2 min = new Vec2(sprite.x - x_radius, sprite.y - y_radius);
+			Rectangle bounds = new Rectangle((int)min.x, (int)min.y, (int)x_radius*2, (int)y_radius*2);						
+
+			screenBounds = (screenBounds == null) ? bounds : screenBounds.union(bounds);
 		}
 		
 		PGraphics drawBuffer = app.createGraphics(screenBounds.width, screenBounds.height, PApplet.JAVA2D);
@@ -49,16 +65,20 @@ public class FileUtils
 
 		for (int i = 0; i < sprites.size(); i++)
 		{
+			drawBuffer.pushMatrix();
 			DisplayObject s = sprites.get(i);
+			Rectangle rectangle = s.getScreenBounds();
+			drawBuffer.translate(-screenBounds.x - rectangle.width / 2, -screenBounds.y - rectangle.height / 2);
 			s.enableExternalRenderTarget(drawBuffer, 0, 0);
 			s.preDraw();
 			s.draw();
 			s.postDraw();
 			s.disableExternalRenderTarget();
+			drawBuffer.popMatrix();
 		}
 		drawBuffer.endDraw();
 		drawBuffer.endCamera();
-		drawBuffer.save(path);
+		return drawBuffer;
 	}
 
 	private static void constructTowerPaths()

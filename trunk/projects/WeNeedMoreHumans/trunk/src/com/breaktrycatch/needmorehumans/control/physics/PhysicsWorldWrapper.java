@@ -112,15 +112,15 @@ public class PhysicsWorldWrapper {
 						float x_radius = (actor.width * c + actor.height * s)/2.0f;
 						float y_radius = (actor.width * s + actor.height * c)/2.0f;
 						Vec2 min = new Vec2(screenPos.x - x_radius, screenPos.y - y_radius);
-//						Vec2 max = new Vec2(screenPos.x + x_radius, screenPos.y + y_radius);
 						Rectangle bounds = new Rectangle((int)min.x, (int)min.y, (int)x_radius*2, (int)y_radius*2);						
 
 						// DEBUG
-//						PhysicsControl.DEBUG_APP.stroke(0xFFFF00FF);
-//						PhysicsControl.DEBUG_APP.line(min.x, min.y, max.x, min.y);
-//						PhysicsControl.DEBUG_APP.line(max.x, min.y, max.x, max.y);
-//						PhysicsControl.DEBUG_APP.line(max.x, max.y, min.x, max.y);
-//						PhysicsControl.DEBUG_APP.line(min.x, max.y, min.x, min.y);
+						Vec2 max = new Vec2(screenPos.x + x_radius, screenPos.y + y_radius);
+						PhysicsControl.DEBUG_APP.stroke(0xFFFF00FF);
+						PhysicsControl.DEBUG_APP.line(min.x, min.y, max.x, min.y);
+						PhysicsControl.DEBUG_APP.line(max.x, min.y, max.x, max.y);
+						PhysicsControl.DEBUG_APP.line(max.x, max.y, min.x, max.y);
+						PhysicsControl.DEBUG_APP.line(min.x, max.y, min.x, min.y);
 						
 						_towerRect = (_towerRect == null) ? bounds : _towerRect.union(bounds);
 					}
