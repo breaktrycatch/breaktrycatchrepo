@@ -94,33 +94,26 @@ public class PhysicsWorldWrapper {
 			}
 			//END DEBUG
 			
-			if(body.isSleeping())
-			{
-				if(_wakeAllOnNextTick)
-					body.wakeUp();
-				else
-					continue;
-			}
 			
 			Vec2 screenPos = worldToScreen(body.getPosition());
+			DisplayObject actor = null;
 			if(body.getUserData() instanceof PhysicsUserDataVO)
 			{
-				DisplayObject actor = ((PhysicsUserDataVO)body.getUserData()).display;
+				actor = ((PhysicsUserDataVO)body.getUserData()).display;
 				if(actor != null)
 				{
 					affectVisual(actor, screenPos, body.getAngle());
 					
 					PhysicsUserDataVO userData = (PhysicsUserDataVO)body.getUserData();
-					if(userData.isHuman && (body.getJointList() != null || userData.hasContacted))
+					if(userData.isHuman && userData.hasContacted)
 					{
-						userData.hasContacted = true;
 						float c = (float)Math.abs(Math.cos(body.getAngle()));
 						float s = (float)Math.abs(Math.sin(body.getAngle()));					
 						float x_radius = (actor.width * c + actor.height * s)/2.0f;
 						float y_radius = (actor.width * s + actor.height * c)/2.0f;
 						Vec2 min = new Vec2(screenPos.x - x_radius, screenPos.y - y_radius);
-						Vec2 max = new Vec2(screenPos.x + x_radius, screenPos.y + y_radius);
-						Rectangle bounds = new Rectangle((int)min.x, (int)min.y, (int)(max.x - min.x), (int)(max.y - min.y));						
+//						Vec2 max = new Vec2(screenPos.x + x_radius, screenPos.y + y_radius);
+						Rectangle bounds = new Rectangle((int)min.x, (int)min.y, (int)x_radius*2, (int)y_radius*2);						
 
 						// DEBUG
 //						PhysicsControl.DEBUG_APP.stroke(0xFFFF00FF);
@@ -129,20 +122,25 @@ public class PhysicsWorldWrapper {
 //						PhysicsControl.DEBUG_APP.line(max.x, max.y, min.x, max.y);
 //						PhysicsControl.DEBUG_APP.line(min.x, max.y, min.x, min.y);
 						
-						if(_towerRect == null)
-						{
-							_towerRect = bounds;
-						}
-						else
-						{
-							_towerRect = _towerRect.union(bounds);
-						}
+						_towerRect = (_towerRect == null) ? bounds : _towerRect.union(bounds);
 					}
 				}				
 			}
 			else if(body.getUserData() instanceof DisplayObject)
 			{
-				affectVisual((DisplayObject)body.getUserData(), screenPos, body.getAngle());
+				actor = (DisplayObject)body.getUserData();
+			}
+			
+			if(body.isSleeping())
+			{
+				if(_wakeAllOnNextTick)
+					body.wakeUp();
+				else
+					continue;
+			}
+			else if(actor != null)
+			{
+				affectVisual(actor, screenPos, body.getAngle());
 			}
 		}
 		

@@ -42,6 +42,15 @@ public class HumanContactListener implements ContactListener {
 			}
 		}
 		
+		if(point.shape1.getBody().getUserData() instanceof PhysicsUserDataVO)
+		{
+			((PhysicsUserDataVO)point.shape1.getBody().getUserData()).hasContacted = true;
+		}
+		
+		if(point.shape2.getBody().getUserData() instanceof PhysicsUserDataVO)
+		{
+			((PhysicsUserDataVO)point.shape2.getBody().getUserData()).hasContacted = true;
+		}
 	}
 	
 	
