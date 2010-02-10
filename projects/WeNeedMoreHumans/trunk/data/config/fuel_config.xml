@@ -23,6 +23,7 @@
 	</section>
 	
 	<section name="tracing">
+		<entry key="numberOfExtremities" value="10" />
 	</section>
 	
 	<section name="physics">
