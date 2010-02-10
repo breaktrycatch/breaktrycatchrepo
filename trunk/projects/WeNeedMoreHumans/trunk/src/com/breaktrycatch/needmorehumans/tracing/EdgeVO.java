@@ -1,6 +1,5 @@
 package com.breaktrycatch.needmorehumans.tracing;
 
-import processing.core.PApplet;
 import processing.core.PVector;
 
 public class EdgeVO {
@@ -12,12 +11,14 @@ public class EdgeVO {
 	
 	public boolean markForCulling;
 	public boolean holdBecauseOfAngle;
+	public boolean deleteDueToLinearAlignment;
 	
 	public EdgeVO(PixelVO _p1, PixelVO _p2) {
 		p1 = _p1;
 		p2 = _p2;
 		markForCulling = false;
 		holdBecauseOfAngle = false;
+		deleteDueToLinearAlignment = false;
 		//PApplet.println("New EDGE " + p1.x + " " + p1.y + " p2 " + p2.x + " " + p2.y);
 		updateLength();
 	}

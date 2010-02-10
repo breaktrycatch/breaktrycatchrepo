@@ -2,6 +2,7 @@ package com.breaktrycatch.needmorehumans.tracing;
 
 import java.util.ArrayList;
 
+import org.apache.log4j.Logger;
 import org.jbox2d.common.Vec2;
 
 import processing.core.PApplet;
@@ -13,6 +14,7 @@ import com.breaktrycatch.needmorehumans.model.BodyVO;
 import com.breaktrycatch.needmorehumans.model.PolyVO;
 import com.breaktrycatch.needmorehumans.tracing.algorithms.BetterRelevancy;
 import com.breaktrycatch.needmorehumans.tracing.polyTool.PolyTool;
+import com.breaktrycatch.needmorehumans.utils.ConfigTools;
 import com.breaktrycatch.needmorehumans.utils.LogRepository;
 import com.breaktrycatch.needmorehumans.utils.TileImageDrawer;
 
@@ -31,6 +33,7 @@ public class ImageAnalysis
 
 	private ArrayList<EdgeVO> edges;
 	private ArrayList<EdgeVO> culledEdges;
+	private ArrayList<EdgeVO> finalCulledEdges;
 	private ArrayList<EdgeVO> innerCulledEdges;
 
 	private ArrayList<PixelVO> culledPoints;
@@ -67,7 +70,7 @@ public class ImageAnalysis
 		maybeCulledPolygons = 0;
 		validPixels = 0;
 		extremities = new ArrayList<PixelVO>();
-		extremitiesArray = new Vec2[4];
+		
 	}
 
 	private void debugDrawPoints(ArrayList<PixelVO> points, int color)
@@ -97,30 +100,30 @@ public class ImageAnalysis
 	public void draw()
 	{
 		//debugDrawPoints(pixelOutline, 0xffff0000);
-		debugDrawPoints(orderedPixelOutline, 0xff00ff00);
-		//debugDrawPoints(culledSimplePixelOutline, 0xff0000ff);
-		//debugDrawEdges(edges, 0x0000ff);
+		//debugDrawPoints(orderedPixelOutline, 0xff00ff00);
+		debugDrawPoints(culledSimplePixelOutline, 0xff0000ff);
+		debugDrawEdges(edges, 0x0000ff);
 
 		PGraphics debugCanvas = app.createGraphics(__originalImage.width, __originalImage.height, PApplet.P2D);
-//		debugCanvas.beginDraw();
-//		debugCanvas.stroke(0xff00ffff);
-//		for (int i = 0; i < culledEdges.size(); i++)
-//		{
-//			if (i % 2 == 0)
-//			{
-//				debugCanvas.stroke(0, 0, 255);
-//			} else
-//			{
-//				debugCanvas.stroke(255, 0, 0);
-//			}
-//			if (culledEdges.get(i).holdBecauseOfAngle == true)
-//			{
-//				// LogRepository.getInstance().getJonsLogger().info("BLACK");
-//				debugCanvas.stroke(0, 0, 0);
-//			}
-//			debugCanvas.line(culledEdges.get(i).p1.x, culledEdges.get(i).p1.y, culledEdges.get(i).p2.x, culledEdges.get(i).p2.y);
-//		}
-//		_debugDrawer.drawImage(debugCanvas);
+		debugCanvas.beginDraw();
+		debugCanvas.stroke(0xff00ffff);
+		for (int i = 0; i < culledEdges.size(); i++)
+		{
+			if (i % 2 == 0)
+			{
+				debugCanvas.stroke(0, 0, 255);
+			} else
+			{
+				debugCanvas.stroke(255, 0, 0);
+			}
+			if (culledEdges.get(i).holdBecauseOfAngle == true)
+			{
+				// LogRepository.getInstance().getJonsLogger().info("BLACK");
+				debugCanvas.stroke(0, 0, 0);
+			}
+			debugCanvas.line(culledEdges.get(i).p1.x, culledEdges.get(i).p1.y, culledEdges.get(i).p2.x, culledEdges.get(i).p2.y);
+		}
+		_debugDrawer.drawImage(debugCanvas);
 
 		// Draw the culled edges
 		debugCanvas = app.createGraphics(__originalImage.width, __originalImage.height, PApplet.P2D);
@@ -150,6 +153,7 @@ public class ImageAnalysis
 		debugCanvas.fill(0xFFFF0000);
 		for (int i = 0; i < extremities.size(); i++) {
 			debugCanvas.ellipse(extremities.get(i).x, extremities.get(i).y, 7, 7);
+			LogRepository.getInstance().getJonsLogger().info("EXTREME POINT " + extremities.get(i).x + " " + extremities.get(i).y);
 		}
 		_debugDrawer.drawImage(debugCanvas);
 	}
@@ -543,11 +547,62 @@ public class ImageAnalysis
 			}
 
 		}
+		
+		ArrayList<EdgeVO> temp = new ArrayList<EdgeVO>();
 
 		for (int i = 0; i < _from.size(); i++)
 		{
 			currentEdge = _from.get(i);
 			if (currentEdge.markForCulling == false)
+			{
+				addedEdge = new EdgeVO(currentEdge.p1, currentEdge.p2);
+				addedEdge.holdBecauseOfAngle = currentEdge.holdBecauseOfAngle;
+				temp.add(addedEdge);
+				if (linkedEdge == null)
+				{
+					linkedEdge = addedEdge;
+				} else
+				{
+					linkedEdge.p2 = addedEdge.p1;
+					addedEdge.p1 = linkedEdge.p2;
+					linkedEdge = addedEdge;
+				}
+			}
+		}
+		
+		//Ensure Closed Circuit
+		temp.get(temp.size()-1).p2 = temp.get(0).p1;
+		
+		//Loop through culled Edges and delete linear lines
+		EdgeVO sEdge = temp.get(0);
+		EdgeVO cEdge;
+
+		int linearCulledEdges = 0;
+		
+		PVector edge1 = sEdge.getVector();
+		PVector edge2;
+			
+		for (int i = 1; i < temp.size(); i++) {
+			cEdge = temp.get(i);
+			edge2 = cEdge.getVector();
+			float angle = Math.abs(PApplet.degrees(PVector.angleBetween(edge1, edge2)));
+			
+			if (angle < 2) {
+				cEdge.deleteDueToLinearAlignment = true;
+				linearCulledEdges++;
+			}
+			else {
+				sEdge = cEdge;
+				edge1 = sEdge.getVector();
+			}
+		}
+		
+		LogRepository.getInstance().getJonsLogger().info("LINEAR CULLED EDGES " + linearCulledEdges);
+		
+		for (int i = 0; i < temp.size(); i++)
+		{
+			currentEdge = temp.get(i);
+			if (currentEdge.deleteDueToLinearAlignment == false)
 			{
 				addedEdge = new EdgeVO(currentEdge.p1, currentEdge.p2);
 				addedEdge.holdBecauseOfAngle = currentEdge.holdBecauseOfAngle;
@@ -564,8 +619,6 @@ public class ImageAnalysis
 			}
 		}
 		
-		//Ensure Closed Circuit
-		culledEdges.get(culledEdges.size()-1).p2 = culledEdges.get(0).p1;
 		
 		
 		//LogRepository.getInstance().getJonsLogger().info("CULLED EDGE CHECKS " + culledEdges.get(0).p1.x + " " + culledEdges.get(0).p1.y + " " + culledEdges.get(0).p1.id + " ");
@@ -616,10 +669,12 @@ public class ImageAnalysis
 		double upperBoundsFar;
 		double lowerBoundsFar;
 		   
-		
+		int numExtremities = ConfigTools.getInt("tracing", "numberOfExtremities");
+		numExtremities = 10;
+		float divisor = 360/numExtremities;
 		   
-		   //Want to get 3 other extremities
-		   for (int j = 0; j < 3; j++) {
+		   //Want to get numExtremities other extremities
+		   for (int j = 0; j < numExtremities-1; j++) {
 			   //last added pixel is the farthest pixel
 			   activePixel = furthestPixel;
 			   lastFurthest = furthestPixel;
@@ -627,9 +682,11 @@ public class ImageAnalysis
 			   //generate upper and lower bounds to search in
 			   //upperBoundsFar = activePixel.angle + 157.5; //135
 			   //lowerBoundsFar = activePixel.angle + 22.5;
-			   upperBoundsFar = 146.25; //135
-			   lowerBoundsFar = 33.75;
-
+			   upperBoundsFar = divisor + (divisor/2) + (divisor/8);
+			   lowerBoundsFar = divisor - (divisor/2) - (divisor/8);
+			   
+			   
+			  
 			   furthestPixel = culledPoints.get(0);
 			   
 			   double normalizedAngle;
@@ -669,18 +726,22 @@ public class ImageAnalysis
 					   //Only allow candiates at least 50 pixels away
 					   if (smallestDistance > 50) {
 						   if (activePixel.distanceFromPreciseCenter > furthestPixel.distanceFromPreciseCenter) {
-							   furthestPixel = activePixel;
+							   if (activePixel.isExtremity == false) {
+								   furthestPixel = activePixel;
+								   furthestPixel.isExtremity = true;
+							   }
 	//						   PApplet.println("CHOSEN " + pTest.angle);
 						   }
 					   }
 				   }
 			
 			   }
+			   
 			   extremities.add(furthestPixel);
 			   furthestPixel.distanceFromPreciseCenter = 0;
 		   }
 		
-		
+		   LogRepository.getInstance().getJonsLogger().info("EXTREMITIES " + extremities.size());
 	}
 
 	private void convertToPolys()
@@ -800,7 +861,7 @@ public class ImageAnalysis
 			}
 			
 			
-			
+			extremitiesArray = new Vec2[extremities.size()];
 			for (int q = 0; q < extremities.size(); q++) {
 				extremitiesArray[q] = new Vec2(extremities.get(q).x - shiftX, extremities.get(q).y - shiftY);
 			}
