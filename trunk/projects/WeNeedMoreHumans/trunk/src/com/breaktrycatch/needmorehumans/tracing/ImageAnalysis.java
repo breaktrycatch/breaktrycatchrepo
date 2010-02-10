@@ -663,14 +663,12 @@ public class ImageAnalysis
 		furthestPixel.distanceFromPreciseCenter = 0;
 		
 		//Now look for the next furthest pixel
-		
 		PixelVO lastFurthest;
 		
 		double upperBoundsFar;
 		double lowerBoundsFar;
 		   
 		int numExtremities = ConfigTools.getInt("tracing", "numberOfExtremities");
-		numExtremities = 10;
 		float divisor = 360/numExtremities;
 		   
 		   //Want to get numExtremities other extremities
@@ -713,7 +711,7 @@ public class ImageAnalysis
 				   if (inRangeFar) {
 					   
 					   //Only Consider candidates that are far enough away from all other extremities
-					   float smallestDistance = 9999999999f;
+					   float smallestDistance = Float.MAX_VALUE;
 					   float checkDistance;
 					   for (int k = 0; k < extremities.size(); k++) {
 						   checkDistance = (float) Math.sqrt(Math.pow(activePixel.x - extremities.get(k).x, 2) + Math.pow(activePixel.y - extremities.get(k).y, 2));
@@ -723,14 +721,14 @@ public class ImageAnalysis
 						   }
 					   }
 					   
-					   //Only allow candiates at least 50 pixels away
+					   //Only allow candidates at least 50 pixels away
 					   if (smallestDistance > 50) {
 						   if (activePixel.distanceFromPreciseCenter > furthestPixel.distanceFromPreciseCenter) {
 							   if (activePixel.isExtremity == false) {
 								   furthestPixel = activePixel;
 								   furthestPixel.isExtremity = true;
 							   }
-	//						   PApplet.println("CHOSEN " + pTest.angle);
+							   PApplet.println("CHOSEN " + furthestPixel.angle);
 						   }
 					   }
 				   }
