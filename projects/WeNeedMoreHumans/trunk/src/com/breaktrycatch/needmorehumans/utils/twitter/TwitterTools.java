@@ -1,4 +1,4 @@
-package com.breaktrycatch.needmorehumans.utils;
+package com.breaktrycatch.needmorehumans.utils.twitter;
 
 import java.io.File;
 import java.io.IOException;

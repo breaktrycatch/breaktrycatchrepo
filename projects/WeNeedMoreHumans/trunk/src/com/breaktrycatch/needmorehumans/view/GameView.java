@@ -29,8 +29,10 @@ import com.breaktrycatch.needmorehumans.control.webcam.callback.ICaptureCallback
 import com.breaktrycatch.needmorehumans.model.BodyVO;
 import com.breaktrycatch.needmorehumans.tracing.callback.IThreadedImageAnalysisCallback;
 import com.breaktrycatch.needmorehumans.utils.FileUtils;
+import com.breaktrycatch.needmorehumans.utils.ImageUtils;
 import com.breaktrycatch.needmorehumans.utils.LogRepository;
 import com.breaktrycatch.needmorehumans.utils.RectUtils;
+import com.breaktrycatch.needmorehumans.utils.twitter.TwitterTowerMonitor;
 import com.esotericsoftware.controller.device.Button;
 
 public class GameView extends AbstractView
@@ -42,6 +44,7 @@ public class GameView extends AbstractView
 	private ParallaxBackground _background;
 	private DisplayObject _zoomContainer;
 	private Simple2DCamera _camera;
+	private TwitterTowerMonitor _twitterMonitor;
 	private HeightMarker _heightMarker;
 	private TallestPointTextField _tallestPoint;
 	private boolean _isPlacing = false;
@@ -74,6 +77,8 @@ public class GameView extends AbstractView
 
 		createCaptureControl();
 		createInputListeners();
+		
+		_twitterMonitor = new TwitterTowerMonitor(app);
 	}
 
 	private void createEnvironment()
@@ -210,7 +215,8 @@ public class GameView extends AbstractView
 		{
 			public void execute()
 			{
-				FileUtils.saveImage(getApp(), _sprites);
+				PImage img = FileUtils.createTowerImage(getApp(), _sprites);
+				FileUtils.saveTowerImage(img);
 			}
 		});
 	}
@@ -275,7 +281,7 @@ public class GameView extends AbstractView
 			} else
 			{
 				ArrayList<PImage> debugImage = new ArrayList<PImage>();
-				debugImage.add(getApp().loadImage(_debugFilename));
+				debugImage.add(ImageUtils.trimTransparency(getApp().loadImage(_debugFilename)));
 				beginPlacement(debugImage);
 
 				showCameraFlash();
@@ -420,30 +426,21 @@ public class GameView extends AbstractView
 		return sprite;
 	}
 
-	private ColorController _debugController;
-
 	@Override
 	public void draw()
 	{
-		// if (_debugController == null)
-		// {
-		// _debugController = new ColorController(getApp());
-		// _debugController.setColor(0x33ff00ff);
-		// _zoomContainer.add(_debugController);
-		// }
-
 		Rectangle r = _physControl.getTowerRect();
-		// RectUtils.sizeTo(_debugController, r);
 
 		_heightMarker.y = (r.y == 0) ? (_physControl.height) : (r.y);
-		_heightMarker.x = r.x + r.width;
-
+		_heightMarker.x = ((r.x == 0) ? (-1000) : (r.x)) + r.width;
+//love with a red underline upside-down																																																																																																																																															q
 		_tallestPoint.setValue(_heightMarker.getDisplayValue());
+		_twitterMonitor.update(_heightMarker.getDisplayValue(), _sprites);
 
 		// transforms the root container to the camera's view port.
 		_camera.update();
 		_camera.setTransform(_zoomContainer);
-
+		
 		super.draw();
 	}
 	
