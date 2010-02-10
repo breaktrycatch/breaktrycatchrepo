@@ -33,13 +33,13 @@ public class TracingDebugView extends AbstractView
 		_debugDrawer = new TileImageDrawer(app, 1);
 //		String t1 = "../data/tracing/TestPerson_png.png";
 //		String t2 = "../data/tracing/Cube.png";
-//		String p1 = "../data/tracing/RealPerson_1.png";
-//		String p2 = "../data/tracing/RealPerson_2.png";
-//		String p3 = "../data/tracing/RealPerson_3.png";
-//		String p4 = "../data/tracing/RealPerson_4.png";
-//		String p5 = "../data/tracing/RealPerson_5.png";
-//		String p6 = "../data/tracing/fuzzy.png";
-//		String p7 = "../data/tracing/fuzzy2.png";
+		String p1 = "../data/tracing/RealPerson_1.png";
+		String p2 = "../data/tracing/RealPerson_2.png";
+		String p3 = "../data/tracing/RealPerson_3.png";
+		String p4 = "../data/tracing/RealPerson_4.png";
+		String p5 = "../data/tracing/RealPerson_5.png";
+		String p6 = "../data/tracing/fuzzy.png";
+		String p7 = "../data/tracing/fuzzy2.png";
 		String p8 = "../data/tracing/no-ear.png";
 
 		// PImage p =
@@ -47,7 +47,7 @@ public class TracingDebugView extends AbstractView
 		// app.loadImage(p1);
 		// PImage p = getApp().loadImage("../data/tracing/RealPerson_3.png");//
 		// app.loadImage(p1);
-		PImage p = getApp().loadImage(p8);// app.loadImage(p1);
+		PImage p = getApp().loadImage(p1);// app.loadImage(p1);
 		p.loadPixels();
 
 		__imageAnalysis = new ImageAnalysis(app);

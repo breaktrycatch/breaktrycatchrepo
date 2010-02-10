@@ -18,6 +18,9 @@ public class PixelVO {
 	public boolean rendered;
 	public boolean saveFromSimpleCulling;
 	
+	public boolean isExtremity;
+	
+	
 	public PixelVO(float _x, float _y, int _index) {
 		x = _x;
 		y = _y;
@@ -25,5 +28,7 @@ public class PixelVO {
 		marked = false;
 		rendered = false;
 		saveFromSimpleCulling = false;
+		isExtremity = false;
+		
 	}
 }
