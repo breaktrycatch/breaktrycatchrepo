@@ -135,7 +135,7 @@ public class GameView extends AbstractView
 	{
 		PApplet app = getApp();
 		_physControl = new PhysicsControl(app);
-		_physControl.width = app.width * 2;
+		_physControl.width = app.width * 4;
 		_physControl.height = app.height * 6;
 		_physControl.init();
 	}
@@ -284,7 +284,8 @@ public class GameView extends AbstractView
 			} else
 			{
 				ArrayList<PImage> debugImage = new ArrayList<PImage>();
-				debugImage.add(ImageUtils.trimTransparency(getApp().loadImage(_debugFilename)));
+//				debugImage.add(ImageUtils.trimTransparency(getApp().loadImage(_debugFilename)));
+				debugImage.add(getApp().loadImage(_debugFilename));
 				beginPlacement(debugImage);
 
 				showCameraFlash();
