@@ -24,12 +24,17 @@ import com.breaktrycatch.lib.display.DisplayObject;
 import com.breaktrycatch.needmorehumans.model.PhysicsShapeDefVO;
 import com.breaktrycatch.needmorehumans.model.PolyVO;
 import com.breaktrycatch.needmorehumans.utils.LogRepository;
+import com.breaktrycatch.needmorehumans.utils.PhysicsUtils;
 
 public class PhysicsWorldWrapper {
 
 	private final float PHYS_TIMESTEP = 1.0f/60.0f;
 	private final int PHYS_ITERATIONS = 10;	
-	private final float JOINT_SNAP_THRESHOLD_SQD = (float)Math.pow(0.2f, 2);
+	
+	private final int SHARED_JOINTS_PER_BODY_PAIR = 2;
+	private final float MIN_JOINT_SEPARATION = (float)Math.pow(0.2f, 2);
+	private final float JOINT_HALF_LENGTH = 0.025f;
+	
 	
 	private World _world;
 	private ProcessingDebugDraw _debugDraw;
@@ -42,6 +47,7 @@ public class PhysicsWorldWrapper {
 	private ArrayList<ContactPoint> _reportedHumanBreakerContacts = new ArrayList<ContactPoint>();
 	private Body _activeHuman;
 	private Rectangle _towerRect;
+	
 	
 	public PhysicsWorldWrapper(float screenWidth, float screenHeight) 
 	{
@@ -102,7 +108,7 @@ public class PhysicsWorldWrapper {
 				actor = ((PhysicsUserDataVO)body.getUserData()).display;
 				if(actor != null)
 				{
-					affectVisual(actor, screenPos, body.getAngle());
+					//affectVisual(actor, screenPos, body.getAngle());
 					
 					PhysicsUserDataVO userData = (PhysicsUserDataVO)body.getUserData();
 					if(userData.isHuman && userData.hasContacted)
@@ -115,12 +121,13 @@ public class PhysicsWorldWrapper {
 						Rectangle bounds = new Rectangle((int)min.x, (int)min.y, (int)x_radius*2, (int)y_radius*2);						
 
 						// DEBUG
-						Vec2 max = new Vec2(screenPos.x + x_radius, screenPos.y + y_radius);
-						PhysicsControl.DEBUG_APP.stroke(0xFFFF00FF);
-						PhysicsControl.DEBUG_APP.line(min.x, min.y, max.x, min.y);
-						PhysicsControl.DEBUG_APP.line(max.x, min.y, max.x, max.y);
-						PhysicsControl.DEBUG_APP.line(max.x, max.y, min.x, max.y);
-						PhysicsControl.DEBUG_APP.line(min.x, max.y, min.x, min.y);
+//						Vec2 max = new Vec2(screenPos.x + x_radius, screenPos.y + y_radius);
+//						PhysicsControl.DEBUG_APP.stroke(0xFFFF00FF);
+//						PhysicsControl.DEBUG_APP.line(min.x, min.y, max.x, min.y);
+//						PhysicsControl.DEBUG_APP.line(max.x, min.y, max.x, max.y);
+//						PhysicsControl.DEBUG_APP.line(max.x, max.y, min.x, max.y);
+//						PhysicsControl.DEBUG_APP.line(min.x, max.y, min.x, min.y);
+						// END DEBUG
 						
 						_towerRect = (_towerRect == null) ? bounds : _towerRect.union(bounds);
 					}
@@ -151,7 +158,7 @@ public class PhysicsWorldWrapper {
 		
 		processHumanToHumanContacts();
 		_reportedHumanHumanContacts.clear();
-		processHumanToBreakerContacts();
+		//processHumanToBreakerContacts();
 		_reportedHumanBreakerContacts.clear();
 		
 //		_world.drawDebugData();
@@ -173,10 +180,7 @@ public class PhysicsWorldWrapper {
 		//Track Dups
 		ArrayList<ContactID> handledContacts = new ArrayList<ContactID>();
 		
-//		final float _JOINT_SIZE = 0.05f;
-		final double _SNAP_RADIUS = 0.20;
-		
-		for(int i=0; i<_reportedHumanHumanContacts.size(); i++)
+		ContactLoop : for(int i=0; i<_reportedHumanHumanContacts.size(); i++)
 		{
 			ContactPoint contact = _reportedHumanHumanContacts.get(i);
 			
@@ -184,44 +188,44 @@ public class PhysicsWorldWrapper {
 			if(containsDupElement(handledContacts, contact.id)){ continue;	}
 			handledContacts.add(contact.id);
 			
+			
 			Body body1 = contact.shape1.getBody();
 			Body body2 = contact.shape2.getBody();
-			PhysicsUserDataVO data1 = (PhysicsUserDataVO)body1.getUserData();
-			PhysicsUserDataVO data2 = (PhysicsUserDataVO)body2.getUserData();
 			
-			//Find the actor points for the joint if any exist (may only exist on/near extremities)
-			PhysicsControl.DEBUG_APP.stroke(0xFFFF0000);
-			Vec2 body1Anchor = findExtremityNearContact(data1.extremities, body1.getPosition(), body1.getAngle(), contact.position);
-			PhysicsControl.DEBUG_APP.stroke(0xFF00FF00);
-			Vec2 body2Anchor = findExtremityNearContact(data2.extremities, body2.getPosition(), body2.getAngle(), contact.position);
+			//Check to see if the two extremities already share too many a joints
+			int sharedJointCount = 0;
 			
-			//Check to make sure two extremities were found
-			if(body1Anchor == null || body2Anchor == null) { continue; }
+			for (JointEdge joint = body1.getJointList(); joint != null; joint = joint.next)
+			{
+				if(joint.other.equals(body2))
+				{
+					sharedJointCount++;
+					
+					if(sharedJointCount >= SHARED_JOINTS_PER_BODY_PAIR)
+					{
+						//LogRepository.getInstance().getMikesLogger().info("Bodies share to many joints already!");
+						continue ContactLoop;
+					}
+					
+					if(Math.abs(PhysicsUtils.distanceSQD(joint.joint.getAnchor1(), contact.position)) <= MIN_JOINT_SEPARATION)
+					{
+						//LogRepository.getInstance().getMikesLogger().info("Contact too close to a joint: " + joint);
+						continue ContactLoop;
+					}
+//					Math.abs(PhysicsUtils.distanceSQD(joint.joint.getAnchor2(), contact.position)) <= MIN_JOINT_SEPARATION
+				}
+			}
 			
-			//Check to see if the two extremities already share a joint
-			if(sharedExtremityJointExists(body1, body1Anchor, body2Anchor)) { continue; }
 			
-			
-			//Vec2 jointHalfLength = contact.normal.mul(_JOINT_SIZE);
 			//Create a joint between the two objects
+			Vec2 jointVectorHalfLength = contact.normal.mul(JOINT_HALF_LENGTH);
 			DistanceJointDef jd = new DistanceJointDef();
 			jd.collideConnected = true;
 			jd.dampingRatio = 0.5f;
-			jd.initialize(body1, body2, body1Anchor, body2Anchor);
+			jd.initialize(contact.shape1.getBody(), contact.shape2.getBody(), contact.position.sub(jointVectorHalfLength), contact.position.add(jointVectorHalfLength));
+			
 			Joint joint = _world.createJoint(jd);
 			
-			
-			/*OLD - Used for body/shape checking or no checking
-			DistanceJointDef jd = new DistanceJointDef();
-			jd.collideConnected = true;
-			jd.dampingRatio = 1.0f;
-			jd.initialize(contact.shape1.getBody(), contact.shape2.getBody(), contact.position.sub(jointHalfLength), contact.position.add(jointHalfLength));
-			//jd.initialize(contact.shape1.getBody(), contact.shape2.getBody(), contact.normal.mul(_JOINT_SIZE), contact.normal.mul(_JOINT_SIZE));
-			//contact.shape1.getBody().setXForm(new Vec2(0,0), 0);
-			Joint joint = _world.createJoint(jd);
-			contact.shape1.setUserData(joint);
-			contact.shape2.setUserData(joint);
-			*/
 			
 			LogRepository.getInstance().getMikesLogger().info("JOINT CREATED! " + joint);
 			//break;
@@ -269,45 +273,6 @@ public class PhysicsWorldWrapper {
 		}
 	}
 	
-	//Try to find an extremity near the contact position.  The vector returned(if any) have been translated into world coordinates from a position relative to the body
-	private Vec2 findExtremityNearContact(Vec2[] extremities, Vec2 extremityParentPos, float extremityParentRot, Vec2 contact)
-	{
-		//DEBUG draw contactPoint
-		PhysicsControl.DEBUG_APP.fill(0x990000FF);
-		Vec2 sContact = worldToScreen(contact.x, contact.y);
-		PhysicsControl.DEBUG_APP.rect(sContact.x-5, sContact.y-5, 10, 10);
-		//DEBUG END
-
-		float sinRot = (float)Math.sin(extremityParentRot);
-		float cosRot = (float)Math.cos(extremityParentRot);
-		
-		for (Vec2 extremity : extremities) {
-			//is the extremity within the snap radius of the contact point
-			Vec2 worldExtremity = extremity.clone();
-
-			//x' = x * cosine(theta) - y * sine(theta)
-			//y' = x * sine(theta) + y * cosine(theta)
-			worldExtremity.x = (extremity.x * cosRot) - (extremity.y * sinRot);
-			worldExtremity.y = (extremity.x * sinRot) + (extremity.y * cosRot);
-			worldExtremity.addLocal(extremityParentPos);
-			
-			
-			//DEBUG Draw lines from contact points to extremeties and ideify extremities
-			Vec2 sExtrem = worldToScreen(worldExtremity.x, worldExtremity.y);
-			PhysicsControl.DEBUG_APP.line(sContact.x, sContact.y, sExtrem.x, sExtrem.y);
-			PhysicsControl.DEBUG_APP.ellipse(sExtrem.x, sExtrem.y, 10, 10);
-			//DEBUG END
-			
-			double distanceSQD = Math.pow(worldExtremity.x - contact.x, 2) + Math.pow(worldExtremity.y - contact.y, 2);
-			if(distanceSQD < JOINT_SNAP_THRESHOLD_SQD)
-			{
-				return worldExtremity;
-			}
-		}
-		
-		return null;
-	}
-	
 	private boolean containsDupElement(ArrayList<ContactID> handledList, ContactID id)
 	{
 		for (ContactID contactID : handledList) {
@@ -318,40 +283,6 @@ public class PhysicsWorldWrapper {
 		}
 		
 		return false;
-	}
-	
-	/* OLD - Used in Joint to shape detection
-	//determins if two bodies share a joint
-	private boolean sharedJointExists(Body body1, Body body2)
-	{
-		for (JointEdge joint = body1.getJointList(); joint != null; joint = joint.next)
-		{
-			if(joint.other.equals(body2))
-			{
-				return true;
-			}
-		}
-		
-		return false;
-	}*/
-	
-	//Finds if two extremity points already share a joint given the two anchor points and one of the bodies
-	private boolean sharedExtremityJointExists(Body body, Vec2 anchor1, Vec2 anchor2)
-	{
-		for (JointEdge joint = body.getJointList(); joint != null; joint = joint.next)
-		{
-			if( (vectorsAreEqual(joint.joint.getAnchor1(), anchor1) && vectorsAreEqual(joint.joint.getAnchor2(), anchor2)) || (vectorsAreEqual(joint.joint.getAnchor1(), anchor2) && vectorsAreEqual(joint.joint.getAnchor2(), anchor1)) )
-			{
-				return true;
-			}
-		}
-		
-		return false;
-	}
-	
-	private boolean vectorsAreEqual(Vec2 vec1, Vec2 vec2)
-	{
-		return vec1.x == vec2.x && vec1.y == vec2.y;
 	}
 	
 	/**
