@@ -83,7 +83,7 @@ public class FileUtils
 
 	private static void constructTowerPaths()
 	{
-		File tempFile = new File("");
+		File tempFile = new File("../");
 		String path = tempFile.getAbsolutePath() + File.separator + "data" + File.separator + "towers";
 
 		__towerDirectory = new File(path);

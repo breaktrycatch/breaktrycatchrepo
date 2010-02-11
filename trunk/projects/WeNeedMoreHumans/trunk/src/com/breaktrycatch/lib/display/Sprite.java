@@ -53,38 +53,45 @@ public class Sprite extends ImageFrame
 	}
 	
 	@Override
-	public void errorTint() {
+	public void errorTint()
+	{
 		// TODO Auto-generated method stub
 		super.errorTint();
-		for (int i = 0; i < _timeline.size(); i++) {
+		for (int i = 0; i < _timeline.size(); i++)
+		{
 			_timeline.get(i).errorTint();
 		}
 	}
-	
+
 	@Override
-	public void regularTint() {
+	public void regularTint()
+	{
 		// TODO Auto-generated method stub
 		super.regularTint();
-		for (int i = 0; i < _timeline.size(); i++) {
+		for (int i = 0; i < _timeline.size(); i++)
+		{
 			_timeline.get(i).regularTint();
 		}
 	}
 
 	@Override
-	public void enableExternalRenderTarget(PGraphics _externalRenderTarget, int _ertoX, int _ertoY) {
-		// TODO Auto-generated method stub
+	public void enableExternalRenderTarget(PGraphics _externalRenderTarget, int _ertoX, int _ertoY)
+	{
 		super.enableExternalRenderTarget(_externalRenderTarget, _ertoX, _ertoY);
-		
-		for (int i = 0; i < _timeline.size(); i++) {
+
+		for (int i = 0; i < _timeline.size(); i++)
+		{
 			_timeline.get(i).enableExternalRenderTarget(_externalRenderTarget, _ertoX, _ertoY);
 		}
 	}
-	
+
 	@Override
-	public void disableExternalRenderTarget() {
-		// TODO Auto-generated method stub
+	public void disableExternalRenderTarget()
+	{
 		super.disableExternalRenderTarget();
-		for (int i = 0; i < _timeline.size(); i++) {
+		
+		for (int i = 0; i < _timeline.size(); i++)
+		{
 			_timeline.get(i).disableExternalRenderTarget();
 		}
 	}

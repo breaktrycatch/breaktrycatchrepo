@@ -37,7 +37,7 @@ public class NeedMoreHumansCore extends Stage
 	@Override
 	public void draw()
 	{
-		getApp().background(0x78C6DC);
+		getApp().background(0x69a8eb);
 		
 		super.draw();
 		
@@ -51,6 +51,10 @@ public class NeedMoreHumansCore extends Stage
 		} else if (app.key == '3')
 		{
 			_mainViewManager.changeView(ViewManager.PHYSICS_VIEW);
+		}
+		else if (app.key == '4')
+		{
+			_mainViewManager.changeView(ViewManager.INPUT_TEST_VIEW);
 		}
 	}
 }

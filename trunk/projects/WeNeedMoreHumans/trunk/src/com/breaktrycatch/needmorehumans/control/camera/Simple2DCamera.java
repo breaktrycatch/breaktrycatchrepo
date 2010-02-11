@@ -2,6 +2,8 @@ package com.breaktrycatch.needmorehumans.control.camera;
 
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.geom.Point2D;
+import java.awt.geom.Point2D.Float;
 
 import megamu.shapetween.Shaper;
 import processing.core.PApplet;
@@ -37,6 +39,8 @@ public class Simple2DCamera
 		_app = app;
 		_viewport = viewport;
 		_bounds = bounds;
+
+		// the inner bounding rectangle of the camera if the scale is set to 1.
 		_innerBounds = new Rectangle(bounds.x + viewport.width / 2, bounds.y + viewport.height / 2, bounds.width - viewport.width, bounds.height - viewport.height);
 
 		_tweenObj = new DisplayObject(app);
@@ -76,18 +80,10 @@ public class Simple2DCamera
 		_lastMousePos = new Point(_app.mouseX, _app.mouseY);
 		updateInnerBounds();
 
-		RectUtils.constrainDisplayObject(_tweenObj, _innerBounds);
-	}
+		// make sure we can't go through the floor.
+		Point2D.Float pt = RectUtils.constrain(new Point2D.Float((int) _tweenObj.x, (int) _tweenObj.y), _innerBounds);
+		_tweenObj.y = pt.y;
 
-	private void updateInnerBounds()
-	{
-
-		// recalculate the inner bounds based on the camera zoom.
-		_innerBounds.x = (int) (_bounds.x + (_viewport.width / 2) * (1 / _tweenObj.scaleX));
-		_innerBounds.y = (int) (_bounds.y + (_viewport.height / 2) * (1 / _tweenObj.scaleY));
-
-		_innerBounds.width = (int) (_bounds.width - (_viewport.width) * (1 / _tweenObj.scaleX));
-		_innerBounds.height = (int) (_bounds.height - (_viewport.height) * (1 / _tweenObj.scaleY));
 	}
 
 	/**
@@ -152,15 +148,17 @@ public class Simple2DCamera
 	{
 		_tweenObj.cancelTweens();
 
+		rect = RectUtils.fitIn(rect, _bounds);
+
 		_tweenObj.x = rect.x + rect.width / 2;
 		_tweenObj.y = rect.y + rect.height / 2;
 
-		float dScaleX = (float)_viewport.width / (float)rect.width;
-		float dScaleY = (float)_viewport.height / (float)rect.height;
+		float dScaleX = (float) _viewport.width / (float) rect.width;
+		float dScaleY = (float) _viewport.height / (float) rect.height;
+		
 		_tweenObj.scaleX = _tweenObj.scaleY = (dScaleX > dScaleY) ? dScaleY : dScaleX;
 
 		updateInnerBounds();
-		RectUtils.constrainDisplayObject(_tweenObj, _innerBounds);
 	}
 
 	/**
@@ -175,8 +173,11 @@ public class Simple2DCamera
 	 */
 	public void lookAt(float x, float y, float duration, ISimpleCallback completeCallback)
 	{
+		Float constrain = RectUtils.constrain(new Point2D.Float(x, y), _innerBounds);
+		x = constrain.x;
+		y = constrain.y;
+
 		_tweenObj.cancelTweens();
-	
 		_tweenObj.slideTo((int) x, (int) y, duration, Shaper.COSINE, completeCallback);
 	}
 
@@ -209,6 +210,11 @@ public class Simple2DCamera
 		RectUtils.constrainDisplayObject(_tweenObj, _innerBounds);
 	}
 
+	/**
+	 * Transforms a display object based on the camera's position and zoom.
+	 * 
+	 * @param obj
+	 */
 	public void setTransform(DisplayObject obj)
 	{
 		obj.setScaleAroundCenter(false);
@@ -218,5 +224,20 @@ public class Simple2DCamera
 
 		obj.scaleX = _tweenObj.scaleX;
 		obj.scaleY = _tweenObj.scaleY;
+	}
+
+	private void updateInnerBounds()
+	{
+		updateInnerBounds(_tweenObj.scaleX, _tweenObj.scaleY);
+	}
+
+	private void updateInnerBounds(float newScaleX, float newScaleY)
+	{
+		// recalculate the inner bounds based on the camera zoom.
+		_innerBounds.x = (int) (_bounds.x + (_viewport.width / 2) * (1 / newScaleX));
+		_innerBounds.y = (int) (_bounds.y + (_viewport.height / 2) * (1 / newScaleY));
+
+		_innerBounds.width = (int) (_bounds.width - (_viewport.width) * (1 / newScaleX));
+		_innerBounds.height = (int) (_bounds.height - (_viewport.height) * (1 / newScaleY));
 	}
 }

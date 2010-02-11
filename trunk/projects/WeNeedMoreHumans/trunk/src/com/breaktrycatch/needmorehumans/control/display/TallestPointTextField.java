@@ -31,6 +31,12 @@ public class TallestPointTextField extends HeightMarker
 	@Override
 	public void draw()
 	{
-		_textField.setText("Tallest Point: " + String.valueOf(_formatter.format(_highestValue / 100)) + "M");
+		String value = "Tallest Point: " + String.valueOf(_formatter.format(_highestValue / 100)) + "M";
+		
+		_textField.setText(value);
+		_shadowTextField.setText(value);
+		
+		_shadowTextField.x = _textField.x + 1;
+		_shadowTextField.y = _textField.y + 1;
 	}
 }

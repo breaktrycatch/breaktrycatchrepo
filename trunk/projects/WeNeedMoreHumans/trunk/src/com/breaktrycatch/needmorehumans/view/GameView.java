@@ -4,6 +4,9 @@ import java.awt.Rectangle;
 import java.util.ArrayList;
 
 import megamu.shapetween.Shaper;
+
+import org.apache.log4j.Level;
+
 import processing.core.PApplet;
 import processing.core.PImage;
 
@@ -55,13 +58,15 @@ public class GameView extends AbstractView
 
 	private ArrayList<XBoxControllableSprite> _sprites;
 	private XBoxControllableSprite _activeSprite;
-	
+
 	Rectangle _activeSpriteRect;
 	Rectangle _checkSpriteRect;
 	boolean _validplacement;
 
 	public GameView()
 	{
+		LogRepository.getInstance().getJonsLogger().setLevel(Level.ERROR);
+		LogRepository.getInstance().getMikesLogger().setLevel(Level.ERROR);
 	}
 
 	@Override
@@ -82,7 +87,7 @@ public class GameView extends AbstractView
 
 		createCaptureControl();
 		createInputListeners();
-		
+
 		_twitterMonitor = new TwitterTowerMonitor(app);
 	}
 
@@ -90,8 +95,8 @@ public class GameView extends AbstractView
 	{
 		// creates the environment
 		PApplet app = getApp();
-		_background = new ParallaxBackground(app, _physControl.width * 3, _physControl.height);
-		DisplayObject background = _background.addTilingLayer(app.loadImage("../data/world/large-background.png"), .05f);
+		_background = new ParallaxBackground(app, _physControl.width * 3.5f, _physControl.height);
+		DisplayObject background = _background.addHorizontalTilingLayer(app.loadImage("../data/world/large-background2.png"), .05f);
 		DisplayObject city = _background.addHorizontalTilingLayer(app.loadImage("../data/world/city.png"), .2f);
 		DisplayObject trees = _background.addHorizontalTilingLayer(app.loadImage("../data/world/trees.png"), .5f);
 		DisplayObject windmill = _background.addLayer(new Windmill(app), .7f);
@@ -102,6 +107,7 @@ public class GameView extends AbstractView
 		windmill.y = ground.y - windmill.height + 20;
 		city.y = ground.y - city.height;
 		trees.y = ground.y - trees.height;
+		background.y = ground.y - background.height;
 
 		for (int i = 0; i < 20; i++)
 		{
@@ -208,14 +214,6 @@ public class GameView extends AbstractView
 			}
 		});
 
-		keyboardManager.registerKeyOnce('-', new ISimpleCallback()
-		{
-			public void execute()
-			{
-				_physControl.addDebugSmileBoxes();
-			}
-		});
-
 		keyboardManager.registerKeyOnce('j', new ISimpleCallback()
 		{
 			public void execute()
@@ -255,7 +253,7 @@ public class GameView extends AbstractView
 
 		remove(_countdown);
 		_countdown = null;
-		
+
 		_capControl.beginCapture(1, new ICaptureCallback()
 		{
 			// executes when the capture has completed.
@@ -293,7 +291,7 @@ public class GameView extends AbstractView
 			}
 		}
 	}
-	
+
 	private void beginPlacement(final ArrayList<PImage> images)
 	{
 		_isPlacing = true;
@@ -305,35 +303,48 @@ public class GameView extends AbstractView
 
 		final XBoxControllableSprite sprite = createPlacementSprite(images);
 		_activeSprite = sprite;
-		
+
 		final XBoxControllerManager controllerManager = (XBoxControllerManager) ManagerLocator.getManager(XBoxControllerManager.class);
 		final KeyboardManager keyboardManager = (KeyboardManager) ManagerLocator.getManager(KeyboardManager.class);
-		
+
 		// place the human in to the sim
 		final ISimpleCallback placementCallback = new ISimpleCallback()
 		{
 			@Override
 			public void execute()
 			{
-				if (_validplacement) {
-					sprite.enableController(false);
-					
-					//Hold the sprites to allow for bounds checking
-					_sprites.add(sprite);
+				if (_validplacement)
+				{
 					_activeSprite = null;
-	
-					// TODO: Zoom out to see the whole tower...
-					_camera.lookAt(new Rectangle((int) _physControl.width / 2 - 600, (int) _physControl.height, 1200, 1200), 1f);
-	
+					_sprites.add(sprite);
+					sprite.enableController(false);
+
+					// zoom out to see the whole tower (with a minimum size)
+					Rectangle towerRect = (Rectangle) _physControl.getTowerRect().clone();
+					if (towerRect.width == 0 || towerRect.height == 0)
+					{
+						towerRect.x = (int) sprite.x;
+						towerRect.y = (int) sprite.y;
+						towerRect.width = 300;
+						towerRect.height = 300;
+					}
+
+					RectUtils.expand(towerRect, 300);
+					_camera.lookAt(towerRect, 1f);
+
 					_physControl.addCurrentBody();
 					LogRepository.getInstance().getPaulsLogger().info("Placed Sprite in PhysicsControl.");
 					keyboardManager.unregisterKeyOnce('p', this);
 					controllerManager.registerButtonOnce(Button.a, this);
-	
+
 					keyboardManager.unregisterKeyOnce('r', this);
 					controllerManager.registerButtonOnce(Button.b, this);
-	
+
 					_isPlacing = false;
+				}
+				else
+				{
+					errorCameraFlash();
 				}
 			}
 		};
@@ -361,14 +372,14 @@ public class GameView extends AbstractView
 
 		controllerManager.registerButtonOnce(Button.b, removeCallback);
 		keyboardManager.registerKeyOnce('r', removeCallback);
-		
+
 		// fire up the worker thread to process our guy.
 		_physControl.createBodyFromHuman(sprite, new IThreadedImageAnalysisCallback()
 		{
 			public void execute(BodyVO analyzedBody)
 			{
 				// if we didn't find an ear, throw it away!
-				if(analyzedBody == null)
+				if (analyzedBody == null)
 				{
 					sprite.enableController(false);
 					LogRepository.getInstance().getPaulsLogger().info("Removed Sprite.");
@@ -378,26 +389,26 @@ public class GameView extends AbstractView
 
 					keyboardManager.unregisterKeyOnce('r', removeCallback);
 					controllerManager.registerButtonOnce(Button.b, removeCallback);
-					
+
 					errorCameraFlash();
-					
+
 					_isPlacing = false;
-				}
-				else
+				} else
 				{
-					//_sprites.add(sprite);
+					// _sprites.add(sprite);
 					_physControl.add(sprite);
 					creationCameraZoom(sprite);
 					sprite.scaleX = sprite.scaleY = 0;
 					sprite.setScaleAroundCenter(true);
 					sprite.scaleTo(1, 1, .5f, Shaper.COSINE);
+
 				}
 			}
 		});
 
 		LogRepository.getInstance().getPaulsLogger().info("Captured image of size: " + img.width + ", " + img.height);
 	}
-	
+
 	private void creationCameraZoom(final XBoxControllableSprite sprite)
 	{
 		Rectangle lookAtBounds = RectUtils.expand(sprite.getBounds(), 700);
@@ -420,21 +431,30 @@ public class GameView extends AbstractView
 			}
 		});
 	}
-	
+
 	private XBoxControllableSprite createPlacementSprite(ArrayList<PImage> images)
 	{
 		final XBoxControllableSprite sprite = new XBoxControllableSprite(getApp());
 		sprite.setRotateAroundCenter(true);
 		sprite.addFrames(images);
 		sprite.setFPS(3);
-		sprite.x = _physControl.width / 2 - sprite.width / 2;
-		sprite.y = _physControl.height - getApp().height / 2 - sprite.height / 2;
+
+		Rectangle towerRect = _physControl.getTowerRect();
+		if (towerRect.width > 0 && towerRect.height > 0)
+		{
+			sprite.x = towerRect.x + (towerRect.width - sprite.width) / 2;
+			sprite.y = towerRect.y - sprite.height - 50;
+		} else
+		{
+			sprite.x = _physControl.width / 2 - sprite.width / 2;
+			sprite.y = _physControl.height - getApp().height / 2 - sprite.height / 2;
+		}
 
 		Rectangle imageBounds = new Rectangle(0, 0, (int) (_physControl.width - sprite.width), (int) (_physControl.height - sprite.height));
 		sprite.setScrollBounds(imageBounds);
-		
+
 		sprite.enableController(false);
-		
+
 		return sprite;
 	}
 
@@ -445,38 +465,42 @@ public class GameView extends AbstractView
 
 		_heightMarker.y = (r.y == 0) ? (_physControl.height) : (r.y);
 		_heightMarker.x = ((r.x == 0) ? (-1000) : (r.x)) + r.width;
-//love with a red underline upside-down																																																																																																																																															q
+		// love with a red underline upside-down q
 		_tallestPoint.setValue(_heightMarker.getDisplayValue());
-		_twitterMonitor.update(_heightMarker.getDisplayValue(), _sprites);
+
+		// TODO: Hook this up to a config var...
+		// _twitterMonitor.update(_heightMarker.getDisplayValue(), _sprites);
 
 		// transforms the root container to the camera's view port.
 		_camera.update();
 		_camera.setTransform(_zoomContainer);
-		
-		
+
 		_validplacement = true;
-		if (_activeSprite != null) {
+		if (_activeSprite != null)
+		{
 			_activeSpriteRect = _activeSprite.getScreenBounds();
-			
-			//Check rect bounds between activeSprite and others
-			for (int i = 0; i < _sprites.size(); i++) {
+
+			// Check rect bounds between activeSprite and others
+			for (int i = 0; i < _sprites.size(); i++)
+			{
 				_checkSpriteRect = _sprites.get(i).getScreenBounds();
-				if (_activeSpriteRect.intersects(_checkSpriteRect)) {
+				if (_activeSpriteRect.intersects(_checkSpriteRect))
+				{
 					_activeSprite.errorTint();
-					//LogRepository.getInstance().getJonsLogger().info("INVALID PLACEMENT");
+					// LogRepository.getInstance().getJonsLogger().info("INVALID PLACEMENT");
 					_validplacement = false;
 					i = _sprites.size();
 				}
 			}
-			if (_validplacement) {
+			if (_validplacement)
+			{
 				_activeSprite.regularTint();
 			}
 		}
-		
-		
+
 		super.draw();
 	}
-	
+
 	private void errorCameraFlash()
 	{
 		showCameraFlash(0xffff0000);

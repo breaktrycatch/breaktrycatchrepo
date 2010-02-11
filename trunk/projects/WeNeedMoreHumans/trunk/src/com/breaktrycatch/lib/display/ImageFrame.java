@@ -31,11 +31,13 @@ public class ImageFrame extends DisplayObject
 		super(app);
 	}
 	
-	public void errorTint() {
+	public void errorTint()
+	{
 		errorTint = true;
 	}
-	
-	public void regularTint() {
+
+	public void regularTint()
+	{
 		errorTint = false;
 	}
 
@@ -46,8 +48,9 @@ public class ImageFrame extends DisplayObject
 
 		if (_img != null)
 		{
-			if (errorTint == true) {
-				_renderTarget.tint(0xFFFF0000);
+			if (errorTint == true)
+			{
+				_renderTarget.tint(0xFFFF6666);
 			}
 			
 			//DEBUG SCREENBOUNDS. Not 100% accurate because the matrix stuff changes them when you view it.
