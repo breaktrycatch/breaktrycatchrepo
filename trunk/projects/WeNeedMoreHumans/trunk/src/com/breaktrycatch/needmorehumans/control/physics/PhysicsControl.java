@@ -45,7 +45,7 @@ public class PhysicsControl extends DisplayObject
 	public void init()
 	{
 		_physWorld = new PhysicsWorldWrapper((float) width, (float) height);
-//		_physWorld.enableDebugDraw(getApp());
+		_physWorld.enableDebugDraw(getApp());
 		_threadedAnalysis = new ThreadedImageAnalysis(getApp());
 
 		PhysicsShapeDefVO vo = new PhysicsShapeDefVO();
@@ -57,6 +57,8 @@ public class PhysicsControl extends DisplayObject
 		bounds[1].setUserData(userData);
 		bounds[2].setUserData(userData);
 		bounds[3].setUserData(userData);
+		
+		addDebugSmileBoxes();
 	}
 
 	/**
