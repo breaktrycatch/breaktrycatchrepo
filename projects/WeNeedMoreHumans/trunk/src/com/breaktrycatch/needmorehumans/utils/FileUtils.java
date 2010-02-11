@@ -83,11 +83,16 @@ public class FileUtils
 
 	private static void constructTowerPaths()
 	{
-		File tempFile = new File("../");
+		File tempFile = new File("");
 		String path = tempFile.getAbsolutePath() + File.separator + "data" + File.separator + "towers";
 
 		__towerDirectory = new File(path);
-		__towerNumber = __towerDirectory.list().length;
+		if (__towerDirectory.list() != null) {
+			__towerNumber = __towerDirectory.list().length;
+		}
+		else {
+			__towerNumber = 0;
+		}
 		LogRepository.getInstance().getJonsLogger().info("IS DIRECTORY " + __towerDirectory.isDirectory() + " length " + __towerNumber);
 
 		String strTowerNumber = leadingSpaces(__towerNumber);
@@ -115,7 +120,12 @@ public class FileUtils
 
 	public static void saveSourceImage(PImage img)
 	{
-		__sourceNumber = __towerSourceDirectory.list().length;
+		if (__towerSourceDirectory.list() != null) {
+			__sourceNumber = __towerSourceDirectory.list().length;
+		}
+		else {
+			__sourceNumber = 0;
+		}
 		String strSourceNumber = leadingSpaces(__sourceNumber);
 
 		String path = __towerSourceDirectory.getAbsolutePath() + "/source_" + strSourceNumber + ".png";

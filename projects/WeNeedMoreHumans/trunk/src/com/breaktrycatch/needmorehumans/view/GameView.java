@@ -54,6 +54,11 @@ public class GameView extends AbstractView
 	private String _debugFilename = _spriteLookup[0];
 
 	private ArrayList<XBoxControllableSprite> _sprites;
+	private XBoxControllableSprite _activeSprite;
+	
+	Rectangle _activeSpriteRect;
+	Rectangle _checkSpriteRect;
+	boolean _validplacement;
 
 	public GameView()
 	{
@@ -299,6 +304,7 @@ public class GameView extends AbstractView
 		FileUtils.saveSourceImage(img);
 
 		final XBoxControllableSprite sprite = createPlacementSprite(images);
+		_activeSprite = sprite;
 		
 		final XBoxControllerManager controllerManager = (XBoxControllerManager) ManagerLocator.getManager(XBoxControllerManager.class);
 		final KeyboardManager keyboardManager = (KeyboardManager) ManagerLocator.getManager(KeyboardManager.class);
@@ -309,20 +315,26 @@ public class GameView extends AbstractView
 			@Override
 			public void execute()
 			{
-				sprite.enableController(false);
-
-				// TODO: Zoom out to see the whole tower...
-				_camera.lookAt(new Rectangle((int) _physControl.width / 2 - 600, (int) _physControl.height, 1200, 1200), 1f);
-
-				_physControl.addCurrentBody();
-				LogRepository.getInstance().getPaulsLogger().info("Placed Sprite in PhysicsControl.");
-				keyboardManager.unregisterKeyOnce('p', this);
-				controllerManager.registerButtonOnce(Button.a, this);
-
-				keyboardManager.unregisterKeyOnce('r', this);
-				controllerManager.registerButtonOnce(Button.b, this);
-
-				_isPlacing = false;
+				if (_validplacement) {
+					sprite.enableController(false);
+					
+					//Hold the sprites to allow for bounds checking
+					_sprites.add(sprite);
+					_activeSprite = null;
+	
+					// TODO: Zoom out to see the whole tower...
+					_camera.lookAt(new Rectangle((int) _physControl.width / 2 - 600, (int) _physControl.height, 1200, 1200), 1f);
+	
+					_physControl.addCurrentBody();
+					LogRepository.getInstance().getPaulsLogger().info("Placed Sprite in PhysicsControl.");
+					keyboardManager.unregisterKeyOnce('p', this);
+					controllerManager.registerButtonOnce(Button.a, this);
+	
+					keyboardManager.unregisterKeyOnce('r', this);
+					controllerManager.registerButtonOnce(Button.b, this);
+	
+					_isPlacing = false;
+				}
 			}
 		};
 
@@ -373,7 +385,7 @@ public class GameView extends AbstractView
 				}
 				else
 				{
-					_sprites.add(sprite);
+					//_sprites.add(sprite);
 					_physControl.add(sprite);
 					creationCameraZoom(sprite);
 					sprite.scaleX = sprite.scaleY = 0;
@@ -440,6 +452,27 @@ public class GameView extends AbstractView
 		// transforms the root container to the camera's view port.
 		_camera.update();
 		_camera.setTransform(_zoomContainer);
+		
+		
+		_validplacement = true;
+		if (_activeSprite != null) {
+			_activeSpriteRect = _activeSprite.getScreenBounds();
+			
+			//Check rect bounds between activeSprite and others
+			for (int i = 0; i < _sprites.size(); i++) {
+				_checkSpriteRect = _sprites.get(i).getScreenBounds();
+				if (_activeSpriteRect.intersects(_checkSpriteRect)) {
+					_activeSprite.errorTint();
+					//LogRepository.getInstance().getJonsLogger().info("INVALID PLACEMENT");
+					_validplacement = false;
+					i = _sprites.size();
+				}
+			}
+			if (_validplacement) {
+				_activeSprite.regularTint();
+			}
+		}
+		
 		
 		super.draw();
 	}

@@ -33,6 +33,7 @@ public class Sprite extends ImageFrame
 		_playing = true;
 	}
 
+
 	@Override
 	public void draw()
 	{
@@ -48,6 +49,24 @@ public class Sprite extends ImageFrame
 				_elapsedFrames += (((float) _fps * (float) diff) / 1000);
 				_frame = (int) _elapsedFrames % _timeline.size();
 			}
+		}
+	}
+	
+	@Override
+	public void errorTint() {
+		// TODO Auto-generated method stub
+		super.errorTint();
+		for (int i = 0; i < _timeline.size(); i++) {
+			_timeline.get(i).errorTint();
+		}
+	}
+	
+	@Override
+	public void regularTint() {
+		// TODO Auto-generated method stub
+		super.regularTint();
+		for (int i = 0; i < _timeline.size(); i++) {
+			_timeline.get(i).regularTint();
 		}
 	}
 
