@@ -160,18 +160,19 @@ public class PhysicsControl extends DisplayObject
 
 		PhysicsUserDataVO userData = new PhysicsUserDataVO();
 		userData.display = sprite;
-
+		
+		/*
 		// Convert all of the extremity points to world space
 		Vec2 axisTransform = new Vec2(1, -1);
 		Vec2 offset = new Vec2(0.0f, 0.0f);
-
 		for (Vec2 extremity : analyzedBody.extremities)
 		{
 			PhysicsUtils.genericTransform(extremity, _physWorld.getPhysScale(), offset, axisTransform, true);
 		}
 
 		userData.extremities = analyzedBody.extremities;
-
+		*/
+	
 		userData.isHuman = true;
 		human.setUserData(userData);
 

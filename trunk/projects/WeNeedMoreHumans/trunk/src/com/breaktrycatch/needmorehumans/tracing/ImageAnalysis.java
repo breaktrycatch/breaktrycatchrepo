@@ -33,7 +33,6 @@ public class ImageAnalysis
 
 	private ArrayList<EdgeVO> edges;
 	private ArrayList<EdgeVO> culledEdges;
-	private ArrayList<EdgeVO> finalCulledEdges;
 	private ArrayList<EdgeVO> innerCulledEdges;
 
 	private ArrayList<PixelVO> culledPoints;
@@ -222,7 +221,6 @@ public class ImageAnalysis
 		// }
 		convertToPoints();
 		LogRepository.getInstance().getJonsLogger().info("NUMBER OF CULLED POINTS " + culledPoints.size());
-		determineExtremities();
 		
 		convertToPolys();
 		
@@ -236,7 +234,7 @@ public class ImageAnalysis
 			BodyVO body = new BodyVO();
 		
 			body.polyDefs = polyDefs;
-			body.extremities = extremitiesArray;
+			body.extremities = null;
 		
 			return body;
 		}

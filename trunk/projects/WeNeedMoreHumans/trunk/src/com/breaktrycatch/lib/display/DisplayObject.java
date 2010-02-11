@@ -416,8 +416,8 @@ public class DisplayObject extends ArrayList<DisplayObject>
 
 		// Normalize to actual shape in screen coordinates because object is
 		// center reffed
-		rec.x += (rec.width / 2);
-		rec.y += (rec.height / 2);
+//		rec.x += (rec.width / 2);
+//		rec.y += (rec.height / 2);
 
 		return rec;
 	}

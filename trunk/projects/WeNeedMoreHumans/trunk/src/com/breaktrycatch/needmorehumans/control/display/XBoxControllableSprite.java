@@ -205,10 +205,13 @@ public class XBoxControllableSprite extends Sprite
 			{
 				_updatedCallback.execute();
 			}
+			
 		}
 
 		super.draw();
 	}
+	
+	
 
 	public void enableController(boolean b)
 	{
