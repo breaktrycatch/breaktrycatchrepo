@@ -13,9 +13,9 @@ import org.jbox2d.dynamics.BodyDef;
 import org.jbox2d.dynamics.DebugDraw;
 import org.jbox2d.dynamics.World;
 import org.jbox2d.dynamics.contacts.ContactPoint;
-import org.jbox2d.dynamics.joints.DistanceJointDef;
 import org.jbox2d.dynamics.joints.Joint;
 import org.jbox2d.dynamics.joints.JointEdge;
+import org.jbox2d.dynamics.joints.RevoluteJointDef;
 import org.jbox2d.testbed.ProcessingDebugDraw;
 
 import processing.core.PApplet;
@@ -79,9 +79,12 @@ public class PhysicsWorldWrapper {
 	public void step()
 	{
 //		_world.setWarmStarting(false);
-//		_world.setPositionCorrection(false);
+
 //		_world.setContinuousPhysics(true);
 //		_towerTopY = Integer.MAX_VALUE;
+		
+		//MUST BE SET TO FALSE...OTHERWISE ITS ALWAYS TRYING TO CORRECT BODIES WITH 1+ JOINTS
+		_world.setPositionCorrection(false);
 
 		_towerRect = null;
 		_world.step(PHYS_TIMESTEP, PHYS_ITERATIONS);
@@ -217,12 +220,22 @@ public class PhysicsWorldWrapper {
 			}
 			
 			
+			//TODO: TEST TO SEE WHICH JOINT CONFIG IS GENERALLY FASTER
 			//Create a joint between the two objects
-			Vec2 jointVectorHalfLength = contact.normal.mul(JOINT_HALF_LENGTH);
-			DistanceJointDef jd = new DistanceJointDef();
+			//Vec2 jointVectorHalfLength = contact.normal.mul(JOINT_HALF_LENGTH);
+//			DistanceJointDef jd = new DistanceJointDef();
+//			jd.collideConnected = true;
+//			jd.dampingRatio = 0.5f;
+//			jd.initialize(contact.shape1.getBody(), contact.shape2.getBody(), contact.position.sub(jointVectorHalfLength), contact.position.add(jointVectorHalfLength));
+			
+			//Revolute joint may be faster than distance...who knows?
+			RevoluteJointDef jd = new RevoluteJointDef();
 			jd.collideConnected = true;
-			jd.dampingRatio = 0.5f;
-			jd.initialize(contact.shape1.getBody(), contact.shape2.getBody(), contact.position.sub(jointVectorHalfLength), contact.position.add(jointVectorHalfLength));
+			jd.initialize(body1, body2, contact.position);
+			
+			//Simulate friction, may or may not increase performace through limiting movement
+//			jd.maxMotorTorque = 10.0f;
+//			jd.enableMotor = true;
 			
 			Joint joint = _world.createJoint(jd);
 			
