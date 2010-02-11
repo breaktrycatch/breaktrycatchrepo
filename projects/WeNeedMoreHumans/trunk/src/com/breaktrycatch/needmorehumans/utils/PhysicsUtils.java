@@ -14,4 +14,9 @@ public class PhysicsUtils {
 		return result;
 	}
 	
+	public static double distanceSQD(Vec2 v1, Vec2 v2)
+	{
+		return Math.pow(v1.x - v2.x, 2) + Math.pow(v1.y - v2.y, 2);
+	}
+	
 }

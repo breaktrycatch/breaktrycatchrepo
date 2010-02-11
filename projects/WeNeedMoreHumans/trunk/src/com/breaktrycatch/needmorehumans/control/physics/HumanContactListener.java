@@ -70,6 +70,36 @@ public class HumanContactListener implements ContactListener {
 	@Override
 	public void result(ContactResult point) {
 		// TODO Auto-generated method stub
+//		if(point.shape1.getBody().getUserData() instanceof PhysicsUserDataVO && point.shape2.getBody().getUserData() instanceof PhysicsUserDataVO)
+//		{
+//			PhysicsUserDataVO data1 = (PhysicsUserDataVO)point.shape1.getBody().getUserData();
+//			PhysicsUserDataVO data2 = (PhysicsUserDataVO)point.shape2.getBody().getUserData();
+//
+////			if(sprite1 != null && sprite2 != null && sprite1.isHuman && sprite2.isHuman && (point.shape1.getUserData() == null || point.shape2.getUserData() == null))
+//			if(data1 != null && data2 != null)
+//			{
+//				//report only sprites which have user data, are human and involve a collision with the last dropped human
+//				if(data1.isHuman && data2.isHuman && (point.shape1.getBody() == _reportTo.getActiveHuman() || point.shape2.getBody() == _reportTo.getActiveHuman()))
+//				{
+////					LogRepository.getInstance().getMikesLogger().info("WE HAVE HUMAN CONTACT!");
+//					_reportTo.reportHumanHumanContact(cloneContactResult(point));
+//				}
+//				else if((data1.isHuman || data2.isHuman) && (data1.breaksHumanJoints || data2.breaksHumanJoints))
+//				{
+//					_reportTo.reportHumanBreakerContact(cloneContactResult(point));
+//				}
+//			}
+//		}
+//		
+//		if(point.shape1.getBody().getUserData() instanceof PhysicsUserDataVO)
+//		{
+//			((PhysicsUserDataVO)point.shape1.getBody().getUserData()).hasContacted = true;
+//		}
+//		
+//		if(point.shape2.getBody().getUserData() instanceof PhysicsUserDataVO)
+//		{
+//			((PhysicsUserDataVO)point.shape2.getBody().getUserData()).hasContacted = true;
+//		}
 		
 	}
 
@@ -83,6 +113,18 @@ public class HumanContactListener implements ContactListener {
 		clone.normal = orig.normal.clone();
 		clone.id = new ContactID(orig.id);
 		clone.velocity = orig.velocity.clone();
+		clone.separation = orig.separation;
+		return clone;
+	}
+	
+	private final ContactPoint cloneContactResult(ContactResult orig)
+	{
+		ContactPoint clone = new ContactPoint();
+		clone.shape1 = orig.shape1;
+		clone.shape2 = orig.shape2;
+		clone.position = orig.position.clone();
+		clone.normal = orig.normal.clone();
+		clone.id = new ContactID(orig.id);
 		
 		return clone;
 	}
