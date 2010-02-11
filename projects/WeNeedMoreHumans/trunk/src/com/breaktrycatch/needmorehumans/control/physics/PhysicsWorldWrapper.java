@@ -35,7 +35,6 @@ public class PhysicsWorldWrapper {
 	private final float MIN_JOINT_SEPARATION = (float)Math.pow(0.2f, 2);
 	private final float JOINT_HALF_LENGTH = 0.025f;
 	
-	
 	private World _world;
 	private ProcessingDebugDraw _debugDraw;
 	private Vec2 _gravity = new Vec2(0.0f, -10.0f);
@@ -133,6 +132,7 @@ public class PhysicsWorldWrapper {
 						// END DEBUG
 						
 						_towerRect = (_towerRect == null) ? bounds : _towerRect.union(bounds);
+						
 					}
 				}				
 			}
@@ -456,10 +456,6 @@ public class PhysicsWorldWrapper {
 		return _physScale;
 	}
 	
-//	public int getTowerTopY()
-//	{
-//		return _towerTopY;
-//	}
 	
 	public Rectangle getTowerRect()
 	{

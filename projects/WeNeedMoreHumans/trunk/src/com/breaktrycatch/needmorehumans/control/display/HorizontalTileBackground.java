@@ -20,7 +20,7 @@ public class HorizontalTileBackground extends AbstractTileBackground
 	{
 		for (int i = 0; i < _maxImages; i++)
 		{
-			_images.get(i).x = _img.width * (i - 1);
+			_images.get(i).x = _img.width * (i - (int)(_maxImages / 2));
 		}
 	}
 
