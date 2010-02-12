@@ -26,7 +26,6 @@ package com.humans.buildings {
 		
 		public function set mc(_mc : BuildingMC) : void {
 			__mc = _mc;
-			__mc.y = (mc.height/2);
 		}
 		
 		public function loadBitmap(_path:String):void {
@@ -38,7 +37,21 @@ package com.humans.buildings {
 		protected function onBitmapLoaded(e:BitmapLoadedEvent):void {
 			__bitmap = new Bitmap(e.bitmapData, "auto", true);
 			__mc.addChild(__bitmap);
-			__mc.y = (mc.height/2);
+		}
+
+		
+		override public function get y() : Number {
+			return super.y;
+		}
+
+		
+		override public function set y(value : Number) : void {
+			if (__mc != null) {
+				super.y = (value + (__mc.height/2));
+			}
+			else {
+				super.y = value;
+			}
 		}
 	}
 }
