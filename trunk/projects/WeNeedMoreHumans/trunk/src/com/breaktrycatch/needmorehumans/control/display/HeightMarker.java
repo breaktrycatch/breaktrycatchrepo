@@ -62,16 +62,16 @@ public class HeightMarker extends DisplayObject
 		_shadowTextField.x = _textField.x + 2;
 		_shadowTextField.y = _textField.y + 2;
 		
-		PApplet app = getApp();
-		
-		int width = 75;
-		int height = 2;
-
-		app.fill(0x000000);
-		app.rect(-width + 2, 2, width, height);
-		
-		app.fill(0xffffffff);
-		app.rect(-width, 0, width, height);
+//		PApplet app = getApp();
+//		
+//		int width = 75;
+//		int height = 2;
+//
+//		app.fill(0x000000);
+//		app.rect(-width + 2, 2, width, height);
+//		
+//		app.fill(0xffffffff);
+//		app.rect(-width, 0, width, height);
 
 	}
 
