@@ -14,6 +14,7 @@ import com.breaktrycatch.needmorehumans.model.BodyVO;
 import com.breaktrycatch.needmorehumans.model.PhysicsShapeDefVO;
 import com.breaktrycatch.needmorehumans.tracing.ThreadedImageAnalysis;
 import com.breaktrycatch.needmorehumans.tracing.callback.IThreadedImageAnalysisCallback;
+import com.breaktrycatch.needmorehumans.utils.ConfigTools;
 import com.breaktrycatch.needmorehumans.utils.LogRepository;
 import com.breaktrycatch.needmorehumans.utils.PhysicsUtils;
 
@@ -45,7 +46,10 @@ public class PhysicsControl extends DisplayObject
 	public void init()
 	{
 		_physWorld = new PhysicsWorldWrapper((float) width, (float) height);
-		_physWorld.enableDebugDraw(getApp());
+		if(ConfigTools.getBoolean("general", "debugMode"))
+		{
+			_physWorld.enableDebugDraw(getApp());
+		}
 		_threadedAnalysis = new ThreadedImageAnalysis(getApp());
 
 		PhysicsShapeDefVO vo = new PhysicsShapeDefVO();
@@ -61,6 +65,9 @@ public class PhysicsControl extends DisplayObject
 		bounds[3].setUserData(userData);
 		
 //		addDebugSmileBoxes();
+		
+		
+		
 	}
 
 	/**
@@ -112,9 +119,9 @@ public class PhysicsControl extends DisplayObject
 			_currentBody = _threadedAnalysis.get();
 			_processingComplete = true;
 			_isProcessingHuman = false;
-			
+
 			_onCompleteCallback.execute(_currentBody);
-			
+
 			addCurrentBody();
 		}
 	}
@@ -164,19 +171,17 @@ public class PhysicsControl extends DisplayObject
 
 		PhysicsUserDataVO userData = new PhysicsUserDataVO();
 		userData.display = sprite;
-		
-		/*
-		// Convert all of the extremity points to world space
-		Vec2 axisTransform = new Vec2(1, -1);
-		Vec2 offset = new Vec2(0.0f, 0.0f);
-		for (Vec2 extremity : analyzedBody.extremities)
-		{
-			PhysicsUtils.genericTransform(extremity, _physWorld.getPhysScale(), offset, axisTransform, true);
-		}
 
-		userData.extremities = analyzedBody.extremities;
-		*/
-	
+		/*
+		 * // Convert all of the extremity points to world space Vec2
+		 * axisTransform = new Vec2(1, -1); Vec2 offset = new Vec2(0.0f, 0.0f);
+		 * for (Vec2 extremity : analyzedBody.extremities) {
+		 * PhysicsUtils.genericTransform(extremity, _physWorld.getPhysScale(),
+		 * offset, axisTransform, true); }
+		 * 
+		 * userData.extremities = analyzedBody.extremities;
+		 */
+
 		userData.isHuman = true;
 		human.setUserData(userData);
 

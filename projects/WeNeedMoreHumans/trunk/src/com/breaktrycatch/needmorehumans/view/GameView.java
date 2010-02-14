@@ -15,13 +15,13 @@ import com.breaktrycatch.lib.component.KeyboardManager;
 import com.breaktrycatch.lib.component.ManagerLocator;
 import com.breaktrycatch.lib.component.XBoxControllerManager;
 import com.breaktrycatch.lib.display.DisplayObject;
+import com.breaktrycatch.lib.display.ImageFrame;
 import com.breaktrycatch.lib.util.callback.ISimpleCallback;
 import com.breaktrycatch.lib.view.AbstractView;
 import com.breaktrycatch.needmorehumans.config.control.ColorController;
 import com.breaktrycatch.needmorehumans.control.camera.Simple2DCamera;
 import com.breaktrycatch.needmorehumans.control.display.Countdown;
 import com.breaktrycatch.needmorehumans.control.display.HeightMarker;
-import com.breaktrycatch.needmorehumans.control.display.HorizontalTileBackground;
 import com.breaktrycatch.needmorehumans.control.display.MonkeySpawner;
 import com.breaktrycatch.needmorehumans.control.display.ParallaxBackground;
 import com.breaktrycatch.needmorehumans.control.display.SkyObject;
@@ -36,7 +36,6 @@ import com.breaktrycatch.needmorehumans.model.BodyVO;
 import com.breaktrycatch.needmorehumans.tracing.callback.IThreadedImageAnalysisCallback;
 import com.breaktrycatch.needmorehumans.utils.ConfigTools;
 import com.breaktrycatch.needmorehumans.utils.FileUtils;
-import com.breaktrycatch.needmorehumans.utils.ImageUtils;
 import com.breaktrycatch.needmorehumans.utils.LogRepository;
 import com.breaktrycatch.needmorehumans.utils.RectUtils;
 import com.breaktrycatch.needmorehumans.utils.twitter.TwitterTowerMonitor;
@@ -116,6 +115,7 @@ public class GameView extends AbstractView
 		
 		int numClouds = 6;
 		HashMap<String, PImage> cloudTable = new HashMap<String, PImage>();
+		Rectangle cloudBounds = new Rectangle((int)(-_physControl.width), 0, (int) (_physControl.width * 2), (int) _physControl.height);
 		for (int i = 0; i < 40; i++)
 		{
 			int cloudType = (int) (Math.floor(Math.random() * numClouds)) + 1;
@@ -125,7 +125,6 @@ public class GameView extends AbstractView
 				cloudTable.put(filename, app.loadImage(filename));
 			}
 			
-			Rectangle cloudBounds = new Rectangle((int)(-_physControl.width), 0, (int) (_physControl.width * 2), (int) _physControl.height);
 			SkyObject cloud = new SkyObject(app, cloudBounds);
 			cloud.addFrame(cloudTable.get(filename));
 			cloud.setSpritePosition((int) (Math.random() * cloudBounds.width), (int) (Math.random() * (cloudBounds.height - 400)));
@@ -133,23 +132,34 @@ public class GameView extends AbstractView
 			_background.addLayer(cloud, .2f);
 		}
 		
-		DisplayObject city = _background.addHorizontalTilingLayer(app.loadImage("../data/world/blurry-city.png"), .2f);
-
+		DisplayObject windmill = _background.addLayer(new Windmill(app), .15f);
+		
+		SkyObject backgroundMonkey = new SkyObject(getApp(), cloudBounds);
+		backgroundMonkey.addFrame(app.loadImage("../data/world/ape-background.png"));
+		backgroundMonkey.setVelocity(1,0);
+		backgroundMonkey.x = (int)(Math.random() * cloudBounds.width);
+		_background.addLayer(backgroundMonkey, .15f);
+		
 		DisplayObject cityBack = _background.addHorizontalTilingLayer(app.loadImage("../data/world/amsterdam-buildings-back.png"), .1f);
 		DisplayObject cityFront = _background.addHorizontalTilingLayer(app.loadImage("../data/world/amsterdam-buildings-front.png"), .2f);
 		DisplayObject trees = _background.addHorizontalTilingLayer(app.loadImage("../data/world/far-grass.png"), .5f);
-		DisplayObject windmill = _background.addLayer(new Windmill(app), .7f);
 		DisplayObject ground = _background.addHorizontalTilingLayer(app.loadImage("../data/world/ground.png"), 1);
+		
 		
 		background.y = -app.height;
 		ground.y = _physControl.height - 7; // 7 is half the thickness of the
 		// physics ground plane
-		windmill.y = ground.y - windmill.height + 20;
-		city.y = ground.y - city.height;
+		windmill.y = ground.y - windmill.height - 70;
 		cityFront.y = ground.y - cityFront.height - 60;
 		cityBack.y = ground.y - cityBack.height;
 		trees.y = ground.y - trees.height;
 		background.y = ground.y - background.height;
+		backgroundMonkey.y = cityBack.y - backgroundMonkey.height / 3;
+
+		_deliveryMonkey = new MonkeySpawner(getApp());
+		_deliveryMonkey.visible = false;
+		_deliveryMonkey.setBounds(new Rectangle(0, 0, (int) _physControl.width, (int) _physControl.height));
+		_background.add(_deliveryMonkey);
 		
 		_zoomContainer.add(_background);
 		_heightMarker = new HeightMarker(app);
@@ -166,8 +176,8 @@ public class GameView extends AbstractView
 	{
 		PApplet app = getApp();
 		_physControl = new PhysicsControl(app);
-		_physControl.width = app.width * 4;
-		_physControl.height = app.height * 6;
+		_physControl.width = 4000;
+		_physControl.height = 10000;
 		_physControl.init();
 	}
 
@@ -379,12 +389,6 @@ public class GameView extends AbstractView
 	
 	private void introActiveSprite()
 	{
-		if(_deliveryMonkey == null)
-		{
-			_deliveryMonkey = new MonkeySpawner(getApp());
-			_deliveryMonkey.visible = false;
-			_background.add(_deliveryMonkey);
-		}
 		
 
 		final XBoxControllerManager controllerManager = (XBoxControllerManager) ManagerLocator.getManager(XBoxControllerManager.class);
