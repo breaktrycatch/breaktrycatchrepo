@@ -6,6 +6,7 @@ import java.awt.Toolkit;
 import processing.core.PApplet;
 
 import com.breaktrycatch.lib.display.Stage;
+import com.breaktrycatch.needmorehumans.utils.ConfigTools;
 import com.breaktrycatch.needmorehumans.utils.FPS;
 import com.breaktrycatch.needmorehumans.view.ViewManager;
 
@@ -31,13 +32,16 @@ public class NeedMoreHumansCore extends Stage
 		_mainViewManager.changeView(ViewManager.GAME_VIEW);
 		add(_mainViewManager);
 
-		add(FPS.register(app));
+		if(ConfigTools.getBoolean("general", "debugMode"))
+		{
+			add(FPS.register(app));
+		}
 	}
 
 	@Override
 	public void draw()
 	{
-		getApp().background(0x69a8eb);
+		getApp().background(0x66a5ea);
 		
 		super.draw();
 		

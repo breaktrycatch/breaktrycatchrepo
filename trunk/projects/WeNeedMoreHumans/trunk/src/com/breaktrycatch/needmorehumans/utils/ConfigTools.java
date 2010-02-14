@@ -61,6 +61,20 @@ public class ConfigTools
 		}
 		return value;
 	}
+	
+	public static boolean getBoolean(String category, String key)
+	{
+		boolean value = false;
+		try
+		{
+			String prop = ConfigTools.get().getProperty(key, null, category);
+			value = Boolean.parseBoolean(prop);
+		} catch (NumberFormatException e)
+		{
+			e.printStackTrace();
+		}
+		return value;
+	}
 
 	public static Configuration get()
 	{

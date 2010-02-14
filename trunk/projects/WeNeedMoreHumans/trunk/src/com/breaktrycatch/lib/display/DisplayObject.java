@@ -31,6 +31,7 @@ public class DisplayObject extends ArrayList<DisplayObject>
 	public float scaleY = 1;
 	public float rotationRad = 0;
 	public float alpha = 1;
+	public boolean visible = true;
 
 	protected PGraphics _renderTarget;
 
@@ -157,8 +158,8 @@ public class DisplayObject extends ArrayList<DisplayObject>
 
 			if (tween.isComplete())
 			{
-				tween.finalizeTween();
 				_activeTweens.remove(i);
+				tween.finalizeTween();
 			}
 		}
 	}
@@ -166,38 +167,45 @@ public class DisplayObject extends ArrayList<DisplayObject>
 	public void preDraw()
 	{
 		updateTweens();
-
+		
 		
 		_renderTarget.pushMatrix();
-		_renderTarget.tint(255, alpha * 255);
-		_renderTarget.translate(x, y);
-		if (getScaleAroundPoint() != null)
+		
+		// get some performance back if we're not visible. We still need to pushMatrix
+		// since if the DisplayObject's draw method toggles visiblity, we'll end up with
+		// one more pop or push matrix than we need.
+		if(visible)
 		{
-			Point2D.Float pt = getScaleAroundPoint();
-			_renderTarget.translate(pt.x / 2, pt.y / 2);
-			_renderTarget.scale(scaleX, scaleY);
-			_renderTarget.translate(-pt.x / 2, -pt.y / 2);
-		} else
-		{
-			if (getScaleAroundCenter())
+			_renderTarget.tint(255, alpha * 255);
+			_renderTarget.translate(x, y);
+			if (getScaleAroundPoint() != null)
+			{
+				Point2D.Float pt = getScaleAroundPoint();
+				_renderTarget.translate(pt.x / 2, pt.y / 2);
+				_renderTarget.scale(scaleX, scaleY);
+				_renderTarget.translate(-pt.x / 2, -pt.y / 2);
+			} else
+			{
+				if (getScaleAroundCenter())
+				{
+					_renderTarget.translate(width / 2, height / 2);
+				}
+				_renderTarget.scale(scaleX, scaleY);
+				if (getScaleAroundCenter())
+				{
+					_renderTarget.translate(-width / 2, -height / 2);
+				}
+			}
+	
+			if (getRotateAroundCenter())
 			{
 				_renderTarget.translate(width / 2, height / 2);
 			}
-			_renderTarget.scale(scaleX, scaleY);
-			if (getScaleAroundCenter())
+			_renderTarget.rotate(rotationRad);
+			if (getRotateAroundCenter())
 			{
 				_renderTarget.translate(-width / 2, -height / 2);
 			}
-		}
-
-		if (getRotateAroundCenter())
-		{
-			_renderTarget.translate(width / 2, height / 2);
-		}
-		_renderTarget.rotate(rotationRad);
-		if (getRotateAroundCenter())
-		{
-			_renderTarget.translate(-width / 2, -height / 2);
 		}
 	}
 
@@ -286,6 +294,7 @@ public class DisplayObject extends ArrayList<DisplayObject>
 	public boolean remove(Object o)
 	{
 		DisplayObject item = (DisplayObject) o;
+		
 		if (contains(o))
 		{
 			addToRemovalList(item);
@@ -431,7 +440,16 @@ public class DisplayObject extends ArrayList<DisplayObject>
 	{
 		rotationRad = PhysicsUtils.degToRad(deg);
 	}
-
+	
+	public void setVisibility(boolean visible)
+	{
+		for(DisplayObject child : this)
+		{
+			child.visible = visible;
+		}
+		this.visible = visible;
+	}
+	
 	public Point2D.Float localToGlobal()
 	{
 		if (getParent() != null)
@@ -442,6 +460,12 @@ public class DisplayObject extends ArrayList<DisplayObject>
 		{
 			return new Point2D.Float(x, y);
 		}
+	}
+	
+	@Override
+	public boolean equals(Object arg0)
+	{
+		return this == arg0;
 	}
 }
 

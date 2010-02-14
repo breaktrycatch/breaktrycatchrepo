@@ -161,7 +161,7 @@ public class PhysicsWorldWrapper {
 		
 		processHumanToHumanContacts();
 		_reportedHumanHumanContacts.clear();
-		//processHumanToBreakerContacts();
+		processHumanToBreakerContacts();
 		_reportedHumanBreakerContacts.clear();
 		
 //		_world.drawDebugData();
@@ -249,32 +249,34 @@ public class PhysicsWorldWrapper {
 	{
 		//TODO: Implement/TEST this later
 
-//		//Track Dups
-//		ArrayList<ContactID> handledContacts = new ArrayList<ContactID>();
-//		
-//
-//		for(int i=0; i<_reportedHumanBreakerContacts.size(); i++)
-//		{
-//			ContactPoint contact = _reportedHumanHumanContacts.get(i);
-//			
-//			//Check if this contact has already been eval'd
-//			if(containsDupElement(handledContacts, contact.id)){ continue;	}
-//			handledContacts.add(contact.id);
-//			
-//			Body body1 = contact.shape1.getBody();
-//			Body body2 = contact.shape2.getBody();
-//			PhysicsUserDataVO data1 = (PhysicsUserDataVO)body1.getUserData();
-//			PhysicsUserDataVO data2 = (PhysicsUserDataVO)body2.getUserData();
-//			
-//			if(data1.breaksHumanJoints)
-//			{
-//				detatchBody(body2);
-//			}
-//			else if(data2.breaksHumanJoints)
-//			{
-//				detatchBody(body1);
-//			}
-//		}
+		//Track Dups
+		ArrayList<ContactID> handledContacts = new ArrayList<ContactID>();
+		
+		int size = _reportedHumanBreakerContacts.size() - 1;
+		for (int i = 0; i < size; i++)
+		{
+			ContactPoint contact = _reportedHumanBreakerContacts.get(i);
+
+			// Check if this contact has already been eval'd
+			if (containsDupElement(handledContacts, contact.id))
+			{
+				continue;
+			}
+			handledContacts.add(contact.id);
+
+			Body body1 = contact.shape1.getBody();
+			Body body2 = contact.shape2.getBody();
+			PhysicsUserDataVO data1 = (PhysicsUserDataVO) body1.getUserData();
+			PhysicsUserDataVO data2 = (PhysicsUserDataVO) body2.getUserData();
+
+			if (data1.breaksHumanJoints)
+			{
+				detatchBody(body2);
+			} else if (data2.breaksHumanJoints)
+			{
+				detatchBody(body1);
+			}
+		}
 	}
 	
 	//Breaks all joints on a body
@@ -311,10 +313,13 @@ public class PhysicsWorldWrapper {
 		Body[] result = new Body[4];
 		result[0] = createRect(centerX - width*.5f - thickness*.5f, centerY - height*.5f - thickness*.5f,
 				   			   centerX - width*.5f + thickness*.5f, centerY + height*.5f + thickness*.5f, settings);
+		
 		result[1] = createRect(centerX + width*.5f - thickness*.5f, centerY - height*.5f - thickness*.5f,
 				   			   centerX + width*.5f + thickness*.5f, centerY + height*.5f + thickness*.5f, settings);
+		
 		result[2] = createRect(centerX - width*.5f - thickness*.5f, centerY + height*.5f - thickness*.5f,
 				   			   centerX + width*.5f + thickness*.5f, centerY + height*.5f + thickness*.5f, settings);
+		
 		result[3] = createRect(centerX - width*.5f - thickness*.5f, centerY - height*.5f - thickness*.5f,
 				   			   centerX + width*.5f + thickness*.5f, centerY - height*.5f + thickness*.5f, settings);
 		return result;
@@ -448,6 +453,7 @@ public class PhysicsWorldWrapper {
 	
 	public void reportHumanBreakerContact(ContactPoint contact)
 	{
+		PApplet.println("BREAKER CONTACT~!!!");
 		_reportedHumanBreakerContacts.add(contact);
 	}
 	

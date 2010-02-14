@@ -33,16 +33,19 @@ public class TextField extends DisplayObject
 	@Override
 	public void draw()
 	{
-		PApplet app = getApp();
-		app.fill((255 << 24 | _color), alpha * 255);
-		app.textFont(getFont());
-		app.text(_text, 0, 0);
+		if (visible)
+		{
+			PApplet app = getApp();
+			app.fill((255 << 24 | _color), alpha * 255);
+			app.textFont(getFont());
+			app.text(_text, 0, 0);
+		}
 	}
 
 	public void setText(String text)
 	{
 		_text = text;
-		
+
 		getApp().textFont(getFont());
 		width = getApp().textWidth(_text);
 		height = getApp().textAscent() + getApp().textDescent();

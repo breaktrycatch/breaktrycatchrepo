@@ -1,5 +1,8 @@
 <?xml version="1.0" ?>
 <properties>
+  <category name="general">
+    <property name="debugMode" value="true"/>
+  </category>
   <category name="capture">
     <property name="blueBalance" value="1.0"/>
     <property name="cameraFPS" value="30"/>
@@ -15,6 +18,6 @@
     <property name="subtractionScale" value="1"/>
   </category>
   <category name="tracing">
-	<property name="numberOfExtremities" value="10"/>
+    <property name="numberOfExtremities" value="10"/>
   </category>
 </properties>

@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import processing.core.PApplet;
+
 import com.breaktrycatch.lib.util.callback.IFloatCallback;
 import com.breaktrycatch.lib.util.callback.ISimpleCallback;
 import com.breaktrycatch.needmorehumans.utils.LogRepository;
@@ -416,13 +418,15 @@ class XBoxControllerFacade
 		// button call backs that fire only on button down.
 		for (Button btn : _onceButtonMap.keySet())
 		{
-			if (_controller.get(btn) && !_alreadyFiredMap.get(btn))
+			if (_controller.get(btn) && _alreadyFiredMap.get(btn) == false)
 			{
 				ArrayList<ISimpleCallback> callbacks = _onceButtonMap.get(btn);
 				executeList(callbacks);
-
+				
+				PApplet.println("EXECUTING CALLBACK on  " + btn + " : " + _alreadyFiredMap.get(btn) + " ::: " + _controller.get(btn));
+				
 				_alreadyFiredMap.put(btn, true);
-			} else
+			} else if(!_controller.get(btn))
 			{
 				_alreadyFiredMap.put(btn, false);
 			}

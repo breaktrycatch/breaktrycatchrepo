@@ -53,12 +53,14 @@ public class PhysicsControl extends DisplayObject
 		vo.friction = 1.0f;
 		PhysicsUserDataVO userData = new PhysicsUserDataVO();
 		userData.breaksHumanJoints = true;
+		
+		// bounds[2] is the floor so we don't break joints on contact.
 		Body[] bounds = _physWorld.createHollowBox(width / 2.0f, height / 2.0f, width, height, 15.0f, vo);
+		bounds[0].setUserData(userData);
 		bounds[1].setUserData(userData);
-		bounds[2].setUserData(userData);
 		bounds[3].setUserData(userData);
 		
-		addDebugSmileBoxes();
+//		addDebugSmileBoxes();
 	}
 
 	/**
