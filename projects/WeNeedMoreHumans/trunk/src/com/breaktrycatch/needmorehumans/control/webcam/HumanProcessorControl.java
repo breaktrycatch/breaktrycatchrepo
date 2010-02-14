@@ -12,9 +12,7 @@ import toxi.video.capture.plugins.ErosionPlugin;
 import toxi.video.capture.plugins.ProcessorPlugin;
 
 import com.breaktrycatch.needmorehumans.control.video.plugins.ChannelThresholdPlugin;
-import com.breaktrycatch.needmorehumans.control.video.plugins.ContrastPlugin;
 import com.breaktrycatch.needmorehumans.control.video.plugins.GapFillPlugin;
-import com.breaktrycatch.needmorehumans.control.video.plugins.LargestBlobExtraction;
 import com.breaktrycatch.needmorehumans.utils.ImageUtils;
 import com.breaktrycatch.needmorehumans.utils.LogRepository;
 import com.breaktrycatch.needmorehumans.utils.TileImageDrawer;
@@ -223,8 +221,6 @@ public class HumanProcessorControl
 		if (_captureBackgrounds)
 		{
 			_rawFrame = _capture.getFrame();
-			debugDraw(_rawFrame);
-
 			_rawFrame.pixels = _prePipeline.process(_rawFrame.pixels, _rawFrame.width, _rawFrame.height);
 
 			debugDraw(_rawFrame);

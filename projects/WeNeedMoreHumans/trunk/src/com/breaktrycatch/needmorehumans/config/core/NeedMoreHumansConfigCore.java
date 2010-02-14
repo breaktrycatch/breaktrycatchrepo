@@ -87,7 +87,7 @@ public class NeedMoreHumansConfigCore extends Stage
 		_controlP5 = new ControlP5(app);
 		_controlP5.addSlider("Exposure", 0f, 1f, ConfigTools.getFloat(CAPTURE, "exposure"), _marginX, startY + (++controlIndex * yJump), 100, 14).setId(1);
 		_controlP5.addSlider("Gain", 0f, 1f, ConfigTools.getFloat(CAPTURE, "gain"), _marginX, startY + (++controlIndex * yJump), 100, 14).setId(2);
-		_controlP5.addSlider("Capture Threshold", 0f, 255f, ConfigTools.getFloat(CAPTURE, "captureThreshold"), _marginX, startY + (++controlIndex * yJump), 100, 14).setId(3);
+		_controlP5.addSlider("Capture Threshold", 0f, 122f, ConfigTools.getFloat(CAPTURE, "captureThreshold"), _marginX, startY + (++controlIndex * yJump), 100, 14).setId(3);
 		_controlP5.addSlider("Shadow Threshold", 0f, 1f, ConfigTools.getFloat(CAPTURE, "shadowThreshold"), _marginX, startY + (++controlIndex * yJump), 100, 14).setId(4);
 
 		controlIndex++;

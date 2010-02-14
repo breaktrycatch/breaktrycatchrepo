@@ -32,9 +32,17 @@ abstract class AbstractTileBackground extends ImageFrame
 		for (int i = 0; i < _maxImages; i++)
 		{
 			ImageFrame frame = new ImageFrame(app, img);
+
+			frame.setScaleAroundCenter(true);
+			frame.scaleX = frame.scaleY = 1.01f;
 			_images.add(frame);
 			add(frame);
 		}
+	}
+	
+	public ArrayList<ImageFrame> getImages()
+	{
+		return _images;
 	}
 	
 	abstract protected int calculateMaxImages();

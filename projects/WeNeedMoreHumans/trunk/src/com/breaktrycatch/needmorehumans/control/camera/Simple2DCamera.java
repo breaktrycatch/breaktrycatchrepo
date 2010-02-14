@@ -81,8 +81,10 @@ public class Simple2DCamera
 		updateInnerBounds();
 
 		// make sure we can't go through the floor.
-		Point2D.Float pt = RectUtils.constrain(new Point2D.Float((int) _tweenObj.x, (int) _tweenObj.y), _innerBounds);
-		_tweenObj.y = pt.y;
+		if (_tweenObj.y > _innerBounds.y + _innerBounds.height)
+		{
+			_tweenObj.y = _innerBounds.y + _innerBounds.height;
+		}
 
 	}
 

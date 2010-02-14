@@ -46,7 +46,7 @@ public class ImageFrame extends DisplayObject
 	{
 		super.draw();
 
-		if (_img != null)
+		if (_img != null && visible)
 		{
 			if (errorTint == true)
 			{

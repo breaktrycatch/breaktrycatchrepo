@@ -13,6 +13,9 @@ public class TallestPointTextField extends HeightMarker
 	public TallestPointTextField(PApplet app)
 	{
 		super(app);
+		
+		_background.visible = false;
+		_textField.visible = true;
 	}
 
 	public void setValue(float value)
@@ -38,5 +41,11 @@ public class TallestPointTextField extends HeightMarker
 		
 		_shadowTextField.x = _textField.x + 1;
 		_shadowTextField.y = _textField.y + 1;
+	}
+
+	@Override
+	public String toString()
+	{
+		return "[TallestPointTextField]";
 	}
 }

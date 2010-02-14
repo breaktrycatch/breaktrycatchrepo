@@ -5,8 +5,6 @@ import org.jbox2d.dynamics.ContactListener;
 import org.jbox2d.dynamics.contacts.ContactPoint;
 import org.jbox2d.dynamics.contacts.ContactResult;
 
-import com.breaktrycatch.needmorehumans.utils.LogRepository;
-
 public class HumanContactListener implements ContactListener {
 
 	private PhysicsWorldWrapper _reportTo;
