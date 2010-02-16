@@ -225,7 +225,10 @@ public class DisplayObject extends ArrayList<DisplayObject>
 		{
 			child.preDraw();
 			child.draw();
-			child.drawChildren();
+			if(visible)
+			{
+				child.drawChildren();
+			}
 			child.postDraw();
 		}
 

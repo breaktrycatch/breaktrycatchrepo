@@ -29,6 +29,8 @@ public class FPS extends DisplayObject
 	static PFont font;
 	static FPS instance;
 
+	private static float _memory;
+
 	public FPS(PApplet app)
 	{
 		super(app);
@@ -45,7 +47,7 @@ public class FPS extends DisplayObject
 		if (instance == null)
 		{
 			instance = new FPS(p);
-			font = p.createFont("Arial-Bold", 50);
+			font = p.createFont("Courier", 50);
 			FPS.p = p;
 			p.registerPost(instance);
 		}
@@ -65,6 +67,9 @@ public class FPS extends DisplayObject
 			startTime += t;
 			frames = 0;
 		}
+		
+		_memory = (float)(Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / (float)Runtime.getRuntime().totalMemory();
+		
 	}
 
 	static public int frameRate()
@@ -81,12 +86,13 @@ public class FPS extends DisplayObject
 	public void draw()
 	{
 		PApplet app = getApp();
-
+		
+		
 		// draw the fps counter
 		app.noStroke();
 		app.fill(0xffff00ff);
 		app.textFont(font, 22);
-		app.text("FPS: " + frameRate(), 8, 24);
+		app.text("FPS: " + frameRate() + " MEM: " + (_memory * 100) + "% \t" + Runtime.getRuntime().freeMemory() + " \t " + Runtime.getRuntime().totalMemory(), 8, 24);
 	}
 
 }

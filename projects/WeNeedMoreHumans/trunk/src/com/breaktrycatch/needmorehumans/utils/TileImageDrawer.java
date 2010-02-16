@@ -6,7 +6,6 @@ import processing.core.PApplet;
 import processing.core.PImage;
 
 import com.breaktrycatch.lib.display.DisplayObject;
-import com.breaktrycatch.lib.display.ImageFrame;
 
 public class TileImageDrawer extends DisplayObject
 {
@@ -63,12 +62,8 @@ public class TileImageDrawer extends DisplayObject
 		{
 			return;
 		}
-
-		if (_scale != 1)
-		{
-			image = ImageUtils.cloneImage(image);
-			image.resize((int) (image.width * _scale), (int) (image.height * _scale));
-		}
+		
+//		image = ImageUtils.cloneImage(image);
 
 		_imagesToDraw.add(new ImageToDraw(image, _dX, _dY));
 		
@@ -90,10 +85,14 @@ public class TileImageDrawer extends DisplayObject
 	@Override
 	public void draw()
 	{
+		getApp().pushMatrix();
 		for (ImageToDraw toDraw : _imagesToDraw)
 		{
+			getApp().scale(_scale);
 			getApp().image(toDraw.img, toDraw.x, toDraw.y);
+//			getApp().image(toDraw.img, 0,0);
 		}
+		getApp().popMatrix();
 		super.draw();
 	}
 
@@ -102,6 +101,16 @@ public class TileImageDrawer extends DisplayObject
 	{
 		super.postDraw();
 		_imagesToDraw.clear();
+	}
+	
+	public int numImagesToDraw()
+	{
+		return _imagesToDraw.size();
+	}
+	
+	public float getScale()
+	{
+		return _scale;
 	}
 
 	public void reset()

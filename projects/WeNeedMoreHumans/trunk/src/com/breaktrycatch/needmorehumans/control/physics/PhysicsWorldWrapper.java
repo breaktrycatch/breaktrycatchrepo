@@ -91,15 +91,15 @@ public class PhysicsWorldWrapper {
 		for (Body body = _world.getBodyList(); body != null; body = body.getNext())
 		{
 			//DEBUG - Draw currently existing joints
-			PhysicsControl.DEBUG_APP.fill(0xFFFFFF00);
-			for (JointEdge joint = body.getJointList(); joint != null; joint = joint.next)
-			{
-				Vec2 anc1 = worldToScreen(joint.joint.getAnchor1());
-				Vec2 anc2 = worldToScreen(joint.joint.getAnchor2());
-				
-				PhysicsControl.DEBUG_APP.ellipse(anc1.x, anc1.y, 10, 10);
-				PhysicsControl.DEBUG_APP.ellipse(anc2.x, anc2.y, 10, 10);
-			}
+//			PhysicsControl.DEBUG_APP.fill(0xFFFFFF00);
+//			for (JointEdge joint = body.getJointList(); joint != null; joint = joint.next)
+//			{
+//				Vec2 anc1 = worldToScreen(joint.joint.getAnchor1());
+//				Vec2 anc2 = worldToScreen(joint.joint.getAnchor2());
+//				
+//				PhysicsControl.DEBUG_APP.ellipse(anc1.x, anc1.y, 10, 10);
+//				PhysicsControl.DEBUG_APP.ellipse(anc2.x, anc2.y, 10, 10);
+//			}
 			//END DEBUG
 			
 			
