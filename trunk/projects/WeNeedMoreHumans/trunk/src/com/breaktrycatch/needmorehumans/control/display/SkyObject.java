@@ -31,11 +31,11 @@ public class SkyObject extends Sprite
 	@Override
 	public void addFrame(PImage img)
 	{
-		if(img.width > width)
+		if (img.width > width)
 		{
 			width = img.width;
 		}
-		if(img.height > height)
+		if (img.height > height)
 		{
 			height = img.height;
 		}
@@ -75,7 +75,7 @@ public class SkyObject extends Sprite
 		if (_internalSprite.x + width < _bounds.x)
 		{
 			_internalSprite.x = _bounds.x + _bounds.width;
-		} else if (x > _bounds.x + _bounds.width)
+		} else if (_internalSprite.x > _bounds.x + _bounds.width)
 		{
 			_internalSprite.x = _bounds.x;
 		}

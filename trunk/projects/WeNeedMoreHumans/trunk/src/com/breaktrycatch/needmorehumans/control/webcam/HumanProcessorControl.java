@@ -181,6 +181,13 @@ public class HumanProcessorControl
 	{
 		if (_debugMode)
 		{
+			if(_debugDrawer.numImagesToDraw() == 0)
+			{
+				_debugDrawer.y = _app.height;
+			}
+			
+			_debugDrawer.x = _app.width - img.width * _debugDrawer.getScale();
+			_debugDrawer.y -= img.height * _debugDrawer.getScale();
 			_debugDrawer.drawImage(img);
 		}
 	}
@@ -193,7 +200,7 @@ public class HumanProcessorControl
 		// create a simple difference mask from the frame.
 		PImage mask = _subtractor.createDifferenceMask(frame);
 
-		debugDraw(mask);
+//		debugDraw(mask);
 
 		// process the mask to remove noise and gaps.
 		mask.pixels = _pipeline.process(mask.pixels, mask.width, mask.height);
@@ -218,12 +225,14 @@ public class HumanProcessorControl
 	{
 		_capture.read();
 
+		_rawFrame = _capture.getFrame();
+		_rawFrame.pixels = _prePipeline.process(_rawFrame.pixels, _rawFrame.width, _rawFrame.height);
+		
+//		debugDraw(_rawFrame);
+
 		if (_captureBackgrounds)
 		{
-			_rawFrame = _capture.getFrame();
-			_rawFrame.pixels = _prePipeline.process(_rawFrame.pixels, _rawFrame.width, _rawFrame.height);
-
-			debugDraw(_rawFrame);
+			
 			_subtractor.addBackgroundImage(ImageUtils.cloneImage(_rawFrame));
 
 			if (_subtractor.totalBackgrounds() > _numBackgrounds)
@@ -239,17 +248,15 @@ public class HumanProcessorControl
 		{
 			
 			_rawFrame = _capture.getFrame();
-			debugDraw(_rawFrame);
 			_rawFrame.pixels = _prePipeline.process(_rawFrame.pixels, _rawFrame.width, _rawFrame.height);
 
-			debugDraw(_subtractor.getBackgroundImage());
+//			debugDraw(_subtractor.getBackgroundImage());
 
 			PImage initialFrame = ImageUtils.cloneImage(_capture.getFrame());
 
 			// overlay the mask.
 			createDiffedImage(initialFrame);
 		}
-
 	}
 
 	public PImage getRawCameraImage()
@@ -264,11 +271,11 @@ public class HumanProcessorControl
 		if (!_captureBackgrounds)
 		{
 			_rawFrame = _capture.getFrame();
-			debugDraw(_rawFrame);
+//			debugDraw(_rawFrame);
 
 			_rawFrame.pixels = _prePipeline.process(_rawFrame.pixels, _rawFrame.width, _rawFrame.height);
 
-			debugDraw(_subtractor.getBackgroundImage());
+//			debugDraw(_subtractor.getBackgroundImage());
 
 			PImage initialFrame = ImageUtils.cloneImage(_capture.getFrame());
 

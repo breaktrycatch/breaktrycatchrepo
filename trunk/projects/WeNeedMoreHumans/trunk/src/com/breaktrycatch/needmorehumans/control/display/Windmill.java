@@ -26,15 +26,13 @@ public class Windmill extends DisplayObject
 	{
 		super(app);
 
-//		scaleX = scaleY = 2;
-		
 		_windmillBase = new ImageFrame(app, app.loadImage("../data/world/windmill-base.png"));
 		_windmillBlades = new ImageFrame(app, app.loadImage("../data/world/windmill-blades.png"));
 		_windmillBlades.x = -80;
 		_windmillBlades.y = -100;
 		_windmillBlades.setRotateAroundCenter(true);
 		_windmillBlades.rotationRad = PhysicsUtils.degToRad((float)Math.random() * 360);
-		_rotationSpeed = PhysicsUtils.degToRad(5 + (float)Math.random() * 4);
+		_rotationSpeed = PhysicsUtils.degToRad(2 + (float)Math.random() * 4);
 		add(_windmillBase);
 		add(_windmillBlades);
 
@@ -53,7 +51,6 @@ public class Windmill extends DisplayObject
 	@Override
 	public void draw()
 	{
-		// TODO Auto-generated method stub
 		super.draw();
 
 		_windmillBlades.rotationRad -= _rotationSpeed;

@@ -47,8 +47,9 @@ public class CaptureControl extends DisplayObject
 		_cameraWidth = ConfigTools.getInt(CAPTURE, "cameraWidth");
 		_cameraHeight = ConfigTools.getInt(CAPTURE, "cameraHeight");
 		_maxBackgrounds = ConfigTools.getInt(CAPTURE, "maxBackgrounds");
-		
-		_debugDrawer = new TileImageDrawer(app, .7f);
+
+		_capturedImages = new ArrayList<PImage>();
+		_debugDrawer = new TileImageDrawer(app, .3f);
 		_debugDrawer.setEnabled(true);
 
 		_capture = new PS3EyeCapture(app);
@@ -121,6 +122,8 @@ public class CaptureControl extends DisplayObject
 
 			_debugDrawer.reset();
 		}
+		
+		
 	}
 
 	public void setDebugMode(boolean debug)
@@ -136,7 +139,7 @@ public class CaptureControl extends DisplayObject
 		if (_initialized)
 		{
 			_imagesToCapture = imagesToCapture;
-			_capturedImages = new ArrayList<PImage>();
+			_capturedImages.clear();
 			_capturing = true;
 		} else
 		{

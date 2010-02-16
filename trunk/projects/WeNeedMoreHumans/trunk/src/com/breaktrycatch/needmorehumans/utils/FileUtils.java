@@ -11,8 +11,6 @@ import processing.core.PGraphics;
 import processing.core.PImage;
 
 import com.breaktrycatch.lib.display.DisplayObject;
-import com.breaktrycatch.needmorehumans.control.physics.PhysicsControl;
-import com.breaktrycatch.needmorehumans.view.GameView;
 
 public class FileUtils
 {
@@ -83,7 +81,7 @@ public class FileUtils
 
 	private static void constructTowerPaths()
 	{
-		File tempFile = new File("../");
+		File tempFile = new File("");
 		String path = tempFile.getAbsolutePath() + File.separator + "data" + File.separator + "towers";
 
 		__towerDirectory = new File(path);

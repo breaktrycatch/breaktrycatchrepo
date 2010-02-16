@@ -15,7 +15,6 @@ import com.breaktrycatch.lib.component.KeyboardManager;
 import com.breaktrycatch.lib.component.ManagerLocator;
 import com.breaktrycatch.lib.component.XBoxControllerManager;
 import com.breaktrycatch.lib.display.DisplayObject;
-import com.breaktrycatch.lib.display.ImageFrame;
 import com.breaktrycatch.lib.util.callback.ISimpleCallback;
 import com.breaktrycatch.lib.view.AbstractView;
 import com.breaktrycatch.needmorehumans.config.control.ColorController;
@@ -55,7 +54,7 @@ public class GameView extends AbstractView
 	private TallestPointTextField _tallestPoint;
 	private boolean _isPlacing = false;
 	private String[] _spriteLookup = new String[]
-	{ "../data/no-ear.png", "../data/tracing/RealPerson_1.png", "../data/tracing/RealPerson_3.png", "../data/tracing/RealPerson_4.png", "../data/tracing/RealPerson_5.png" };
+	{ "../data/tracing/RealPerson_1.png", "../data/tracing/RealPerson_3.png", "../data/tracing/RealPerson_4.png", "../data/tracing/RealPerson_5.png" };
 
 	private String _debugFilename = _spriteLookup[0];
 
@@ -82,7 +81,11 @@ public class GameView extends AbstractView
 	public void initialize(PApplet app)
 	{
 		super.initialize(app);
-
+		
+		if (!ConfigTools.getBoolean("general", "debugMode"))
+		{
+			app.noCursor();
+		}
 		_sprites = new ArrayList<XBoxControllableSprite>();
 		_zoomContainer = new DisplayObject(app);
 		add(_zoomContainer);
@@ -93,17 +96,56 @@ public class GameView extends AbstractView
 
 		// add after we create the environment!
 		_zoomContainer.add(_physControl);
-		
+
 		// put the grass in front of the people.
 		ParallaxBackground frontLayer = new ParallaxBackground(app, _physControl.width * 3.5f, _physControl.height);
 		DisplayObject grass = frontLayer.addHorizontalTilingLayer(app.loadImage("../data/world/grass.png"), 1);
 		grass.y = _physControl.height - 7 - 40;
 		_zoomContainer.add(frontLayer);
-		
+
 		createCaptureControl();
 		createInputListeners();
 
 		_twitterMonitor = new TwitterTowerMonitor(app);
+	}
+	
+	private void createClouds()
+	{
+		int numClouds = 6;
+		PApplet app = getApp();
+		HashMap<String, PImage> cloudTable = new HashMap<String, PImage>();
+		Rectangle cloudBounds = new Rectangle((int) (-_physControl.width), 0, (int) (_physControl.width * 2.5), (int) _physControl.height);
+		for (int i = 0; i < 40; i++)
+		{
+			int cloudType = (int) (Math.floor(Math.random() * numClouds)) + 1;
+			String filename = "../data/world/cloud" + cloudType + ".png";
+			if (!cloudTable.containsKey(filename))
+			{
+				cloudTable.put(filename, app.loadImage(filename));
+			}
+
+			SkyObject cloud = new SkyObject(app, cloudBounds);
+			cloud.addFrame(cloudTable.get(filename));
+			cloud.setSpritePosition(cloudBounds.x + (int) (Math.random() * cloudBounds.width - cloud.width), (int) (cloudBounds.height - (Math.random() * 3000) - 400));
+			cloud.setVelocity(((float) (Math.random() / 2) + .5f) + 1, 0);
+			_background.addLayer(cloud, .2f);
+		}
+	}
+	
+	private void createPlanes()
+	{
+		Rectangle cloudBounds = new Rectangle((int) (-_physControl.width), 0, (int) (_physControl.width * 2.5), (int) _physControl.height);
+		PImage plane1 = getApp().loadImage( "../data/world/plane1.png");
+		PImage plane2 = getApp().loadImage( "../data/world/plane2.png");
+		for (int i = 0; i < 5; i++)
+		{
+			SkyObject plane = new SkyObject(getApp(), cloudBounds);
+			plane.addFrame(plane1);
+			plane.addFrame(plane2);
+			plane.setSpritePosition(cloudBounds.x + (int) (Math.random() * cloudBounds.width - plane.width), (int) (cloudBounds.height - (Math.random() * 2000) - 3000));
+			plane.setVelocity(((float) (-Math.random()*3) + .5f) - 1, 0);
+			_background.addLayer(plane, .2f);
+		}
 	}
 
 	private void createEnvironment()
@@ -111,63 +153,54 @@ public class GameView extends AbstractView
 		// creates the environment
 		PApplet app = getApp();
 		_background = new ParallaxBackground(app, _physControl.width * 3.5f, _physControl.height);
-		DisplayObject background = _background.addHorizontalTilingLayer(app.loadImage("../data/world/large-background2.png"), .05f);
+		DisplayObject tier1 = _background.addHorizontalTilingLayer(app.loadImage("../data/world/tier1.jpg"), .05f);
+		DisplayObject tier2 = _background.addHorizontalTilingLayer(app.loadImage("../data/world/tier2.jpg"), .05f);
+		DisplayObject tier3 = _background.addHorizontalTilingLayer(app.loadImage("../data/world/tier3.jpg"), .05f);
+		DisplayObject tier4 = _background.addHorizontalTilingLayer(app.loadImage("../data/world/tier4.jpg"), .05f);
+		DisplayObject tier5 = _background.addHorizontalTilingLayer(app.loadImage("../data/world/tier5.jpg"), .05f);
 		
-		int numClouds = 6;
-		HashMap<String, PImage> cloudTable = new HashMap<String, PImage>();
-		Rectangle cloudBounds = new Rectangle((int)(-_physControl.width), 0, (int) (_physControl.width * 2), (int) _physControl.height);
-		for (int i = 0; i < 40; i++)
-		{
-			int cloudType = (int) (Math.floor(Math.random() * numClouds)) + 1;
-			String filename = "../data/world/cloud" + cloudType + ".png";
-			if(!cloudTable.containsKey(filename))
-			{
-				cloudTable.put(filename, app.loadImage(filename));
-			}
-			
-			SkyObject cloud = new SkyObject(app, cloudBounds);
-			cloud.addFrame(cloudTable.get(filename));
-			cloud.setSpritePosition((int) (Math.random() * cloudBounds.width), (int) (Math.random() * (cloudBounds.height - 400)));
-			cloud.setVelocity(-((float) (Math.random() / 2) + .5f), 0);
-			_background.addLayer(cloud, .2f);
-		}
-		
+		createClouds();
+		createPlanes();
+
 		DisplayObject windmill = _background.addLayer(new Windmill(app), .15f);
-		
-		SkyObject backgroundMonkey = new SkyObject(getApp(), cloudBounds);
+
+		Rectangle simBounds = new Rectangle((int) (-_physControl.width), 0, (int) (_physControl.width * 2), (int) _physControl.height);
+		SkyObject backgroundMonkey = new SkyObject(getApp(), simBounds);
 		backgroundMonkey.addFrame(app.loadImage("../data/world/ape-background.png"));
-		backgroundMonkey.setVelocity(1,0);
-		backgroundMonkey.x = (int)(Math.random() * cloudBounds.width);
+		backgroundMonkey.setVelocity(1, 0);
+		backgroundMonkey.x = (int) (Math.random() * simBounds.width);
 		_background.addLayer(backgroundMonkey, .15f);
-		
+
 		DisplayObject cityBack = _background.addHorizontalTilingLayer(app.loadImage("../data/world/amsterdam-buildings-back.png"), .1f);
 		DisplayObject cityFront = _background.addHorizontalTilingLayer(app.loadImage("../data/world/amsterdam-buildings-front.png"), .2f);
 		DisplayObject trees = _background.addHorizontalTilingLayer(app.loadImage("../data/world/far-grass.png"), .5f);
 		DisplayObject ground = _background.addHorizontalTilingLayer(app.loadImage("../data/world/ground.png"), 1);
-		
-		
-		background.y = -app.height;
+
 		ground.y = _physControl.height - 7; // 7 is half the thickness of the
 		// physics ground plane
 		windmill.y = ground.y - windmill.height - 70;
 		cityFront.y = ground.y - cityFront.height - 60;
 		cityBack.y = ground.y - cityBack.height;
 		trees.y = ground.y - trees.height;
-		background.y = ground.y - background.height;
+		tier1.y = ground.y - tier1.height;
+		tier2.y = tier1.y - tier2.height;
+		tier3.y = tier2.y - tier3.height;
+		tier4.y = tier3.y - tier4.height;
+		tier5.y = tier4.y - tier5.height;
 		backgroundMonkey.y = cityBack.y - backgroundMonkey.height / 3;
 
 		_deliveryMonkey = new MonkeySpawner(getApp());
 		_deliveryMonkey.visible = false;
 		_deliveryMonkey.setBounds(new Rectangle(0, 0, (int) _physControl.width, (int) _physControl.height));
 		_background.add(_deliveryMonkey);
-		
+
 		_zoomContainer.add(_background);
 		_heightMarker = new HeightMarker(app);
 		_heightMarker.setBounds(new Rectangle(0, 0, (int) _physControl.width, (int) _physControl.height));
 		_zoomContainer.add(_heightMarker);
 
 		_tallestPoint = new TallestPointTextField(app);
-		_tallestPoint.x = app.width - 330;
+		_tallestPoint.x = app.width - 160;
 		_tallestPoint.y = 30;
 		add(_tallestPoint);
 	}
@@ -185,9 +218,8 @@ public class GameView extends AbstractView
 	{
 		PApplet app = getApp();
 		_capControl = new CaptureControl(app);
-		_capControl.x = (app.width / 2);
-		_capControl.width = (app.width / 2);
-		_capControl.height = (app.height);
+		_capControl.width = app.width;
+		_capControl.height = app.height;
 
 		// TODO: Hook this up to a config var...
 		_capControl.setDebugMode(true);
@@ -200,6 +232,8 @@ public class GameView extends AbstractView
 		_camera = new Simple2DCamera(app, new Rectangle(0, 0, app.width, app.height), new Rectangle(0, 0, (int) _physControl.width, (int) _physControl.height));
 		_camera.lookAt(_physControl.width / 2, 0);
 		_camera.lookAt(_physControl.width / 2, _physControl.height, 5f);
+
+//		_camera.lookAt(new Rectangle(0, 0, (int) _physControl.width, (int) _physControl.height));
 	}
 
 	private void createInputListeners()
@@ -286,10 +320,10 @@ public class GameView extends AbstractView
 			});
 			_countdown.x = getApp().width / 2;
 			_countdown.y = getApp().height / 2;
-			_countdown.setCountFrom(3);
+			_countdown.setCountFrom(1);
 			_countdown.start();
 			add(_countdown);
-		}	
+		}
 	}
 
 	private void countdownComplete()
@@ -327,7 +361,7 @@ public class GameView extends AbstractView
 			} else
 			{
 				ArrayList<PImage> debugImage = new ArrayList<PImage>();
-//				debugImage.add(ImageUtils.trimTransparency(getApp().loadImage(_debugFilename)));
+				// debugImage.add(ImageUtils.trimTransparency(getApp().loadImage(_debugFilename)));
 				debugImage.add(getApp().loadImage(_debugFilename));
 				beginPlacement(debugImage);
 
@@ -349,7 +383,6 @@ public class GameView extends AbstractView
 		final KeyboardManager keyboardManager = (KeyboardManager) ManagerLocator.getManager(KeyboardManager.class);
 
 		_activeSprite = createPlacementSprite(images);
-
 
 		// fire up the worker thread to process our guy.
 		_physControl.createBodyFromHuman(_activeSprite, new IThreadedImageAnalysisCallback()
@@ -377,55 +410,55 @@ public class GameView extends AbstractView
 					_activeSprite.scaleX = _activeSprite.scaleY = 0;
 					_physControl.add(_activeSprite);
 					creationCameraZoom(_activeSprite);
-					
+
 					introActiveSprite();
 
 				}
 			}
 		});
-		
+
 		LogRepository.getInstance().getPaulsLogger().info("Captured image of size: " + img.width + ", " + img.height);
 	}
-	
+
 	private void introActiveSprite()
 	{
-		
 
 		final XBoxControllerManager controllerManager = (XBoxControllerManager) ManagerLocator.getManager(XBoxControllerManager.class);
 		final KeyboardManager keyboardManager = (KeyboardManager) ManagerLocator.getManager(KeyboardManager.class);
 		final int dist = 1000;
-		final Rectangle towerRect = (Rectangle)_physControl.getTowerRect().clone();
-		
-		if(towerRect.width == 0 || towerRect.height == 0)
+		final Rectangle towerRect = (Rectangle) _physControl.getTowerRect().clone();
+
+		if (towerRect.width == 0 || towerRect.height == 0)
 		{
-			towerRect.x = (int)_physControl.width / 2;
+			towerRect.x = (int) _physControl.width / 2;
 		}
-		_deliveryMonkey.x = towerRect.x + towerRect.width + dist;
+		_deliveryMonkey.x = towerRect.x + towerRect.width + dist ;
 		_deliveryMonkey.y = _activeSprite.y - _deliveryMonkey.height / 2;
 		_deliveryMonkey.visible = true;
-		_deliveryMonkey.slideTo((int)_activeSprite.x, (int)_deliveryMonkey.y, .5f, null, new ISimpleCallback()
+		_deliveryMonkey.slideTo((int) _activeSprite.x - 200, (int) _deliveryMonkey.y, .5f, null, new ISimpleCallback()
 		{
 			@Override
 			public void execute()
 			{
 				_deliveryMonkey.shake(new ISimpleCallback()
 				{
-					
+
 					@Override
 					public void execute()
 					{
 						_activeSprite.enableController(true);
 						_activeSprite.setScaleAroundCenter(true);
+						_activeSprite.rotateTo((float)Math.PI * 2, .5f, Shaper.COSINE);
 						_activeSprite.scaleTo(1, 1, .5f, Shaper.COSINE);
-						
+
 						controllerManager.registerButtonOnce(Button.a, _placementCallback);
 						keyboardManager.registerKeyOnce('p', _placementCallback);
 
 						controllerManager.registerButtonOnce(Button.b, _removeCallback);
 						keyboardManager.registerKeyOnce('r', _removeCallback);
-						
-						_deliveryMonkey.slideTo(towerRect.x + towerRect.width + dist, (int)_deliveryMonkey.y, .5f, null, new ISimpleCallback()
-						{	
+
+						_deliveryMonkey.slideTo(towerRect.x + towerRect.width + dist, (int) _deliveryMonkey.y, .5f, null, new ISimpleCallback()
+						{
 							@Override
 							public void execute()
 							{
@@ -560,7 +593,8 @@ public class GameView extends AbstractView
 	{
 		Rectangle r = _physControl.getTowerRect();
 
-		_heightMarker.y = (r.y == 0) ? (_physControl.height) : (r.y);
+		// hide it off screen if there is no one there.
+		_heightMarker.y = (r.y == 0) ? (_physControl.height + 1000) : (r.y);
 		_heightMarker.x = ((r.x == 0) ? (-1000) : (r.x)) + r.width;
 		// love with a red underline upside-down q
 		_tallestPoint.setValue(_heightMarker.getDisplayValue());
@@ -586,7 +620,7 @@ public class GameView extends AbstractView
 				if (_activeSpriteRect.intersects(_checkSpriteRect))
 				{
 					_activeSprite.errorTint();
-					 LogRepository.getInstance().getJonsLogger().warn("INVALID PLACEMENT");
+					LogRepository.getInstance().getJonsLogger().warn("INVALID PLACEMENT");
 					_validplacement = false;
 					i = _sprites.size();
 				}
@@ -596,7 +630,7 @@ public class GameView extends AbstractView
 				_activeSprite.regularTint();
 			}
 		}
-
+		
 		super.draw();
 	}
 
