@@ -31,7 +31,7 @@ package com.humans.ui.view {
 			super.completeConstruction();
 			__twitter = new Twitter();
 			__twitter.addEventListener(TwitterEvent.ON_USER_TIMELINE_RESULT, onUserTimeline);
-			__twitter.loadUserTimeline("NeedMoreHumans");
+			//__twitter.loadUserTimeline("NeedMoreHumans");
 		}
 
 		
