@@ -1,0 +1,23 @@
+FILE - X, Y, WIDTH, HEIGHT
+
+RealPerson_6 - 21, 1, 42, 42
+
+RealPerson_7 - 28, 19, 36, 36
+
+RealPerson_8 - 41, 21, 36, 36
+
+RealPerson_9 - 49. 50, 38, 38
+
+RealPerson_10 - 30, 12, 34, 34
+
+RealPerson_11 - 32, 4, 48, 48
+
+RealPerson_12 - 12, 2, 42, 42
+
+RealPerson_13 - 12, 4, 31, 31
+
+RealPerson_14 - 93, 4, 54, 54
+
+RealPerson_15 - 23, 1, 44, 44
+
+RealPerson_16 - 48, 23, 44, 44

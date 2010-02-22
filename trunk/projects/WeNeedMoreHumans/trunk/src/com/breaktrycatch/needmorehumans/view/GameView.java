@@ -58,6 +58,7 @@ public class GameView extends AbstractView
 
 	private ArrayList<XBoxControllableSprite> _sprites;
 	private XBoxControllableSprite _activeSprite;
+	public static  int HEIGHT_DIVISOR  = 180;
 
 	Rectangle _activeSpriteRect;
 	Rectangle _checkSpriteRect;
@@ -109,12 +110,10 @@ public class GameView extends AbstractView
 		grass.y = _physControl.height - 7 - 40;
 		_zoomContainer.add(frontLayer);
 
-		// _follower = new TwitterFollower();
 		createInputListeners();
 
 		_twitterMonitor = new TwitterTowerMonitor(app);
 
-		fetchTwitterImage();
 		scheduleTask();
 	}
 
@@ -129,7 +128,7 @@ public class GameView extends AbstractView
 				PApplet.println("Run");
 				fetchTwitterImage();
 			}
-		}, 10000);
+		}, ConfigTools.getInt("general", "tweetCheckInterval"));
 	}
 
 	private void fetchTwitterImage()
@@ -137,7 +136,25 @@ public class GameView extends AbstractView
 		PApplet.println("Fetching.... " + _follower);
 		if(_follower != null)
 		{
+		
+//			ArrayList<PImage> list = new ArrayList<PImage>();
+//			
+//			HumanImageCreator creator = new HumanImageCreator(getApp());
+//			PImage debug = creator.create(getApp().loadImage("../data/world/SNC00153_bigger.jpg"));
+//			
+//
+//			ImageFrame debugFrame = new ImageFrame(getApp(), debug);
+//			add(debugFrame);
+//			
+//			
+//			list.add(debug);
+//			beginPlacement(list);
+//			scheduleTask();
+			
+			scheduleTask();
 			return;
+			
+		
 		}
 		_follower = new TwitterFollower(new ISimpleCallback()
 		{
@@ -150,10 +167,8 @@ public class GameView extends AbstractView
 				
 				HumanImageCreator creator = new HumanImageCreator(getApp());
 				PImage create = creator.create(_follower.getImage());
+
 				list.add(create);
-				
-				ImageFrame test = new ImageFrame(getApp(), _follower.getImage());
-				add(test);
 				
 				beginPlacement(list);
 				scheduleTask();
@@ -263,6 +278,13 @@ public class GameView extends AbstractView
 		followUs.y = 30;
 		followUs.x = 3;
 		add(followUs);
+
+		ShadowTextField tweetWith = new ShadowTextField(app);
+		tweetWith.setFont(app.loadFont("../data/fonts/AnonimRound-48.vlw"));
+		tweetWith.setText("Tweet with #FITC to add yourself!");
+		tweetWith.y = 63;
+		tweetWith.x = 3;
+		add(tweetWith);
 	}
 
 	private void createPhysicsControl()
@@ -280,9 +302,6 @@ public class GameView extends AbstractView
 		_camera = new Simple2DCamera(app, new Rectangle(0, 0, app.width, app.height), new Rectangle(0, 0, (int) _physControl.width, (int) _physControl.height));
 		_camera.lookAt(_physControl.width / 2, 0);
 		_camera.lookAt(_physControl.width / 2, _physControl.height, 5f);
-
-		// _camera.lookAt(new Rectangle(0, 0, (int) _physControl.width, (int)
-		// _physControl.height));
 	}
 
 	private void onMoveCamera()
@@ -325,7 +344,6 @@ public class GameView extends AbstractView
 				HumanImageCreator creator = new HumanImageCreator(getApp());
 				PImage create = creator.create(getApp().loadImage("../data/world/SNC00153_bigger.jpg"));
 
-
 				ArrayList<PImage> list = new ArrayList<PImage>();
 				list.add(create);
 				beginPlacement(list);
@@ -354,6 +372,10 @@ public class GameView extends AbstractView
 		FileUtils.saveSourceImage(img);
 
 		_activeSprite = createPlacementSprite(images);
+		if(_activeSprite == null)
+		{
+			return;
+		}
 
 		// fire up the worker thread to process our guy.
 		_physControl.createBodyFromHuman(_activeSprite, new IThreadedImageAnalysisCallback()
@@ -491,12 +513,17 @@ public class GameView extends AbstractView
 
 	private XBoxControllableSprite createPlacementSprite(ArrayList<PImage> images)
 	{
+		Rectangle towerRect = _physControl.getTowerRect();
+		if(towerRect == null)
+		{
+			return null;
+		}
+		
 		final XBoxControllableSprite sprite = new XBoxControllableSprite(getApp());
 		sprite.setRotateAroundCenter(true);
 		sprite.addFrames(images);
 		sprite.setFPS(3);
 
-		Rectangle towerRect = _physControl.getTowerRect();
 		if (towerRect.width > 0 && towerRect.height > 0)
 		{
 			sprite.x = towerRect.x + (towerRect.width - sprite.width) / 2;

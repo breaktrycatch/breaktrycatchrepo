@@ -8,6 +8,7 @@ import processing.core.PApplet;
 import com.breaktrycatch.lib.display.DisplayObject;
 import com.breaktrycatch.lib.display.ImageFrame;
 import com.breaktrycatch.lib.display.TextField;
+import com.breaktrycatch.needmorehumans.view.GameView;
 
 public class HeightMarker extends DisplayObject
 {
@@ -48,7 +49,7 @@ public class HeightMarker extends DisplayObject
 	@Override
 	public void draw()
 	{		
-		_text.setText(String.valueOf(_formatter.format(getDisplayValue() / 100)) + "M");
+		_text.setText(String.valueOf(_formatter.format(getDisplayValue() / GameView.HEIGHT_DIVISOR)) + "M");
 
 //		PApplet app = getApp();
 //		

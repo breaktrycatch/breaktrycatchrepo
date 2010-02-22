@@ -1,8 +1,5 @@
 package com.breaktrycatch.needmorehumans.imageloading;
 
-import java.awt.Image;
-import java.awt.MediaTracker;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,7 +14,6 @@ import twitter4j.TwitterAdapter;
 
 import com.breaktrycatch.lib.util.callback.ISimpleCallback;
 import com.breaktrycatch.needmorehumans.utils.AsyncImageLoader;
-import com.breaktrycatch.needmorehumans.utils.ImageLoader;
 import com.breaktrycatch.needmorehumans.utils.LogRepository;
 
 public class TwitterFollower
@@ -27,24 +23,16 @@ public class TwitterFollower
 	private AsyncTwitterFactory factory;
 	private static final String USERNAME = "NeedMoreHumans";
 	private static final String PASSWORD = "ignite";
-
 	private List<Tweet> returnedTweets;
-	private Tweet tempTweet;
-
 	private PApplet app;
-
-	private MediaTracker tracker;
-
 	private ISimpleCallback __callback;
-	private Image _loadingImage;
-	private ImageLoader _loader;
 	private PImage _vessel;
+	private int _page;
 
-	private static  ArrayList<String> _usedURLs = new ArrayList<String>();
+	private static ArrayList<String> _usedURLs = new ArrayList<String>();
 
 	public TwitterFollower(ISimpleCallback _callback, PApplet _appletReference)
 	{
-		// TODO Auto-generated constructor stub
 		app = _appletReference;
 		__callback = _callback;
 		factory = new AsyncTwitterFactory(new TwitterAdapter()
@@ -52,16 +40,12 @@ public class TwitterFollower
 			@Override
 			public void searched(QueryResult result)
 			{
-				// TODO Auto-generated method stub
 				LogRepository.getInstance().getJonsLogger().info("SEARCH COMPLETE");
 				returnedTweets = result.getTweets();
 				LogRepository.getInstance().getJonsLogger().info("Tweets returned " + returnedTweets.size());
 				for (int i = 0; i < returnedTweets.size(); i++)
 				{
 					Tweet tweet = returnedTweets.get(i);
-//					LogRepository.getInstance().getJonsLogger().info("Tweet: " + tempTweet.getFromUser() + " " + tempTweet.getProfileImageUrl() + " " + tempTweet.getText());
-
-					PApplet.println("DO I CONTAIN? " + _usedURLs.contains(tweet.getProfileImageUrl()) + " : " + tweet.getProfileImageUrl());
 					
 					if (!_usedURLs.contains(tweet.getProfileImageUrl()))
 					{
@@ -69,6 +53,13 @@ public class TwitterFollower
 						loadTweetImage(tweet.getProfileImageUrl());
 						return;
 					}
+				}
+				
+				PApplet.println("NO TWEETS FOUND, next page?  " + _page);
+				if(_page < 3)
+				{
+					_page++;
+					follow(_page);
 				}
 			}
 
@@ -97,12 +88,18 @@ public class TwitterFollower
 		}
 	}
 
-	public void follow()
+	public void follow(int page)
 	{
+		_page = page;
 		Query query;
 		query = new Query("#FITC");
-		query.setPage(1);
+		query.setPage(page);
 		__twitter.search(query);
+	}
+
+	public void follow()
+	{
+		follow(1);
 	}
 
 	PImage loadImageAsync(String filename)

@@ -1,7 +1,8 @@
 <?xml version="1.0" ?>
 <properties>
   <category name="general">
-    <property name="debugMode" value="true"/>
+    <property name="debugMode" value="false"/>
+    <property name="tweetCheckInterval" value="5000"/>
   </category>
   <category name="capture">
     <property name="blueBalance" value="1.0"/>
