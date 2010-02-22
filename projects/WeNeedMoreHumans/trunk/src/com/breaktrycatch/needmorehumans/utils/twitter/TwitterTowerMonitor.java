@@ -9,6 +9,7 @@ import processing.core.PImage;
 import com.breaktrycatch.lib.display.DisplayObject;
 import com.breaktrycatch.needmorehumans.utils.FileUtils;
 import com.breaktrycatch.needmorehumans.utils.LogRepository;
+import com.breaktrycatch.needmorehumans.view.GameView;
 
 public class TwitterTowerMonitor
 {
@@ -27,7 +28,7 @@ public class TwitterTowerMonitor
 
 	public void update(float height, ArrayList<? extends DisplayObject> sprites)
 	{
-		height = height / 100;
+		height = height / GameView.HEIGHT_DIVISOR;
 
 		if (_increments.size() > 0 && height > _increments.get(0))
 		{
@@ -48,17 +49,15 @@ public class TwitterTowerMonitor
 		_increments = new ArrayList<Integer>();
 		_increments.add(5);
 		_increments.add(10);
-		_increments.add(25);
-		_increments.add(50);
-		_increments.add(100);
-		_increments.add(150);
+		_increments.add(20);
+		_increments.add(30);
+		_increments.add(40);
 		
 		_messages = new ArrayList<String>();
 		_messages.add("What a tiny tower at only " + _token + " meters. We need more humans!");
-		_messages.add("The tower is starting to take shape at " + _token + " meters!");
-		_messages.add("The tower just hit 10 stories at " + _token + " meters!");
-		_messages.add("Now thats a pile of people! The tower is now " + _token + " meters.");
-		_messages.add("A sturdy skyscraper syle structure stretching upwards to " + _token + " meters!");
-		_messages.add("This tower is now the 8th wonder of the world at " + _token + " meters!");
+		_messages.add("The tower is starting to take shape at " + _token + " meters! We need more humans!");
+		_messages.add("The tower just hit 10 stories at " + _token + " meters! We need more humans!");
+		_messages.add("Now thats a pile of people! The tower is now " + _token + " meters. But we still need more humans!");
+		_messages.add("This tower is now the 8th wonder of the world at " + _token + " meters! Thanks for all the humans!");
 	}
 }

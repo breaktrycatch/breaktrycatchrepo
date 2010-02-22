@@ -209,7 +209,7 @@ public class Simple2DCamera
 		_tweenObj.x = x;
 		_tweenObj.y = y;
 
-		RectUtils.constrainDisplayObject(_tweenObj, _innerBounds);
+//		RectUtils.constrainDisplayObject(_tweenObj, _innerBounds);
 	}
 	
 	/**

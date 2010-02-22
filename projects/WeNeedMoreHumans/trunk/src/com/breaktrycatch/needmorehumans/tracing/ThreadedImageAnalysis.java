@@ -55,6 +55,10 @@ public class ThreadedImageAnalysis
 
 	public boolean isDone()
 	{
+		if(_future == null)
+		{
+			return false;
+		}
 		return _future.isDone();
 	}
 

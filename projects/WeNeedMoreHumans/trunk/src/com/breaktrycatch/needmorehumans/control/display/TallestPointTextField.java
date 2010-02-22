@@ -4,6 +4,8 @@ import java.text.DecimalFormat;
 
 import processing.core.PApplet;
 
+import com.breaktrycatch.needmorehumans.view.GameView;
+
 public class TallestPointTextField extends ShadowTextField
 {
 	/**
@@ -13,6 +15,7 @@ public class TallestPointTextField extends ShadowTextField
 	
 	private float _highestValue;
 	private DecimalFormat _formatter;
+	
 
 	public TallestPointTextField(PApplet app)
 	{
@@ -37,7 +40,7 @@ public class TallestPointTextField extends ShadowTextField
 	@Override
 	public void draw()
 	{
-		setText("Best: " + String.valueOf(_formatter.format(_highestValue / 100)) + "M");
+		setText("Best: " + String.valueOf(_formatter.format(_highestValue / GameView.HEIGHT_DIVISOR)) + "M");
 		super.draw();
 	}
 
