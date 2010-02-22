@@ -2,7 +2,7 @@
 <properties>
   <category name="general">
     <property name="debugMode" value="false"/>
-    <property name="tweetCheckInterval" value="5000"/>
+    <property name="tweetCheckInterval" value="15000"/>
   </category>
   <category name="capture">
     <property name="blueBalance" value="1.0"/>

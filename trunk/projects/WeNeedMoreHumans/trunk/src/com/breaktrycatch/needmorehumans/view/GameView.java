@@ -119,6 +119,7 @@ public class GameView extends AbstractView
 
 	private void scheduleTask()
 	{
+		PApplet.println("Scheduled...");
 		_timer = new Timer();
 		_timer.schedule(new TimerTask()
 		{
@@ -171,6 +172,15 @@ public class GameView extends AbstractView
 				list.add(create);
 				
 				beginPlacement(list);
+				scheduleTask();
+			}
+		}, new ISimpleCallback()
+		{
+			
+			@Override
+			public void execute()
+			{
+				PApplet.println("DEBUG SCHEDULE..");
 				scheduleTask();
 			}
 		}, getApp());
@@ -527,7 +537,7 @@ public class GameView extends AbstractView
 		if (towerRect.width > 0 && towerRect.height > 0)
 		{
 			sprite.x = towerRect.x + (towerRect.width - sprite.width) / 2;
-			sprite.y = towerRect.y - sprite.height - 50;
+			sprite.y = towerRect.y - sprite.height - 200;
 		} else
 		{
 			sprite.x = _physControl.width / 2 - sprite.width / 2;

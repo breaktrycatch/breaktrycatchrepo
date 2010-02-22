@@ -31,7 +31,7 @@ public class TwitterFollower
 
 	private static ArrayList<String> _usedURLs = new ArrayList<String>();
 
-	public TwitterFollower(ISimpleCallback _callback, PApplet _appletReference)
+	public TwitterFollower(ISimpleCallback _callback, final ISimpleCallback _noTweetsCallback, PApplet _appletReference)
 	{
 		app = _appletReference;
 		__callback = _callback;
@@ -60,6 +60,10 @@ public class TwitterFollower
 				{
 					_page++;
 					follow(_page);
+				}
+				else
+				{
+					_noTweetsCallback.execute();
 				}
 			}
 
