@@ -42,7 +42,8 @@ public class WeNeedMoreHumansMain extends AbstractMain
 		// a list of Manager classes that need their update() method
 		// called once per render tick. They can be accessed via
 		// ManagerLocator.getInstance().getManager(ManagerType.class);
-	
+
+		size(1440, 900, PApplet.OPENGL);
 		
 		addManager(new KeyboardManager(this));
 		addManager(new TimeManager());
