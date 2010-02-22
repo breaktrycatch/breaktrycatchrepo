@@ -129,12 +129,16 @@ public class GameView extends AbstractView
 				PApplet.println("Run");
 				fetchTwitterImage();
 			}
-		}, 30000);
+		}, 10000);
 	}
 
 	private void fetchTwitterImage()
 	{
-		PApplet.println("Fetching....");
+		PApplet.println("Fetching.... " + _follower);
+		if(_follower != null)
+		{
+			return;
+		}
 		_follower = new TwitterFollower(new ISimpleCallback()
 		{
 
