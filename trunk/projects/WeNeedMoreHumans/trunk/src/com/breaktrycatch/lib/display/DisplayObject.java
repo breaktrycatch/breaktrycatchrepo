@@ -426,11 +426,6 @@ public class DisplayObject extends ArrayList<DisplayObject>
 		rec.width = (int) (bounds.width * Math.abs(Math.cos(rotationRad)) + bounds.height * Math.abs(Math.sin(rotationRad)));
 		rec.height = (int) (bounds.height * Math.abs(Math.cos(rotationRad)) + bounds.width * Math.abs(Math.sin(rotationRad)));
 
-		// Normalize to actual shape in screen coordinates because object is
-		// center reffed
-//		rec.x += (rec.width / 2);
-//		rec.y += (rec.height / 2);
-
 		return rec;
 	}
 
@@ -469,6 +464,11 @@ public class DisplayObject extends ArrayList<DisplayObject>
 	public boolean equals(Object arg0)
 	{
 		return this == arg0;
+	}
+
+	public boolean isTweening()
+	{
+		return (_activeTweens.size() > 0);
 	}
 }
 

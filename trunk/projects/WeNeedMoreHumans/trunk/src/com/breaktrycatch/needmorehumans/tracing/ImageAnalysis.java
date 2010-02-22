@@ -173,7 +173,7 @@ public class ImageAnalysis
 			}
 
 			LogRepository.getInstance().getJonsLogger().info("LESS THAN 90%  Starting with " + __pixelCount);
-			__pixelCount++;
+			__pixelCount+=5;
 			return false;
 		}
 		return true;

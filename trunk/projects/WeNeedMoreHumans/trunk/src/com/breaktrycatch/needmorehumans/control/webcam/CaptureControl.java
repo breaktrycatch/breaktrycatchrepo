@@ -34,6 +34,7 @@ public class CaptureControl extends DisplayObject
 	private ArrayList<PImage> _capturedImages;
 
 	private ICaptureCallback _captureCompleteCallback;
+	private boolean _showDebugImage = false;
 
 	private int _imagesToCapture;
 
@@ -48,9 +49,11 @@ public class CaptureControl extends DisplayObject
 		_cameraHeight = ConfigTools.getInt(CAPTURE, "cameraHeight");
 		_maxBackgrounds = ConfigTools.getInt(CAPTURE, "maxBackgrounds");
 
+		scaleX = scaleY = .3f;
+
 		_capturedImages = new ArrayList<PImage>();
 		_debugDrawer = new TileImageDrawer(app, .3f);
-		_debugDrawer.setEnabled(true);
+		_debugDrawer.setEnabled(ConfigTools.getBoolean("general", "debugMode"));
 
 		_capture = new PS3EyeCapture(app);
 		if (_capture.initVideo("", _cameraWidth, _cameraHeight, ConfigTools.getInt(CAPTURE, "cameraFPS")))
@@ -76,6 +79,15 @@ public class CaptureControl extends DisplayObject
 					_processor.captureBackgrounds(_maxBackgrounds);
 				};
 			});
+
+			keyboardManager.registerKeyOnce('m', new ISimpleCallback()
+			{
+				public void execute()
+				{
+					_showDebugImage = !_showDebugImage;
+				};
+			});
+
 			_initialized = true;
 		}
 	}
@@ -113,17 +125,23 @@ public class CaptureControl extends DisplayObject
 			{
 				PImage img = _processor.getProcessedImage();
 				_capturedImages.add(img);
-				
+
 				if (_capturedImages.size() >= _imagesToCapture)
 				{
 					executeCaptureCallback();
 				}
 			}
 
+			if (_showDebugImage)
+			{
+				PImage img = _processor.getRawCameraImage();
+				img.updatePixels();
+				getApp().image(img, 0, 0);
+			}
+
 			_debugDrawer.reset();
 		}
-		
-		
+
 	}
 
 	public void setDebugMode(boolean debug)
@@ -152,4 +170,10 @@ public class CaptureControl extends DisplayObject
 		_capturing = false;
 		_captureCompleteCallback.execute(_capturedImages);
 	}
+
+	public PImage getRawImage()
+	{
+		return _capture.getFrame();
+	}
+
 }

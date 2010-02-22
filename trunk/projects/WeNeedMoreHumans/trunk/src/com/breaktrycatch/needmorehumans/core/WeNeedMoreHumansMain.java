@@ -48,7 +48,6 @@ public class WeNeedMoreHumansMain extends AbstractMain
 		addManager(new KeyboardManager(this));
 		addManager(new TimeManager());
 		addManager(new XBoxControllerManager());
-		
 		_stage = new NeedMoreHumansCore(this);
 	}
 

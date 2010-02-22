@@ -202,8 +202,6 @@ public class NeedMoreHumansConfigCore extends Stage
 			{
 				PImage masked = _control.getProcessedImage();
 
-				ImageUtils.tint(masked, 0xff0000, 1);
-
 				getApp().image(_control.getRawCameraImage(), (getApp().width - _cameraWidth) / 2, getApp().height - _cameraHeight - 20);
 				getApp().image(masked, (getApp().width - _cameraWidth) / 2, getApp().height - _cameraHeight - 20);
 			}

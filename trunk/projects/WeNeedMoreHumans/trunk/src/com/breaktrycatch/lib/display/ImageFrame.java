@@ -67,4 +67,9 @@ public class ImageFrame extends DisplayObject
 	{
 		return _img;
 	}
+
+	public void setImage(PImage imng)
+	{
+		_img = imng;
+	}
 }
