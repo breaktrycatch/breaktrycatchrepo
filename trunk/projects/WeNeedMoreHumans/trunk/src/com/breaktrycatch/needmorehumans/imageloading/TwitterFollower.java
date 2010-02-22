@@ -30,7 +30,6 @@ public class TwitterFollower
 
 	private List<Tweet> returnedTweets;
 	private Tweet tempTweet;
-	private Tweet lastTweet;
 
 	private PApplet app;
 
@@ -41,14 +40,13 @@ public class TwitterFollower
 	private ImageLoader _loader;
 	private PImage _vessel;
 
-	private ArrayList<String> _usedURLs;
+	private static  ArrayList<String> _usedURLs = new ArrayList<String>();
 
 	public TwitterFollower(ISimpleCallback _callback, PApplet _appletReference)
 	{
 		// TODO Auto-generated constructor stub
 		app = _appletReference;
 		__callback = _callback;
-		_usedURLs = new ArrayList<String>();
 		factory = new AsyncTwitterFactory(new TwitterAdapter()
 		{
 			@Override
@@ -60,35 +58,16 @@ public class TwitterFollower
 				LogRepository.getInstance().getJonsLogger().info("Tweets returned " + returnedTweets.size());
 				for (int i = 0; i < returnedTweets.size(); i++)
 				{
-					tempTweet = returnedTweets.get(i);
-					LogRepository.getInstance().getJonsLogger().info("Tweet: " + tempTweet.getFromUser() + " " + tempTweet.getProfileImageUrl() + " " + tempTweet.getText());
-					if (lastTweet == null)
-					{
-						lastTweet = tempTweet;
-						if(_usedURLs.contains(lastTweet.getProfileImageUrl()))
-						{
-							LogRepository.getInstance().getJonsLogger().info("First Tweet Ever!");
-	
-							_usedURLs.add(lastTweet.getProfileImageUrl());
-							loadTweetImage(lastTweet.getProfileImageUrl());
-						}
+					Tweet tweet = returnedTweets.get(i);
+//					LogRepository.getInstance().getJonsLogger().info("Tweet: " + tempTweet.getFromUser() + " " + tempTweet.getProfileImageUrl() + " " + tempTweet.getText());
 
+					PApplet.println("DO I CONTAIN? " + _usedURLs.contains(tweet.getProfileImageUrl()) + " : " + tweet.getProfileImageUrl());
+					
+					if (!_usedURLs.contains(tweet.getProfileImageUrl()))
+					{
+						_usedURLs.add(tweet.getProfileImageUrl());
+						loadTweetImage(tweet.getProfileImageUrl());
 						return;
-					} else
-					{
-
-						if (lastTweet.getId() == tempTweet.getId())
-						{
-							LogRepository.getInstance().getJonsLogger().info("Same Tweet as last time...");
-							return;
-						} else
-						{
-							LogRepository.getInstance().getJonsLogger().info("New Tweet!");
-							lastTweet = tempTweet;
-							loadTweetImage(lastTweet.getProfileImageUrl());
-							
-							return;
-						}
 					}
 				}
 			}
