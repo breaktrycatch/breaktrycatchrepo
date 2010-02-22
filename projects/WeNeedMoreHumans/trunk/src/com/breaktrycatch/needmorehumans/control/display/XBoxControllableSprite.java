@@ -24,7 +24,7 @@ public class XBoxControllableSprite extends Sprite
 	private Vec2D _velocity;
 	private float _rotation;
 	private static final int MAX_VEL = 20;
-	private static final float MAX_ROT = .2f;
+	private static final float MAX_ROT = .1f;
 	private boolean _updatedVel = false;
 	private boolean _updatedRot = false;
 	private boolean _enabled;
@@ -36,7 +36,7 @@ public class XBoxControllableSprite extends Sprite
 		public void execute(float value)
 		{
 			_updatedRot = true;
-			_rotation += value / 2;
+			_rotation += value / 30;
 			_rotation = MathUtils.clamp(_rotation, -MAX_ROT, MAX_ROT);
 		}
 	};
@@ -46,7 +46,7 @@ public class XBoxControllableSprite extends Sprite
 		public void execute(float value)
 		{
 			_updatedRot = true;
-			_rotation -= value / 2;
+			_rotation -= value / 30;
 			_rotation = MathUtils.clamp(_rotation, -MAX_ROT, MAX_ROT);
 		}
 	};

@@ -3,34 +3,39 @@ package com.breaktrycatch.needmorehumans.view;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import megamu.shapetween.Shaper;
 
 import org.apache.log4j.Level;
+import org.jbox2d.common.MathUtils;
 
 import processing.core.PApplet;
 import processing.core.PImage;
+import toxi.geom.Vec2D;
 
 import com.breaktrycatch.lib.component.KeyboardManager;
 import com.breaktrycatch.lib.component.ManagerLocator;
 import com.breaktrycatch.lib.component.XBoxControllerManager;
 import com.breaktrycatch.lib.display.DisplayObject;
+import com.breaktrycatch.lib.display.ImageFrame;
+import com.breaktrycatch.lib.util.callback.IFloatCallback;
 import com.breaktrycatch.lib.util.callback.ISimpleCallback;
 import com.breaktrycatch.lib.view.AbstractView;
 import com.breaktrycatch.needmorehumans.config.control.ColorController;
 import com.breaktrycatch.needmorehumans.control.camera.Simple2DCamera;
-import com.breaktrycatch.needmorehumans.control.display.Countdown;
 import com.breaktrycatch.needmorehumans.control.display.HeightMarker;
 import com.breaktrycatch.needmorehumans.control.display.MonkeySpawner;
 import com.breaktrycatch.needmorehumans.control.display.ParallaxBackground;
+import com.breaktrycatch.needmorehumans.control.display.ShadowTextField;
 import com.breaktrycatch.needmorehumans.control.display.SkyObject;
 import com.breaktrycatch.needmorehumans.control.display.TallestPointTextField;
 import com.breaktrycatch.needmorehumans.control.display.Windmill;
 import com.breaktrycatch.needmorehumans.control.display.XBoxControllableSprite;
 import com.breaktrycatch.needmorehumans.control.physics.PhysicsControl;
-import com.breaktrycatch.needmorehumans.control.webcam.CaptureControl;
-import com.breaktrycatch.needmorehumans.control.webcam.CaptureValidator;
-import com.breaktrycatch.needmorehumans.control.webcam.callback.ICaptureCallback;
+import com.breaktrycatch.needmorehumans.control.sprite.HumanImageCreator;
+import com.breaktrycatch.needmorehumans.imageloading.TwitterFollower;
 import com.breaktrycatch.needmorehumans.model.BodyVO;
 import com.breaktrycatch.needmorehumans.tracing.callback.IThreadedImageAnalysisCallback;
 import com.breaktrycatch.needmorehumans.utils.ConfigTools;
@@ -38,25 +43,18 @@ import com.breaktrycatch.needmorehumans.utils.FileUtils;
 import com.breaktrycatch.needmorehumans.utils.LogRepository;
 import com.breaktrycatch.needmorehumans.utils.RectUtils;
 import com.breaktrycatch.needmorehumans.utils.twitter.TwitterTowerMonitor;
-import com.esotericsoftware.controller.device.Button;
+import com.esotericsoftware.controller.device.Axis;
 
 public class GameView extends AbstractView
 {
 	private static final long serialVersionUID = 1L;
-	private CaptureControl _capControl;
 	private PhysicsControl _physControl;
-	protected Countdown _countdown;
 	private ParallaxBackground _background;
 	private DisplayObject _zoomContainer;
 	private Simple2DCamera _camera;
 	private TwitterTowerMonitor _twitterMonitor;
 	private HeightMarker _heightMarker;
 	private TallestPointTextField _tallestPoint;
-	private boolean _isPlacing = false;
-	private String[] _spriteLookup = new String[]
-	{ "../data/tracing/RealPerson_1.png", "../data/tracing/RealPerson_3.png", "../data/tracing/RealPerson_4.png", "../data/tracing/RealPerson_5.png" };
-
-	private String _debugFilename = _spriteLookup[0];
 
 	private ArrayList<XBoxControllableSprite> _sprites;
 	private XBoxControllableSprite _activeSprite;
@@ -65,27 +63,35 @@ public class GameView extends AbstractView
 	Rectangle _checkSpriteRect;
 	boolean _validplacement;
 	private MonkeySpawner _deliveryMonkey;
+	private Vec2D _cameraVelocity;
+
+	private final int MAX_CAMERA_VEL = 30;
+	private Timer _timer;
+
+	private TwitterFollower _follower;
 
 	public GameView()
 	{
 		PApplet.println("DEBUG MODE? " + ConfigTools.getBoolean("general", "debugMode"));
 
-		if (!ConfigTools.getBoolean("general", "debugMode"))
-		{
-			LogRepository.getInstance().getJonsLogger().setLevel(Level.ERROR);
-			LogRepository.getInstance().getMikesLogger().setLevel(Level.ERROR);
-		}
+		// if (!ConfigTools.getBoolean("general", "debugMode"))
+		// {
+		LogRepository.getInstance().getJonsLogger().setLevel(Level.ERROR);
+		LogRepository.getInstance().getMikesLogger().setLevel(Level.ERROR);
+		LogRepository.getInstance().getPaulsLogger().setLevel(Level.ERROR);
+		// }
 	}
 
 	@Override
 	public void initialize(PApplet app)
 	{
 		super.initialize(app);
-		
+
 		if (!ConfigTools.getBoolean("general", "debugMode"))
 		{
 			app.noCursor();
 		}
+
 		_sprites = new ArrayList<XBoxControllableSprite>();
 		_zoomContainer = new DisplayObject(app);
 		add(_zoomContainer);
@@ -103,12 +109,55 @@ public class GameView extends AbstractView
 		grass.y = _physControl.height - 7 - 40;
 		_zoomContainer.add(frontLayer);
 
-		createCaptureControl();
+		// _follower = new TwitterFollower();
 		createInputListeners();
 
 		_twitterMonitor = new TwitterTowerMonitor(app);
+
+		fetchTwitterImage();
+		scheduleTask();
 	}
-	
+
+	private void scheduleTask()
+	{
+		_timer = new Timer();
+		_timer.schedule(new TimerTask()
+		{
+			@Override
+			public void run()
+			{
+				PApplet.println("Run");
+				fetchTwitterImage();
+			}
+		}, 30000);
+	}
+
+	private void fetchTwitterImage()
+	{
+		PApplet.println("Fetching....");
+		_follower = new TwitterFollower(new ISimpleCallback()
+		{
+
+			@Override
+			public void execute()
+			{
+				PApplet.println("GOT!");
+				ArrayList<PImage> list = new ArrayList<PImage>();
+				
+				HumanImageCreator creator = new HumanImageCreator(getApp());
+				PImage create = creator.create(_follower.getImage());
+				list.add(create);
+				
+				ImageFrame test = new ImageFrame(getApp(), _follower.getImage());
+				add(test);
+				
+				beginPlacement(list);
+				scheduleTask();
+			}
+		}, getApp());
+		_follower.follow();
+	}
+
 	private void createClouds()
 	{
 		int numClouds = 6;
@@ -127,23 +176,23 @@ public class GameView extends AbstractView
 			SkyObject cloud = new SkyObject(app, cloudBounds);
 			cloud.addFrame(cloudTable.get(filename));
 			cloud.setSpritePosition(cloudBounds.x + (int) (Math.random() * cloudBounds.width - cloud.width), (int) (cloudBounds.height - (Math.random() * 3000) - 400));
-			cloud.setVelocity(((float) (Math.random() / 2) + .5f) + 1, 0);
+			cloud.setVelocity(((float) (Math.random() / 2) + .5f), 0);
 			_background.addLayer(cloud, .2f);
 		}
 	}
-	
+
 	private void createPlanes()
 	{
 		Rectangle cloudBounds = new Rectangle((int) (-_physControl.width), 0, (int) (_physControl.width * 2.5), (int) _physControl.height);
-		PImage plane1 = getApp().loadImage( "../data/world/plane1.png");
-		PImage plane2 = getApp().loadImage( "../data/world/plane2.png");
+		PImage plane1 = getApp().loadImage("../data/world/plane1.png");
+		PImage plane2 = getApp().loadImage("../data/world/plane2.png");
 		for (int i = 0; i < 5; i++)
 		{
 			SkyObject plane = new SkyObject(getApp(), cloudBounds);
 			plane.addFrame(plane1);
 			plane.addFrame(plane2);
 			plane.setSpritePosition(cloudBounds.x + (int) (Math.random() * cloudBounds.width - plane.width), (int) (cloudBounds.height - (Math.random() * 2000) - 3000));
-			plane.setVelocity(((float) (-Math.random()*3) + .5f) - 1, 0);
+			plane.setVelocity(((float) (-Math.random() * 3) + .5f) - 1, 0);
 			_background.addLayer(plane, .2f);
 		}
 	}
@@ -158,11 +207,11 @@ public class GameView extends AbstractView
 		DisplayObject tier3 = _background.addHorizontalTilingLayer(app.loadImage("../data/world/tier3.jpg"), .05f);
 		DisplayObject tier4 = _background.addHorizontalTilingLayer(app.loadImage("../data/world/tier4.jpg"), .05f);
 		DisplayObject tier5 = _background.addHorizontalTilingLayer(app.loadImage("../data/world/tier5.jpg"), .05f);
-		
+
 		createClouds();
 		createPlanes();
 
-		DisplayObject windmill = _background.addLayer(new Windmill(app), .15f);
+		DisplayObject windmill = _background.addLayer(new Windmill(app), .08f);
 
 		Rectangle simBounds = new Rectangle((int) (-_physControl.width), 0, (int) (_physControl.width * 2), (int) _physControl.height);
 		SkyObject backgroundMonkey = new SkyObject(getApp(), simBounds);
@@ -173,7 +222,7 @@ public class GameView extends AbstractView
 
 		DisplayObject cityBack = _background.addHorizontalTilingLayer(app.loadImage("../data/world/amsterdam-buildings-back.png"), .1f);
 		DisplayObject cityFront = _background.addHorizontalTilingLayer(app.loadImage("../data/world/amsterdam-buildings-front.png"), .2f);
-		DisplayObject trees = _background.addHorizontalTilingLayer(app.loadImage("../data/world/far-grass.png"), .5f);
+		DisplayObject trees = _background.addHorizontalTilingLayer(app.loadImage("../data/world/far-grass.png"), .8f);
 		DisplayObject ground = _background.addHorizontalTilingLayer(app.loadImage("../data/world/ground.png"), 1);
 
 		ground.y = _physControl.height - 7; // 7 is half the thickness of the
@@ -200,9 +249,16 @@ public class GameView extends AbstractView
 		_zoomContainer.add(_heightMarker);
 
 		_tallestPoint = new TallestPointTextField(app);
-		_tallestPoint.x = app.width - 160;
+		_tallestPoint.x = app.width - 175;
 		_tallestPoint.y = 30;
 		add(_tallestPoint);
+
+		ShadowTextField followUs = new ShadowTextField(app);
+		followUs.setFont(app.loadFont("../data/fonts/AnonimRound-48.vlw"));
+		followUs.setText("Follow us on Twitter @NeedMoreHumans");
+		followUs.y = 30;
+		followUs.x = 3;
+		add(followUs);
 	}
 
 	private void createPhysicsControl()
@@ -214,18 +270,6 @@ public class GameView extends AbstractView
 		_physControl.init();
 	}
 
-	private void createCaptureControl()
-	{
-		PApplet app = getApp();
-		_capControl = new CaptureControl(app);
-		_capControl.width = app.width;
-		_capControl.height = app.height;
-
-		// TODO: Hook this up to a config var...
-		_capControl.setDebugMode(true);
-		add(_capControl);
-	}
-
 	private void createCamera()
 	{
 		PApplet app = getApp();
@@ -233,7 +277,16 @@ public class GameView extends AbstractView
 		_camera.lookAt(_physControl.width / 2, 0);
 		_camera.lookAt(_physControl.width / 2, _physControl.height, 5f);
 
-//		_camera.lookAt(new Rectangle(0, 0, (int) _physControl.width, (int) _physControl.height));
+		// _camera.lookAt(new Rectangle(0, 0, (int) _physControl.width, (int)
+		// _physControl.height));
+	}
+
+	private void onMoveCamera()
+	{
+		if (_activeSprite == null && !_camera.isTweening())
+		{
+			_camera.lookAt(_camera.getCameraX() + _cameraVelocity.x, _camera.getCameraY() + _cameraVelocity.y);
+		}
 	}
 
 	private void createInputListeners()
@@ -241,55 +294,42 @@ public class GameView extends AbstractView
 		final XBoxControllerManager controllerManager = (XBoxControllerManager) ManagerLocator.getManager(XBoxControllerManager.class);
 		final KeyboardManager keyboardManager = (KeyboardManager) ManagerLocator.getManager(KeyboardManager.class);
 
-		final ISimpleCallback countdownCallback = new ISimpleCallback()
+		_cameraVelocity = new Vec2D();
+		controllerManager.registerAxis(Axis.rightStickX, new IFloatCallback()
 		{
+
+			public void execute(float value)
+			{
+				_cameraVelocity.x += value * 3;
+				_cameraVelocity.x = MathUtils.clamp(_cameraVelocity.x, -MAX_CAMERA_VEL, MAX_CAMERA_VEL);
+			}
+		});
+		controllerManager.registerAxis(Axis.rightStickY, new IFloatCallback()
+		{
+			public void execute(float value)
+			{
+				_cameraVelocity.y -= value * 3;
+				_cameraVelocity.y = MathUtils.clamp(_cameraVelocity.y, -MAX_CAMERA_VEL, MAX_CAMERA_VEL);
+			}
+		});
+
+		keyboardManager.registerKeyOnce('q', new ISimpleCallback()
+		{
+			@Override
 			public void execute()
 			{
-				startCountdown();
-			}
-		};
+				HumanImageCreator creator = new HumanImageCreator(getApp());
+				PImage create = creator.create(getApp().loadImage("../data/world/SNC00153_bigger.jpg"));
 
-		// A button triggers the start of the count down...
-		controllerManager.registerButtonOnce(Button.b, countdownCallback);
-		keyboardManager.registerKeyOnce('c', countdownCallback);
+
+				ArrayList<PImage> list = new ArrayList<PImage>();
+				list.add(create);
+				beginPlacement(list);
+			}
+		});
 
 		if (ConfigTools.getBoolean("general", "debugMode"))
 		{
-			keyboardManager.registerKeyOnce('7', new ISimpleCallback()
-			{
-				public void execute()
-				{
-					_debugFilename = _spriteLookup[0];
-					beginCapture(null);
-				}
-			});
-
-			keyboardManager.registerKeyOnce('8', new ISimpleCallback()
-			{
-				public void execute()
-				{
-					_debugFilename = _spriteLookup[1];
-					beginCapture(null);
-				}
-			});
-
-			keyboardManager.registerKeyOnce('9', new ISimpleCallback()
-			{
-				public void execute()
-				{
-					_debugFilename = _spriteLookup[2];
-					beginCapture(null);
-				}
-			});
-
-			keyboardManager.registerKeyOnce('0', new ISimpleCallback()
-			{
-				public void execute()
-				{
-					_debugFilename = _spriteLookup[3];
-					beginCapture(null);
-				}
-			});
 
 			keyboardManager.registerKeyOnce('j', new ISimpleCallback()
 			{
@@ -302,85 +342,12 @@ public class GameView extends AbstractView
 		}
 	}
 
-	private void startCountdown()
-	{
-		// don't start a count down if one is in progress.
-		if (_countdown == null && !_isPlacing)
-		{
-			LogRepository.getInstance().getPaulsLogger().info("Beginning count down");
-
-			_countdown = new Countdown(getApp(), new ISimpleCallback()
-			{
-				// once the count down is complete we start capturing
-				// the image.
-				public void execute()
-				{
-					countdownComplete();
-				}
-			});
-			_countdown.x = getApp().width / 2;
-			_countdown.y = getApp().height / 2;
-			_countdown.setCountFrom(1);
-			_countdown.start();
-			add(_countdown);
-		}
-	}
-
-	private void countdownComplete()
-	{
-		remove(_countdown);
-		_countdown = null;
-
-		_capControl.beginCapture(1, new ICaptureCallback()
-		{
-			// executes when the capture has completed.
-			public void execute(ArrayList<PImage> images)
-			{
-				beginCapture(images);
-			}
-		});
-	}
-
-	private void beginCapture(ArrayList<PImage> images)
-	{
-		if (!_isPlacing)
-		{
-			if (images != null)
-			{
-				ArrayList<PImage> culledImages = CaptureValidator.validateList(images);
-
-				if (images.size() > 0)
-				{
-					beginPlacement(culledImages);
-					showCameraFlash();
-				} else
-				{
-					LogRepository.getInstance().getPaulsLogger().warn("No images returned from capture control!");
-					errorCameraFlash();
-				}
-			} else
-			{
-				ArrayList<PImage> debugImage = new ArrayList<PImage>();
-				// debugImage.add(ImageUtils.trimTransparency(getApp().loadImage(_debugFilename)));
-				debugImage.add(getApp().loadImage(_debugFilename));
-				beginPlacement(debugImage);
-
-				showCameraFlash();
-			}
-		}
-	}
-
 	private void beginPlacement(final ArrayList<PImage> images)
 	{
-		_isPlacing = true;
-
 		final PImage img = images.get(0);
 
 		// save the file out for later.
 		FileUtils.saveSourceImage(img);
-
-		final XBoxControllerManager controllerManager = (XBoxControllerManager) ManagerLocator.getManager(XBoxControllerManager.class);
-		final KeyboardManager keyboardManager = (KeyboardManager) ManagerLocator.getManager(KeyboardManager.class);
 
 		_activeSprite = createPlacementSprite(images);
 
@@ -395,17 +362,13 @@ public class GameView extends AbstractView
 					_activeSprite.enableController(false);
 					LogRepository.getInstance().getPaulsLogger().info("Removed Sprite.");
 
-					keyboardManager.unregisterKeyOnce('p', _placementCallback);
-					controllerManager.unregisterButtonOnce(Button.a, _placementCallback);
-
-					keyboardManager.unregisterKeyOnce('r', _removeCallback);
-					controllerManager.unregisterButtonOnce(Button.b, _removeCallback);
-
 					errorCameraFlash();
 
-					_isPlacing = false;
+					_activeSprite = null;
 				} else
 				{
+					showCameraFlash();
+
 					// _sprites.add(sprite);
 					_activeSprite.scaleX = _activeSprite.scaleY = 0;
 					_physControl.add(_activeSprite);
@@ -422,9 +385,6 @@ public class GameView extends AbstractView
 
 	private void introActiveSprite()
 	{
-
-		final XBoxControllerManager controllerManager = (XBoxControllerManager) ManagerLocator.getManager(XBoxControllerManager.class);
-		final KeyboardManager keyboardManager = (KeyboardManager) ManagerLocator.getManager(KeyboardManager.class);
 		final int dist = 1000;
 		final Rectangle towerRect = (Rectangle) _physControl.getTowerRect().clone();
 
@@ -432,7 +392,7 @@ public class GameView extends AbstractView
 		{
 			towerRect.x = (int) _physControl.width / 2;
 		}
-		_deliveryMonkey.x = towerRect.x + towerRect.width + dist ;
+		_deliveryMonkey.x = towerRect.x + towerRect.width + dist;
 		_deliveryMonkey.y = _activeSprite.y - _deliveryMonkey.height / 2;
 		_deliveryMonkey.visible = true;
 		_deliveryMonkey.slideTo((int) _activeSprite.x - 200, (int) _deliveryMonkey.y, .5f, null, new ISimpleCallback()
@@ -448,14 +408,10 @@ public class GameView extends AbstractView
 					{
 						_activeSprite.enableController(true);
 						_activeSprite.setScaleAroundCenter(true);
-						_activeSprite.rotateTo((float)Math.PI * 2, .5f, Shaper.COSINE);
+						_activeSprite.rotateTo((float) Math.PI * 2, .5f, Shaper.COSINE);
 						_activeSprite.scaleTo(1, 1, .5f, Shaper.COSINE);
 
-						controllerManager.registerButtonOnce(Button.a, _placementCallback);
-						keyboardManager.registerKeyOnce('p', _placementCallback);
-
-						controllerManager.registerButtonOnce(Button.b, _removeCallback);
-						keyboardManager.registerKeyOnce('r', _removeCallback);
+						_placementCallback.execute();
 
 						_deliveryMonkey.slideTo(towerRect.x + towerRect.width + dist, (int) _deliveryMonkey.y, .5f, null, new ISimpleCallback()
 						{
@@ -470,29 +426,6 @@ public class GameView extends AbstractView
 			}
 		});
 	}
-
-	// remove the human from the sim since its a bad capture.
-	private final ISimpleCallback _removeCallback = new ISimpleCallback()
-	{
-		@Override
-		public void execute()
-		{
-			final XBoxControllerManager controllerManager = (XBoxControllerManager) ManagerLocator.getManager(XBoxControllerManager.class);
-			final KeyboardManager keyboardManager = (KeyboardManager) ManagerLocator.getManager(KeyboardManager.class);
-
-			_activeSprite.enableController(false);
-			_physControl.remove(_activeSprite);
-			_activeSprite = null;
-
-			LogRepository.getInstance().getPaulsLogger().info("Removed Sprite.");
-
-			keyboardManager.unregisterKeyOnce('p', _placementCallback);
-			controllerManager.unregisterButtonOnce(Button.a, _placementCallback);
-
-			keyboardManager.unregisterKeyOnce('r', _removeCallback);
-			controllerManager.unregisterButtonOnce(Button.b, _removeCallback);
-		}
-	};
 
 	// place the human in to the sim
 	private final ISimpleCallback _placementCallback = new ISimpleCallback()
@@ -522,16 +455,6 @@ public class GameView extends AbstractView
 				_physControl.addCurrentBody();
 				LogRepository.getInstance().getPaulsLogger().info("Placed Sprite in PhysicsControl.");
 
-				final XBoxControllerManager controllerManager = (XBoxControllerManager) ManagerLocator.getManager(XBoxControllerManager.class);
-				final KeyboardManager keyboardManager = (KeyboardManager) ManagerLocator.getManager(KeyboardManager.class);
-
-				keyboardManager.unregisterKeyOnce('p', this);
-				controllerManager.unregisterButtonOnce(Button.a, this);
-
-				keyboardManager.unregisterKeyOnce('r', _removeCallback);
-				controllerManager.unregisterButtonOnce(Button.b, _removeCallback);
-
-				_isPlacing = false;
 				_activeSprite = null;
 			} else
 			{
@@ -622,12 +545,25 @@ public class GameView extends AbstractView
 					_activeSprite.errorTint();
 					LogRepository.getInstance().getJonsLogger().warn("INVALID PLACEMENT");
 					_validplacement = false;
+
+					// What is this!?!?
 					i = _sprites.size();
 				}
 			}
 			if (_validplacement)
 			{
 				_activeSprite.regularTint();
+			}
+		}
+
+		onMoveCamera();
+		_cameraVelocity.scaleSelf(.9f);
+
+		if(_follower != null)
+		{
+			if(_follower.update())
+			{
+				_follower = null;
 			}
 		}
 		

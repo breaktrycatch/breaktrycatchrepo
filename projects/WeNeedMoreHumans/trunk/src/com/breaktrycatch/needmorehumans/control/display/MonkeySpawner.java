@@ -136,7 +136,7 @@ public class MonkeySpawner extends DisplayObject
 	public void draw()
 	{
 		_jetpack.visible = (y < (_bounds.y + _bounds.height) - 2000);
-		_helmet.visible = (y < (_bounds.y + _bounds.height) - 5500);
+		_helmet.visible = (y < (_bounds.y + _bounds.height) - 3750);
 		
 		super.draw();
 	}

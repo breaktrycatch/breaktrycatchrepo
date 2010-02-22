@@ -1,21 +1,24 @@
 package com.breaktrycatch.needmorehumans.control.display;
 
+import java.text.DecimalFormat;
+
 import processing.core.PApplet;
 
-public class TallestPointTextField extends HeightMarker
+public class TallestPointTextField extends ShadowTextField
 {
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
+	
 	private float _highestValue;
+	private DecimalFormat _formatter;
 
 	public TallestPointTextField(PApplet app)
 	{
 		super(app);
-		
-		_background.visible = false;
-		_textField.visible = true;
+		_formatter = new DecimalFormat("##0.00");
+		setFont(app.loadFont("../data/fonts/AnonimRound-48.vlw"));
 	}
 
 	public void setValue(float value)
@@ -34,13 +37,8 @@ public class TallestPointTextField extends HeightMarker
 	@Override
 	public void draw()
 	{
-		String value = "Best: " + String.valueOf(_formatter.format(_highestValue / 100)) + "M";
-		
-		_textField.setText(value);
-		_shadowTextField.setText(value);
-		
-		_shadowTextField.x = _textField.x + 1;
-		_shadowTextField.y = _textField.y + 1;
+		setText("Best: " + String.valueOf(_formatter.format(_highestValue / 100)) + "M");
+		super.draw();
 	}
 
 	@Override

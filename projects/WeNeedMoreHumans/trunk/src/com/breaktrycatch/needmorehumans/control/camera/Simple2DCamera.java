@@ -211,6 +211,25 @@ public class Simple2DCamera
 
 		RectUtils.constrainDisplayObject(_tweenObj, _innerBounds);
 	}
+	
+	/**
+	 * Centers the view port on a point.
+	 * 
+	 * @param x
+	 * @param y
+	 * @param scale
+	 */
+	public void lookAtScale(float x, float y, float scale)
+	{
+		_tweenObj.cancelTweens();
+
+		_tweenObj.x = x;
+		_tweenObj.y = y;
+		
+		_tweenObj.scaleX = _tweenObj.scaleY = scale;
+
+		RectUtils.constrainDisplayObject(_tweenObj, _innerBounds);
+	}
 
 	/**
 	 * Transforms a display object based on the camera's position and zoom.
@@ -241,5 +260,25 @@ public class Simple2DCamera
 
 		_innerBounds.width = (int) (_bounds.width - (_viewport.width) * (1 / newScaleX));
 		_innerBounds.height = (int) (_bounds.height - (_viewport.height) * (1 / newScaleY));
+	}
+	
+	public float getCameraX()
+	{
+		return _tweenObj.x;
+	}
+
+	public float getCameraY()
+	{
+		return _tweenObj.y;
+	}
+
+	public float getCameraScale()
+	{
+		return _tweenObj.scaleX;
+	}
+	
+	public boolean isTweening()
+	{
+		return _tweenObj.isTweening();
 	}
 }

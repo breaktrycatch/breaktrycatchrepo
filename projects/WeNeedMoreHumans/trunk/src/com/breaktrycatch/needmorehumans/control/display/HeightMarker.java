@@ -4,7 +4,6 @@ import java.awt.Rectangle;
 import java.text.DecimalFormat;
 
 import processing.core.PApplet;
-import processing.core.PFont;
 
 import com.breaktrycatch.lib.display.DisplayObject;
 import com.breaktrycatch.lib.display.ImageFrame;
@@ -16,34 +15,29 @@ public class HeightMarker extends DisplayObject
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	protected TextField _textField;
-	protected TextField _shadowTextField;
-	protected DecimalFormat _formatter;
-	protected ImageFrame _background;
+	private DecimalFormat _formatter;
+	private ImageFrame _background;
+	private TextField _text;
 	private Rectangle _bounds;
 
 	public HeightMarker(PApplet app)
 	{
 		super(app);
 		_formatter = new DecimalFormat("##0.00");
-		PFont font = app.loadFont("../data/fonts/AnonimRound-48.vlw");
-
-		_background = new ImageFrame(app, app.loadImage("../data/world/height-marker-background.png"));
-		_background.x = -_background.width / 2;
-		_background.y = -_background.height / 2;
 		
-		_textField = new TextField(app);
-		_textField.setFont(font);
-		_textField.x = -30;
-		_textField.visible = false;
+		
+		_background = new ImageFrame(app, app.loadImage("../data/world/height-marker-background.png"));
+		_background.x = -_background.width / 2 + 20;
+		_background.y = -_background.height / 2;
 
-		_shadowTextField = new TextField(app);
-		_shadowTextField.setFont(font);
-		_shadowTextField.setColor(0x000000);
+		_text = new TextField(app);
+		_text.setFont(app.loadFont("../data/fonts/AnonimRound-48.vlw"));
+		_text.setColor(0x000000);
+		_text.y = 10;
+		_text.x = -5;
 		
 		add(_background);
-		add(_shadowTextField);
-		add(_textField);
+		add(_text);
 	}
 
 	public void setBounds(Rectangle rect)
@@ -54,14 +48,8 @@ public class HeightMarker extends DisplayObject
 	@Override
 	public void draw()
 	{		
-		String value = String.valueOf(_formatter.format(getDisplayValue() / 100)) + "M";
-		_textField.setText(value);
-		_textField.y = _textField.height / 2 - 5;
+		_text.setText(String.valueOf(_formatter.format(getDisplayValue() / 100)) + "M");
 
-		_shadowTextField.setText(value);
-		_shadowTextField.x = _textField.x + 2;
-		_shadowTextField.y = _textField.y + 2;
-		
 //		PApplet app = getApp();
 //		
 //		int width = 75;
@@ -72,7 +60,6 @@ public class HeightMarker extends DisplayObject
 //		
 //		app.fill(0xffffffff);
 //		app.rect(-width, 0, width, height);
-
 	}
 
 	public float getDisplayValue()

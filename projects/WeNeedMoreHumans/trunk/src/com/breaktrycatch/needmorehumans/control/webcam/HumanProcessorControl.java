@@ -32,7 +32,6 @@ public class HumanProcessorControl
 	private boolean _processingEnabled;
 	private boolean _debugMode = false;
 	private PApplet _app;
-	private ProcessorPlugin _gapFillPlugin;
 
 	public HumanProcessorControl(PApplet app, SimpleCapture capture)
 	{
@@ -118,16 +117,12 @@ public class HumanProcessorControl
 		fillGaps.put(GapFillPlugin.GAP_FILL, 8);
 		fillGaps.put(GapFillPlugin.START_THRESHOLD, 200);
 		fillGaps.put(GapFillPlugin.END_THRESHOLD, 50);
-		_gapFillPlugin = addPlugin(_pipeline, GapFillPlugin.class, fillGaps);
+		addPlugin(_pipeline, GapFillPlugin.class, fillGaps);
 		
-		
-
 //		HashMap<String, Object> removeBlobConfig = new HashMap<String, Object>();
 //		removeBlobConfig.put(LargestBlobExtraction.OPEN_CV, _subtractor.getOpenCV());
 //		removeBlobConfig.put(LargestBlobExtraction.PAPPLET, _app);
 //		addPlugin(_pipeline, LargestBlobExtraction.class, removeBlobConfig);
-		
-		
 
 		// blow it up huuuuuuge to fill in the holes
 		HashMap<String, Object> expandConfig = new HashMap<String, Object>();
@@ -156,11 +151,10 @@ public class HumanProcessorControl
 		// noiseReduction.put(NoiseReductionPlugin.THRESHOLD, 200);
 		// addPlugin(_pipeline, NoiseReductionPlugin.class, noiseReduction);
 
-		// HashMap<String, Object> contractBack = new HashMap<String,
-		// Object>();
-		// contractBack.put(ErosionPlugin.INVERTED, false);
-		// contractBack.put(ErosionPlugin.NUM_PASSES, 1);
-		// addPlugin(_pipeline, ErosionPlugin.class, contractBack);
+//		HashMap<String, Object> contractBack = new HashMap<String, Object>();
+//		contractBack.put(ErosionPlugin.INVERTED, false);
+//		contractBack.put(ErosionPlugin.NUM_PASSES, 1);
+//		addPlugin(_pipeline, ErosionPlugin.class, contractBack);
 	}
 
 	private ProcessorPlugin addPlugin(ProcessorPipeline pipeline, Class<?> c, HashMap<String, Object> map)
@@ -200,16 +194,16 @@ public class HumanProcessorControl
 		// create a simple difference mask from the frame.
 		PImage mask = _subtractor.createDifferenceMask(frame);
 
-//		debugDraw(mask);
-
 		// process the mask to remove noise and gaps.
 		mask.pixels = _pipeline.process(mask.pixels, mask.width, mask.height);
+
+		foreground.pixels = _postPipeline.process(foreground.pixels, foreground.width, foreground.height);
 
 		// apply the mask to our raw camera frame.
 		PImage maskedFrame = _subtractor.applyDifferenceMask(foreground, mask);
 
-		maskedFrame.resize(320, 240);
-
+//		maskedFrame.resize(320, 240);
+		
 		_subtractor.extractLargestBlob(maskedFrame);
 //		 _subtractor.removeShadows(maskedFrame);
 		

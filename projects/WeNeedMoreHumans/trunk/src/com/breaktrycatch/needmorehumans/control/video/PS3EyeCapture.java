@@ -33,6 +33,7 @@ public class PS3EyeCapture implements SimpleCapture
 	public void read()
 	{
 		_cam.getCameraFrame(_cameraBuffer.pixels, 0);
+		_cameraBuffer.updatePixels();
 	}
 
 	@Override
@@ -82,6 +83,7 @@ public class PS3EyeCapture implements SimpleCapture
 		_cam.setCameraParam(CLCamera.CLEYE_WHITEBALANCE_BLUE, 240);
 
 		_cam.setCameraParam(CLCamera.CLEYE_AUTO_WHITEBALANCE, 0);
+		_cam.setCameraParam(CLCamera.CLEYE_AUTO_GAIN, 0);
 		_cam.setCameraParam(CLCamera.CLEYE_AUTO_EXPOSURE, 0);
 		_cam.setCameraParam(CLCamera.CLEYE_AUTO_GAIN, 0);
 		_cam.setCameraParam(CLCamera.CLEYE_GRAYSCALE, 1);

@@ -86,11 +86,10 @@ public class TileImageDrawer extends DisplayObject
 	public void draw()
 	{
 		getApp().pushMatrix();
+		getApp().scale(_scale);
 		for (ImageToDraw toDraw : _imagesToDraw)
 		{
-			getApp().scale(_scale);
 			getApp().image(toDraw.img, toDraw.x, toDraw.y);
-//			getApp().image(toDraw.img, 0,0);
 		}
 		getApp().popMatrix();
 		super.draw();

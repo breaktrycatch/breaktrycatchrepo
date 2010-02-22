@@ -57,7 +57,6 @@ public class ParallaxBackground extends DisplayObject
 	private DisplayObject internalAddLayer(DisplayObject layer, float movementAmt)
 	{
 		add(layer);
-
 		_layers.add(new ParallaxLayer(layer, movementAmt));
 		return layer;
 	}
