@@ -43,7 +43,7 @@ public class WeNeedMoreHumansMain extends AbstractMain
 		// called once per render tick. They can be accessed via
 		// ManagerLocator.getInstance().getManager(ManagerType.class);
 
-		size(1440, 900, PApplet.OPENGL);
+		size(1024, 768, PApplet.OPENGL);
 		
 		addManager(new KeyboardManager(this));
 		addManager(new TimeManager());
