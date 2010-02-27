@@ -1,0 +1,1 @@
+package com.fuelindustries.net.remoting {	import flash.events.EventDispatcher;	import flash.net.ObjectEncoding;	/**	 * @author jdolce	 */	public class BaseRemoting extends EventDispatcher 	{				public static var AMF0:uint = ObjectEncoding.AMF0;		public static var AMF3:uint = ObjectEncoding.AMF3;		public function BaseRemoting()		{		}	}}
