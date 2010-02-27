@@ -138,6 +138,7 @@ package com.fuelindustries.core
 			var objDescriptor : XML;
 			//Get this class name
 			var qualifiedClassName:String = getQualifiedClassName(this);
+			
 			//Check and see if we have it already in the cache
 			if (__xmlCache[qualifiedClassName] is XML) {
 				objDescriptor = __xmlCache[qualifiedClassName];
@@ -155,10 +156,11 @@ package com.fuelindustries.core
 			{
 				if (property.name() == "variable") 
 				{
+					
 					var name : String = property.@name;
 					var type : String = property.@type;
 					var clazz : Class;
-				
+					
 					//Check For any overrides
 					if (__overriddenVariables && __overriddenVariables[name]) 
 					{
@@ -198,6 +200,7 @@ package com.fuelindustries.core
 							}
 							catch(e:Error)
 							{
+								dtrace("ERROR");
 								throw new Error( "Inheritance error on " + name + ". " + inst + " doesn't extend " + type );
 							}
 						}
@@ -217,6 +220,8 @@ package com.fuelindustries.core
 				//Assign the dynamic property to the MovieClip. Remember to destroy the class when finished with it.
 				__display[PROXYCODE] = this;
 			}
+			
+			dtrace("Completing construction", this);
 			//Finish the Construction
 			completeConstruction();
 		}

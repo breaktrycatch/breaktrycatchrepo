@@ -10,6 +10,8 @@ package com.fuelindustries.net.assetmanager.statics {
 		
 
 		public static const GROUP_PRELOADER:int = 0;
+		public static const GROUP_TOWERMANIFEST:int = 1;
+		public static const GROUP_TOWERLOADER:int = 2;
 	
 		
 		/**
