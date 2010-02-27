@@ -92,7 +92,8 @@ package com.humans.core {
 			__assetManager.addAsset( ProjectStatics.getStatic( "swf_url" ) + "framework_core.swf", AssetStatics.GROUP_PRELOADER );
 			
 			//VIEWS
-			__assetManager.addAsset( ProjectStatics.getStatic( "swf_url" ) + "view_gallery.swf", AssetStatics.GROUP_PRELOADER );	
+			__assetManager.addAsset( ProjectStatics.getStatic( "swf_url" ) + "view_gallery.swf", AssetStatics.GROUP_PRELOADER );
+			__assetManager.addAsset( ProjectStatics.getStatic( "swf_url" ) + "view_towerGallery.swf", AssetStatics.GROUP_PRELOADER );	
 		}
 		
 		//Automatically loads the assets configured
