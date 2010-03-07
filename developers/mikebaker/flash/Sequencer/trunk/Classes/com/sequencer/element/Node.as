@@ -1,6 +1,8 @@
 package com.sequencer.element {
 	import com.fuelindustries.core.AssetProxy;
-	
+
+	import flash.events.MouseEvent;
+
 	/**
 	 * @author fuel
 	 */
@@ -19,18 +21,26 @@ package com.sequencer.element {
 			super();
 			
 			linkage = "node_mc";
+			maintainClassReference = true;
 		}
 
 		override protected function completeConstruction() : void {
 			super.completeConstruction();
 			
 			setState(_currentState);
+			
 		}
-		
-		public function setState(state : String) : void {
+
+		public function flipState():void
+		{
+			setState((_currentState == STATE_OFF) ? STATE_ON : STATE_OFF);
+		}
+
+		protected function setState(state : String) : void {
 			if(state != currentLabel)
 			{
 				gotoAndStop(state);
+				_currentState = state;
 			}
 		}
 		
