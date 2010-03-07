@@ -6,9 +6,10 @@ package com.sequencer.manager {
 	 */
 	public class NodeFactory {
 	
+		private static const PI_2:Number = 2 * Math.PI;
 		private static const NODE_SIZE:Number = 25;
 		
-		public static function createLine(x:Number, y:Number, slope:Number, nodeLength:int):Node
+		public static function createLine(x:Number, y:Number, rise:int, run:int, nodeLength:int):Node
 		{
 			var nodes:Array = new Array();
 			
@@ -16,8 +17,30 @@ package com.sequencer.manager {
 			{
 				var node:Node = new Node();
 				node.linkDisplay();
-				node.x = x + (NODE_SIZE * i * (1/slope));
-				node.y = y + (NODE_SIZE * i * slope);
+				node.x = x + (NODE_SIZE * i * run);
+				node.y = y + (NODE_SIZE * i * rise);
+				
+				nodes.push(node);
+			}
+			
+			linkNodes(nodes);
+			
+			return nodes[0];
+		}
+		
+		public static function createCircle(x:Number, y:Number, radius:int):Node
+		{
+			var angleStep:Number = (PI_2 * radius * NODE_SIZE)/PI_2;
+			var nodes:Array = new Array();
+			
+			for(var angle:Number = 0; angle < PI_2; angle += angleStep)
+			{
+				var node:Node = new Node();
+				node.linkDisplay();
+				node.x = radius * Math.cos(angle) + x;
+				node.y = radius * Math.sin(angle) + y;
+				
+				nodes.push(node);
 			}
 			
 			linkNodes(nodes);
