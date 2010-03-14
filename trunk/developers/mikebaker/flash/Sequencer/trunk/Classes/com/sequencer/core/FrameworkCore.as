@@ -1,4 +1,6 @@
 ﻿package com.sequencer.core {
+	import com.fuelindustries.utils.IntervalManager;
+	import com.fuelindustries.utils.IntervalCall;
 	import com.fuelindustries.AbstractMain;
 	import com.fuelindustries.core.AssetProxy;
 	import com.sequencer.element.Node;
@@ -13,18 +15,21 @@
 	 
 	 
 	public class FrameworkCore extends AbstractMain{
+		protected const INTERVAL_UPDATE:int = 200;
+		
 		protected var _currentNode:Node;
+		protected var _updateIntervalID:int = IntervalManager.setInterval(onUpdateInterval, 200);
+		
 
 		override protected function onAdded(e : Event) : void {
 			super.onAdded(e);
 			
-			_currentNode = NodeFactory.createLine(50, 50, 0, 2, 5);
-//			_currentNode = NodeFactory.createCircle(50, 50, 5);
+//			_currentNode = NodeFactory.createLine(50, 50, 0, 2, 5);
+			_currentNode = NodeFactory.createCircle(50, 50, 5);
 			
 			addLinkedNodes(_currentNode);
 			
 			addEventListener(MouseEvent.CLICK, onClick);
-			addEventListener(Event.ENTER_FRAME, onEnterFrame);
 		}
 		
 		protected function addLinkedNodes(thisNode:Node):void
@@ -47,7 +52,7 @@
 			}
 		}
 		
-		private function onEnterFrame(e : Event) : void {
+		private function onUpdateInterval(...args) : void {
 			updateChildNodes(_currentNode);
 		}
 		
@@ -64,8 +69,6 @@
 			if(flipState || thisNode.currentState == Node.STATE_ON) {
 				thisNode.flipState();
 			}
-			
-			
 			
 		}
 		
