@@ -30,7 +30,9 @@ package com.sequencer.manager {
 		
 		public static function createCircle(x:Number, y:Number, radius:int):Node
 		{
-			var angleStep:Number = (PI_2 * radius * NODE_SIZE)/PI_2;
+			// c = 2PIr
+			var angleStep:Number = PI_2 / ((PI_2 * radius)/(NODE_SIZE + 10));
+//			var angleStep:Number = (PI_2 * radius * NODE_SIZE)/PI_2;
 			var nodes:Array = new Array();
 			
 			for(var angle:Number = 0; angle < PI_2; angle += angleStep)

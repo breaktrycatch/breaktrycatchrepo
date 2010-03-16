@@ -11,11 +11,13 @@ package com.sequencer.element {
 		public static const STATE_ON:String = "on";
 		public static const STATE_OFF:String = "off";
 		
+		public var lastUpdate:Number = -1;
 		public var childNodes:Array = new Array();
 		protected var _currentState:String = STATE_OFF;
 		public function get currentState() : String {
 			return _currentState;
 		}
+		
 		
 		public function Node() {
 			super();
