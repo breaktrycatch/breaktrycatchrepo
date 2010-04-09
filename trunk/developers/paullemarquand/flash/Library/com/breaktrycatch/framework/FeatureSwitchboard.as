@@ -14,27 +14,6 @@ package com.breaktrycatch.framework
 		
 		private static var _servers : Dictionary;
 		
-		/**
-		* Sets the current runtime environment. Use stage.loaderInfo.url to get
-		* the url of the current swf dynamically.
-		* 
-		* @param rootURL The url of the current swf.
-		*/
-		public static function setEnvironment(rootURL : String) : void
-		{
-			for (var name : String in _servers) 
-			{
-				if(new RegExp(name).test(rootURL))
-				{
-					CURRENT_SERVER = _servers[name];
-				}
-			}
-			
-			if(CURRENT_SERVER == NONE)
-			{
-				throw new ArgumentError("Unknown server! Halting execution.");
-			}
-		}
 		
 		/**
 		* Adds a server to the list of allowed servers the application can
@@ -55,6 +34,28 @@ package com.breaktrycatch.framework
 			}
 			
 			_servers[id] = permissionLevel;
+		}
+		
+		/**
+		* Sets the current runtime environment. Use stage.loaderInfo.url to get
+		* the url of the current swf dynamically.
+		* 
+		* @param rootURL The url of the current swf.
+		*/
+		public static function setEnvironment(rootURL : String) : void
+		{
+			for (var name : String in _servers) 
+			{
+				if(new RegExp(name).test(rootURL))
+				{
+					CURRENT_SERVER = _servers[name];
+				}
+			}
+			
+			if(CURRENT_SERVER == NONE)
+			{
+				throw new ArgumentError("Unknown server! Halting execution.");
+			}
 		}
 		
 		/**
