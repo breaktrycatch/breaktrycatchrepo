@@ -39,9 +39,10 @@ package com.sequencer.element {
 		}
 
 		protected function setState(state : String) : void {
-			if(state != currentLabel)
+			//if(state != currentLabel)
 			{
-				gotoAndStop(state);
+//				gotoAndStop(state);
+				gotoAndPlay(state);
 				_currentState = state;
 			}
 		}
