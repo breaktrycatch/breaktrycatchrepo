@@ -7,7 +7,7 @@ package com.sequencer.manager {
 	public class NodeFactory {
 	
 		private static const PI_2:Number = 2 * Math.PI;
-		private static const NODE_SIZE:Number = 25;
+		public static const NODE_SIZE:Number = 25;
 		
 		public static function createLine(x:Number, y:Number, rise:int, run:int, nodeLength:int):Node
 		{

@@ -15,22 +15,39 @@
 	 
 	 
 	public class FrameworkCore extends AbstractMain{
-		protected const INTERVAL_UPDATE:int = 200;
+		protected const INTERVAL_UPDATE:int = 50;
 		
 		protected var _currentNode:Node;
-		protected var _updateIntervalID:int = IntervalManager.setInterval(onUpdateInterval, 200);
+		protected var _updateIntervalID:int = IntervalManager.setInterval(onUpdateInterval, INTERVAL_UPDATE);
 		protected var _lastUpdate : Number;
 
 		
 		override protected function onAdded(e : Event) : void {
 			super.onAdded(e);
 			
-			_currentNode = NodeFactory.createLine(50, 50, 0, 2, 5);
-
-//			_currentNode = NodeFactory.createCircle(100, 100, 50);
-//			var lastNode:Node = getEndNode(_currentNode);
+			var line:Node = NodeFactory.createLine(350 - NodeFactory.NODE_SIZE, 200, 0, -2, 6);
+			
+			_currentNode = NodeFactory.createCircle(200, 200, 150);
+			//connect the circle
+			var lastNode:Node = getEndNode(_currentNode);
+			lastNode.childNodes.push(_currentNode);
+			
+			//connect first node of line to circle
+			_currentNode.childNodes.push(line);
+			
+			
+			//connect last node of line to halfway through the circle
+			lastNode = getEndNode(line);
+			var searchNode: Node = _currentNode.childNodes[0];
+			while(searchNode.x > lastNode.x || searchNode.y > lastNode.y)
+			{
+				searchNode = searchNode.childNodes[0];
+			}
+			lastNode.childNodes.push(searchNode);
+			
+			
+			//Add the nodes to the stage 
 			addLinkedNodes(_currentNode);
-//			lastNode.childNodes.push(_currentNode);
 			
 			addEventListener(MouseEvent.CLICK, onClick);
 		}
@@ -38,7 +55,7 @@
 		protected function getEndNode(startNode:Node):Node
 		{
 			var node:Node;
-			for(node = startNode.childNodes[0]; node != null; node.childNodes[0]){}
+			for(node = startNode.childNodes[0]; node.childNodes.length > 0; node = node.childNodes[0]){}
 			
 			return node;
 		}
@@ -51,7 +68,10 @@
 				addChild(thisNode.display);
 				
 				for each (var node : Node in thisNode.childNodes) {
-					addLinkedNodes(node);
+					if(node.parent == null)
+					{
+						addLinkedNodes(node);
+					}
 				}
 			}
 		}
@@ -68,26 +88,63 @@
 		
 		private function onUpdateInterval(...args) : void {
 			_lastUpdate = new Date().time;
-			updateChildNodes(_currentNode);
+			update();
+//			updateChildNodes(_currentNode);
 		}
 		
-		protected function updateChildNodes(thisNode:Node, flipState:Boolean = false):void
+		protected function update():void
 		{
-			thisNode.lastUpdate = _lastUpdate;
+			var onNodes:Array = findOnNodes(_currentNode);
+//			dtrace("ON NODES:", onNodes.length);
+			for each (var onNode : Node in onNodes) {
+				onNode.flipState();
+				
+				for each (var node : Node in onNode.childNodes) {
+					node.flipState();
+				}
+			}
+		}
+		
+		private function findOnNodes(searchNode:Node):Array 
+		{
+			searchNode.lastUpdate = _lastUpdate;
 			
-			for each (var node : Node in thisNode.childNodes) {
+			var onNodes:Array = new Array();
+			
+			if(searchNode.currentState == Node.STATE_ON)
+			{
+				onNodes.push(searchNode);
+//				dtrace("FOUND ON NODE");
+			}
+			
+			for each (var node : Node in searchNode.childNodes) 
+			{
 				if(node.lastUpdate < _lastUpdate)
 				{
-					updateChildNodes(node, thisNode.currentState == Node.STATE_ON);
+					onNodes = onNodes.concat(findOnNodes(node));
 				}
 			}
 			
-			
-			if(flipState || thisNode.currentState == Node.STATE_ON) {
-				thisNode.flipState();
-			}
-			
+			return onNodes;
 		}
+
+//		protected function updateChildNodes(thisNode:Node, flipState:Boolean = false):void
+//		{
+//			thisNode.lastUpdate = _lastUpdate;
+//			
+//			for each (var node : Node in thisNode.childNodes) {
+//				if(node.lastUpdate < _lastUpdate)
+//				{
+//					updateChildNodes(node, thisNode.currentState == Node.STATE_ON);
+//				}
+//			}
+//			
+//			
+//			if(flipState || thisNode.currentState == Node.STATE_ON) {
+//				thisNode.flipState();
+//			}
+//			
+//		}
 		
 	}
 	
