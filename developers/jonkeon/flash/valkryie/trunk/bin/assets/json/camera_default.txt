@@ -1,1 +1,0 @@
-{"cameraStartIsoX":-1,"cameraStartIsoY":-1,"cameraViewSpaceHeight":500,"cameraViewSpaceY":0,"cameraViewSpaceWidth":760,"cameraViewSpaceX":0,"cameraLocation":0}
