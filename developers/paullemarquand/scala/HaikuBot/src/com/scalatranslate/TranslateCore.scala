@@ -17,7 +17,7 @@ object TranslateCore extends scala.Application {
 
   val MAX_SEPARATION_SYLLABLES: Int = 26
   val MAX_TRANSLATION_STACK: Int = 15
-  val MAX_TWEES_PER_RUN: Int = 3
+  val MAX_TWEES_PER_RUN: Int = 30
   val MAX_TWEET_SIZE: Int = 144 
   val DEBUG_MODE: Boolean = false
   val INPUT_MODE: Boolean = false
@@ -51,8 +51,8 @@ object TranslateCore extends scala.Application {
     {
       Console.print("Enter input: ")
       poemInput = sanitizeStatus(Console.readLine())
-      Console.println(poemInput.split(' ').map(word => haikuForm.wordSyllables(word)).zip(poemInput.split(' ')).map( set => "(" + set._1 + "): " +  set._2).mkString("| "))
 
+      Console.println(poemInput.split(' ').map(word => haikuForm.wordSyllables(word)).zip(poemInput.split(' ')).map( set => "(" + set._1 + "): " +  set._2).mkString("| "))
 
       if(!escapeSequences.contains( poemInput ))
         languages.foreach( lang => findPoem(poemInput, haikuForm, lang))
@@ -70,13 +70,21 @@ object TranslateCore extends scala.Application {
     val followerIDs = twitter.getFollowersIDs().getIDs()
     val friendIDs = twitter.getFriendsIDs().getIDs()
     followerIDs.filter( id => !friendIDs.contains(id) ).map( id => createFriendship( twitter, id ) )
-     Console.println("\n")
+    Console.println("\n")
   }
 
   // awwwwww, best function ever!
   def createFriendship(twitter:Twitter, id:Int ) : Unit = {
-    val friend: User = twitter.createFriendship( id )
-    Console.println("Found a new Friend!!! Their name is: " + friend.getScreenName() )
+    try
+    {
+     val friend: User = twitter.createFriendship( id )
+      Console.println("Found a new Friend!!! Their name is: " + friend.getScreenName() )
+    } catch {
+       case e: Exception => {
+         Console.println("*********************************** " + e.toString())
+         null
+       }
+    }
   }
 
   def createHaikuFromStatuses(twitter: Twitter) : Unit = twitter.getFriendsStatuses().toList.map( usr => createHaikuFromLatestStatus( usr, twitter ) )
@@ -114,7 +122,7 @@ object TranslateCore extends scala.Application {
 
     if(poem != null)
     {
-      val newStatus: String = poem.replaceAll("\n", " /") + " #haiku by: " + "@" + user.getScreenName()
+      val newStatus: String = "@" + user.getScreenName() + ": " + poem.replaceAll("\n", " /")
       Console.println("STATUS\n" + newStatus + "\n\n\n\n")
       tweetsMade += 1
 
@@ -230,7 +238,7 @@ object TranslateCore extends scala.Application {
   def processInput(input: String): String =
   {
     try{
-      input.split(' ').filter( t => t.matches( """[0-9]+""" ) ).foldLeft(input)((str, digit) => str.replaceAll(digit, new NumberToWordConversion().convert(digit.toInt)))
+      input.split(' ').filter( t => t.matches( """[0-9]+""" ) ).foldLeft(input)((str, digit) => str.replaceAll(digit, NumberToWordConversion.convert(Integer.parseInt(digit))))
     } catch {
          case e: NumberFormatException => {
            Console.println("*********************************** " + e.toString())
