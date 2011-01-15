@@ -2,7 +2,7 @@ package com.scalatranslate.util
 
 import java.text.DecimalFormat
 
-class NumberToWordConversion
+object NumberToWordConversion
 {
   val tensNames :Array[String] = Array[String](
     "",
@@ -38,7 +38,7 @@ class NumberToWordConversion
     " eighteen",
     " nineteen")
 
-   def convertLessThanOneThousand(value: Int): String = {
+   private def convertLessThanOneThousand(value: Int): String = {
     var soFar: String = "";
     var number: Int = value;
      
