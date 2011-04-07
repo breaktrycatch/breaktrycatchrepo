@@ -11,6 +11,8 @@ package com.unloadAndStopExample.loaded {
 	{
 		public var now_txt:TextField;
 		
+		private var __framesPassed:int = 0;
+		
 		public function LoadedClipExample()
 		{
 			super();
@@ -23,12 +25,13 @@ package com.unloadAndStopExample.loaded {
 			removeEventListener(Event.ADDED_TO_STAGE, onAdded);
 			
 			stage.addEventListener(Event.ENTER_FRAME, onUpdate);
+			onUpdate(null);
 		}
 
 		private function onUpdate(e : Event) : void 
 		{
-			var now:Date = new Date();
-			now_txt.text = now.toString();
+			__framesPassed++;
+			now_txt.text = String(__framesPassed);
 		}
 	}
 }
