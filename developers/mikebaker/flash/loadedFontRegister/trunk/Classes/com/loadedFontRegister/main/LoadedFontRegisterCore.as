@@ -11,7 +11,7 @@ package com.loadedFontRegister.main {
 		public var brokenLoadedFont_mc:LoadControl;
 		public var workingLoadedFont_mc:LoadControl;
 		
-		private var __path:String = 'loaded.swf';
+		private var file:String = 'loadedFontRegister_loaded.swf';
 		
 		public function LoadedFontRegisterCore()
 		{
@@ -23,9 +23,11 @@ package com.loadedFontRegister.main {
 			removeEventListener(Event.ADDED_TO_STAGE, onAdded);
 			
 			//in a moderately gross way set an absolute path to the loaded swf
-			__path = stage.loaderInfo.url.replace('main.swf', __path);
-			workingLoadedFont_mc.init(__path, true, "Register Font on Host Application Domain");
-			brokenLoadedFont_mc.init(__path, false, "Register Font on Current Application Domain");
+			var path:String = stage.loaderInfo.url.replace('loadedFontRegister_main.swf', file);
+			path = path.replace('loadedFontRegister%5Fmain.swf', file);
+
+			workingLoadedFont_mc.init(path, true, "Register Font on Host Application Domain");
+			brokenLoadedFont_mc.init(path, false, "Register Font on Current Application Domain");
 		}
 	}
 }
