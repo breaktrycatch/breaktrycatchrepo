@@ -23,7 +23,6 @@ package com.thread.color
 			KulerSingletonProxy.getInstance().removeEventListener( ColorRecievedEvent.COLORS_RECIEVED, onResults );
 			
 			_colors = event.colors;
-			trace("SETTING COLORS: " + _colors, _colors.length)
 			activeColorIndex = 0;
 		}
 

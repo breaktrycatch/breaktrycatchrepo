@@ -38,7 +38,7 @@ package com.thread.line
 		override public function randomize() : void
 		{
 			var randomizer : Randomizer = new Randomizer( );
-			randomizer.addRule( Number, "maxAlpha", .05, .2 );
+			randomizer.addRule( Number, "maxAlpha", .2, .3 );
 			randomizer.randomize( this );
 		}
 	}

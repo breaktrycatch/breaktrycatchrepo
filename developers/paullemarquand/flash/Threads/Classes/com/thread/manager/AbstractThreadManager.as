@@ -44,14 +44,21 @@ package com.thread.manager
 		protected function addThread() : void
 		{
 			_threads.push( addChild( _threadFactory.getThread() ) );
+			
+			//TODO: HACK!!! only for the right angle follow agents.
+			if(_threads.length == 1)
+			{
+				Thread(_threads[0]).vo.lineAlpha = 0;
+			}
 		}
 		
 		public function update() : void
 		{
 			for (var i : Number = _threads.length - 1; i >= 0 ; i--) 
 			{
-				_threads[i].setWorldData( _threads, i );
-				_threads[i].update( );
+				var thread : Thread = _threads[i];
+				thread.setWorldData( _threads, i );
+				thread.update( );
 			}
 		}
 		
