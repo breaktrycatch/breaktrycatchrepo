@@ -15,7 +15,7 @@ package com.thread.transform
 		private var _sections : int;
 		private var _trnsPoint : Point = new Point( ThreadConstants.MANAGER_WIDTH / 2, ThreadConstants.MANAGER_HEIGHT / 2 );
 
-		public function KaleidoscopeTransform(sections : int = 20)
+		public function KaleidoscopeTransform(sections : int = 10)
 		{
 			_sections = sections;
 			super( this );

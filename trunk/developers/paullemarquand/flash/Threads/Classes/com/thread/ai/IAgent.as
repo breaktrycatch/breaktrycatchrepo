@@ -13,5 +13,7 @@ package com.thread.ai
 		function setModifiers(...args) : void;
 
 		function randomize() : void;
+		
+		function run() : void;
 	}
 }

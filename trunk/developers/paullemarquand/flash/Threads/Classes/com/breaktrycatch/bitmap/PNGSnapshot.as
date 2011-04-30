@@ -1,5 +1,6 @@
 package com.breaktrycatch.bitmap 
-{	import flash.system.Capabilities;
+{
+
 	import flash.display.BitmapData;
 	import flash.display.DisplayObject;
 	import flash.net.FileReference;

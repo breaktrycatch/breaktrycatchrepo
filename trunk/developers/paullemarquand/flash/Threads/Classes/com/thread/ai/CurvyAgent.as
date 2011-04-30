@@ -1,6 +1,6 @@
 package com.thread.ai 
-{	import com.thread.constant.ThreadConstants;
-	import com.thread.ai.AbstractAgent;
+{
+
 	import com.thread.vo.IMotionable;
 	import com.util.Randomizer;
 
@@ -12,20 +12,19 @@ package com.thread.ai
 		public function CurvyAgent(target : IMotionable)
 		{			super( target, this );		}
 
-		override public function update() : void
+		override public function run() : void
 		{
-			_target.angle += _target.x / ThreadConstants.MANAGER_WIDTH;
-			//_target.angle += (Math.cos( _ctr / _curlSpeed ) * _curlTightness * Math.sin( _ctr / _curlSpeed ) * _curlTightness) * 360;
-			//			_target.angle += Math.cos( _ctr / _curlSpeed ) * _curlTightness * ( 1 - Math.sin( _ctr / _curlSpeed ));
-			//			_target.angle += 10;
+			_target.angle += (Math.cos( _ctr / _curlSpeed ) * _curlTightness * Math.sin( _ctr / _curlSpeed ) * _curlTightness) * 360;
 			_ctr += .01;
+			
+			super.run();
 		}
 
 		override public function randomize() : void
 		{
 			var randomizer : Randomizer = new Randomizer( );
-			randomizer.addRule( Number, "curlSpeed", 10, 10 );
-			randomizer.addRule( Number, "curlTightness", 1,1 );
+			randomizer.addRule( Number, "curlSpeed", 1000, 10000 );
+			randomizer.addRule( Number, "curlTightness", 1200,1900 );
 			randomizer.randomize( this );
 		}
 

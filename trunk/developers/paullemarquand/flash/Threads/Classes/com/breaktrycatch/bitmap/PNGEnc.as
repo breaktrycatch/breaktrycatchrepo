@@ -64,19 +64,19 @@ package com.breaktrycatch.bitmap
 				crcTable = [];
 				for (var n : uint = 0; n < 256 ; n++) 
 				{
-					var c : uint = n;
+					var c2 : uint = n;
 					for (var k : uint = 0; k < 8 ; k++) 
 					{
-						if (c & 1) 
+						if (c2 & 1) 
 						{
-							c = uint( uint( 0xedb88320 ) ^ uint( c >>> 1 ) );
+							c2 = uint( uint( 0xedb88320 ) ^ uint( c2 >>> 1 ) );
 						} 
 						else 
 						{
-							c = uint( c >>> 1 );
+							c2 = uint( c2 >>> 1 );
 						}
 					}
-					crcTable[n] = c;
+					crcTable[n] = c2;
 				}
 			}
 			var len : uint = 0;

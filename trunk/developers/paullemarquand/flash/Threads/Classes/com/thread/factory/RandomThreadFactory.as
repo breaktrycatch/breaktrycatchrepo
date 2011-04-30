@@ -1,41 +1,28 @@
 package com.thread.factory 
-{	import com.breaktrycatch.collection.util.ArrayExtensions;
+{
+
+	import com.thread.transform.SimpleTransform;
+	import com.breaktrycatch.collection.util.ArrayExtensions;
 	import com.thread.Thread;
-	import com.thread.ai.BoidsAgent;
-	import com.thread.bounds.BounceBoundsChecker;
-	import com.thread.bounds.ContinuationBoundsChecker;
+	import com.thread.ai.FollowAgent;
 	import com.thread.bounds.RandomAngleBoundsChecker;
-	import com.thread.color.KulerColorSupplier;
-	import com.thread.draw.CircleDrawer;
-	import com.thread.draw.PolyDrawer;
-	import com.thread.draw.ProximityPolyDrawer;
+	import com.thread.color.GradientColorSupplier;
 	import com.thread.draw.SimpleDrawer;
-	import com.thread.draw.SquareDrawer;
-	import com.thread.line.AlphaLine;
-	import com.thread.line.FaintLine;
-	import com.thread.line.FillShapeStyle;
-	import com.thread.line.SimpleLine;
-	import com.thread.line.SizedAlphaLine;
 	import com.thread.line.SizedLine;
 	import com.thread.transform.FourWayTransform;
-	import com.thread.transform.MirrorRibbonTransform;
-	import com.thread.transform.MirrorTransform;
-	import com.thread.transform.RibbonTransform;
-	import com.thread.transform.SimpleTransform;
 	import com.thread.vo.IRandomizable;
 	import com.thread.vo.ThreadDataVO;
-
 	import org.as3commons.lang.ClassUtils;
 
 	/**	 * @author plemarquand	 */	public class RandomThreadFactory 
 	{
 		private var _threadVO : Array = [ThreadDataVO];
-		private var _agents : Array = [BoidsAgent];//[RightAngleFollowAgent];//[UniqueLeaderFollowAgent];//[SimpleAgent, CurvyAgent, FollowAgent, GroupFollowAgent, RightAngleAgent];
-		private var _colours : Array = [KulerColorSupplier];//[GradientColorSupplier, IncrementalStartKulerColorSupplier, KulerColorSupplier, RandomKulerColorSupplier];//[SimpleColorSupplier, GradientColorSupplier, IncrementalStartKulerColorSupplier, KulerColorSupplier, RandomKulerColorSupplier];
-		private var _drawers : Array = [SimpleDrawer, CircleDrawer, PolyDrawer, ProximityPolyDrawer, SquareDrawer];
-		private var _transformers : Array = [FourWayTransform, MirrorRibbonTransform, MirrorTransform, RibbonTransform, SimpleTransform];//[FourWayIntermittentTransform, FourWayRibbonTransform, FourWayTransform, KaleidoscopeTransform, MirrorRibbonTransform, MirrorTransform, RibbonTransform, SimpleTransform];
-		private var _bounds : Array = [BounceBoundsChecker, ContinuationBoundsChecker, RandomAngleBoundsChecker];
-		private var _styles : Array = [AlphaLine, FaintLine, FillShapeStyle, SimpleLine, SizedAlphaLine, SizedLine];
+		private var _agents : Array = [FollowAgent];//[FollowAgent];//[RightAngleFollowAgent];//[UniqueLeaderFollowAgent];//[SimpleAgent, CurvyAgent, FollowAgent, GroupFollowAgent, RightAngleAgent];
+		private var _colours : Array = [GradientColorSupplier];//[GradientColorSupplier, IncrementalStartKulerColorSupplier, KulerColorSupplier, RandomKulerColorSupplier];//[SimpleColorSupplier, GradientColorSupplier, IncrementalStartKulerColorSupplier, KulerColorSupplier, RandomKulerColorSupplier];
+		private var _drawers : Array = [SimpleDrawer];//, CircleDrawer, PolyDrawer, ProximityPolyDrawer, SquareDrawer];
+		private var _transformers : Array = [SimpleTransform];//[FourWayTransform, MirrorRibbonTransform, MirrorTransform, RibbonTransform, SimpleTransform];//[FourWayIntermittentTransform, FourWayRibbonTransform, FourWayTransform, KaleidoscopeTransform, MirrorRibbonTransform, MirrorTransform, RibbonTransform, SimpleTransform];
+		private var _bounds : Array = [RandomAngleBoundsChecker];//[BounceBoundsChecker, ContinuationBoundsChecker, RandomAngleBoundsChecker];
+		private var _styles : Array = [SizedLine];//[AlphaLine, FaintLine, FillShapeStyle, SimpleLine, SizedAlphaLine, SizedLine];
 
 		private var _randomized : Boolean;
 		private var _parameterLists : Vector.<ParameterList>;
@@ -50,7 +37,7 @@ package com.thread.factory
 				var rnd : Class = ArrayExtensions.randomElement( items[i] );
 				var list : ParameterList = new ParameterList( rnd );
 				_parameterLists.push( list );
-				trace("Using: " + rnd);
+//				trace("Using: " + rnd);
 			}
 			_randomized = true;
 		}
@@ -82,7 +69,6 @@ package com.thread.factory
 		}	}}
 
 import com.breaktrycatch.collection.util.ArrayExtensions;
-
 import org.as3commons.lang.ClassUtils;
 import org.as3commons.reflect.Parameter;
 import org.as3commons.reflect.Type;

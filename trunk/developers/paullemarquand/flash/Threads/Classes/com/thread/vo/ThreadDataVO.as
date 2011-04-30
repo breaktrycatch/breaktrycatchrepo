@@ -1,5 +1,6 @@
-package com.thread.vo 
+package com.thread.vo
 {
+
 	import com.thread.constant.ThreadConstants;
 	import com.util.Randomizer;
 
@@ -10,18 +11,15 @@ package com.thread.vo
 	{
 		private var _x : Number;
 		private var _y : Number;
-
 		private var _prevX : Number;
 		private var _prevY : Number;
-
 		private var _angle : Number;
 		private var _speed : Number;
-
 		private var _lineSize : Number;
 		private var _lineAlpha : Number;
 		private var _initialSpeed : Number;
 
-		public function ThreadDataVO() 
+		public function ThreadDataVO()
 		{
 			prevX = 0;
 			prevY = 0;
@@ -129,17 +127,18 @@ package com.thread.vo
 
 		public function randomize() : void
 		{
-			var randomizer : Randomizer = new Randomizer( );
-			randomizer.addRule( Number, "angle", 0, 360 );
+			var randomizer : Randomizer = new Randomizer();
+			randomizer.addRule( Number, "angle", 267, 273 );
 			randomizer.addRule( Number, "x", 0, ThreadConstants.MANAGER_WIDTH );
 			randomizer.addRule( Number, "y", 0, ThreadConstants.MANAGER_HEIGHT );
-			randomizer.addRule( Number, "initialSpeed", 2, 2 );
-			randomizer.addRule( Number, "lineSize", 75, 125 );
-			randomizer.addRule( Number, "lineAlpha", .1, 1 );
+			randomizer.addRule( Number, "initialSpeed", 4, 4 );
+			randomizer.addRule( Number, "lineSize", 1, 3 );
+			randomizer.addRule( Number, "lineAlpha", 1,1 );
 			randomizer.randomize( this );
-			
-			x = ThreadConstants.MANAGER_WIDTH / 2;
-			y = ThreadConstants.MANAGER_HEIGHT / 2;
+
+			x = ThreadConstants.MANAGER_WIDTH / 2 - Math.random() * 20 + Math.random() * 20;
+			y = ThreadConstants.MANAGER_HEIGHT - 5
+			// 2;
 		}
 	}
 }
