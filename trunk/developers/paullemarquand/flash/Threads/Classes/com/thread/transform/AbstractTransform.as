@@ -10,9 +10,9 @@ package com.thread.transform
 	 */
 	public class AbstractTransform implements IDrawTransform, IRandomizable
 	{
-		public function AbstractTransform(enforcer : AbstractTransform) 
+		public function AbstractTransform() 
 		{
-			
+			randomize();
 		}
 		
 		public function transform(d : IPositionable) : Array

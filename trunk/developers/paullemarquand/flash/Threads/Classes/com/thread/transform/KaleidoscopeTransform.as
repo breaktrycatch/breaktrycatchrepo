@@ -18,7 +18,7 @@ package com.thread.transform
 		public function KaleidoscopeTransform(sections : int = 10)
 		{
 			_sections = sections;
-			super( this );
+			super();
 		}
 
 		override public function transform(d : IPositionable) : Array

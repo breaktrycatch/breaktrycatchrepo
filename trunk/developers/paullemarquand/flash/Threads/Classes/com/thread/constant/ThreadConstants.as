@@ -8,16 +8,16 @@ package com.thread.constant
 	{
 		public static const BG_COLOUR : int = 0x000000;
 		
-		public static const GRID_WIDTH				: int = 16;
-		public static const GRID_HEIGHT				: int = 8;
+		public static const GRID_WIDTH				: int = 1;
+		public static const GRID_HEIGHT				: int = 1;
 		public static const MANAGERS_PER_GRID 		: int = 1;
 		
 		public static const MARGIN_X				: Number = -4;
 		public static const MARGIN_Y				: Number = -4;
 		
-		public static const START_THREADS			: uint = 15;
+		public static const START_THREADS			: uint = 50;
 		
-		public static const CLEAR_INTERVAL			: int = 15;
+		public static const CLEAR_INTERVAL			: int = 50;
 		public static const CLEAR_AMOUNT			: Number = .02;
 		public static const CAPTURE_TIME 			: Number = 45;
 		

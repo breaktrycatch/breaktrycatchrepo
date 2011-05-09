@@ -307,7 +307,7 @@ package com.breaktrycatch.collection.util
 		{
 			simpleForEach( array, function(item : *) : void
 			{
-				item[callback].apply( item, callbackArgs );
+				(item[callback] as Function).apply( item, callbackArgs );
 			} );
 		}
 	}

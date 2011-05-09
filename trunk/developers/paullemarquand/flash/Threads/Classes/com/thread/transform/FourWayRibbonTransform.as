@@ -9,7 +9,7 @@ package com.thread.transform
 		public function FourWayRibbonTransform(ribbonSection : int = 5, ribbonSeparation : int = 5)
 		{
 			_fourWay = new FourWayTransform( );
-			_ribbonDrawer = new RibbonTransform( ribbonSection, ribbonSeparation );			super( this );		}
+			_ribbonDrawer = new RibbonTransform( ribbonSection, ribbonSeparation );			super();		}
 
 		override public function transform(d : IPositionable) : Array
 		{

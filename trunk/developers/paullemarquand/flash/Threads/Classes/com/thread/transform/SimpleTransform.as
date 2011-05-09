@@ -10,7 +10,7 @@ package com.thread.transform
 	{
 		public function SimpleTransform() 
 		{
-			super( this );
+			super();
 		}
 
 		override public function transform(d : IPositionable) : Array

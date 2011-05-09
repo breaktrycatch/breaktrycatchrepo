@@ -29,14 +29,14 @@ package com.thread
 		public var drawTransform	: IDrawTransform;
 		public var drawer 			: IDrawer;
 		public var motionAI 		: IAgent;
-		public var vo	 			: ThreadDataVO;
+		public var data	 			: ThreadDataVO;
 
 		private var _worldThreads 	: Array;
 		private var _worldIndex 	: int;
 
 		public function Thread(_data : ThreadDataVO, _bounds : IBoundsChecker, _color : IColorSupplier, _transform : IDrawTransform, _drawer : IDrawer, _line : IDrawStyle, _agent : IAgent)
 		{
-			vo = _data;
+			data = _data;
 			
 			boundsChecker = _bounds;
 			colorSupplier = _color;
@@ -60,12 +60,12 @@ package com.thread
 			drawer.setModifiers( _worldThreads, _worldIndex );
 			motionAI.update( );
 			
-			var dx : Number = Math.cos( NumberUtils.degreeToRad( vo.angle ) ) * vo.speed;
-			var dy : Number = Math.sin( NumberUtils.degreeToRad( vo.angle ) ) * vo.speed;
-			var pt : Point = boundsChecker.checkBounds( vo.x + dx, vo.y + dy );
+			var dx : Number = Math.cos( NumberUtils.degreeToRad( data.angle ) ) * data.speed;
+			var dy : Number = Math.sin( NumberUtils.degreeToRad( data.angle ) ) * data.speed;
+			var pt : Point = boundsChecker.checkBounds( data.x + dx, data.y + dy );
 			
-			vo.x = pt.x;
-			vo.y = pt.y;
+			data.x = pt.x;
+			data.y = pt.y;
 		}
 
 		public function draw() : void
@@ -73,13 +73,10 @@ package com.thread
 			graphics.clear( );
 			
 			lineStyle.preDraw( this );
-			drawer.draw( this, drawTransform.transform( vo ) );
+			drawer.draw( this, drawTransform.transform( data ) );
 			lineStyle.postDraw( this );
-		}
-
-		public function get data() : ThreadDataVO
-		{
-			return vo;
+			
+			graphics.endFill();
 		}
 		
 		public function dispose() : void

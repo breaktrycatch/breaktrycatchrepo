@@ -16,7 +16,7 @@ package com.thread.transform
 		{
 			_sections = sections;
 			_ribbonSeparation = ribbonSeparation;
-			super( this );
+			super();
 		}
 
 		override public function transform(d : IPositionable) : Array

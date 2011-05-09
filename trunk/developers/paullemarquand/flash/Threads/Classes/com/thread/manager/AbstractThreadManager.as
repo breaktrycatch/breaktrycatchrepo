@@ -48,7 +48,7 @@ package com.thread.manager
 			//TODO: HACK!!! only for the right angle follow agents.
 			if(_threads.length == 1)
 			{
-				Thread(_threads[0]).vo.lineAlpha = 0;
+				Thread(_threads[0]).data.lineAlpha = 0;
 			}
 		}
 		

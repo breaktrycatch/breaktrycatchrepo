@@ -54,9 +54,10 @@ package com.thread.ai
 
 		public function setModifiers(...args) : void
 		{
+			var spd : Number = 0;
 			_worldAgents = args[0];
 			_index = args[1];
-			_target.speed = _target.initialSpeed * ((1 - (_index / _worldAgents.length)) * .2 + .8);
+			_target.speed = _target.initialSpeed * ((1 - (_index / _worldAgents.length)))// * (1 - spd) + spd);
 			_isLeader = (_index == 0);
 
 			updateFollowTarget();

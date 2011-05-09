@@ -23,7 +23,7 @@ package com.thread.ai
 		{
 			if (Math.random() < SWITCH_PROBABBILITY)
 			{
-				_target.angle += ((Math.random() < .5) ? (-1) : (1)) *90;
+				_target.angle += ((Math.random() < .5) ? (-1) : (1)) * 90;
 				super.run();
 			}
 		}

@@ -1,116 +1,62 @@
-package com.thread.factory 
+package com.thread.factory
 {
 
-	import com.thread.transform.SimpleTransform;
+	import com.thread.transform.MirrorTransform;
 	import com.breaktrycatch.collection.util.ArrayExtensions;
 	import com.thread.Thread;
 	import com.thread.ai.FollowAgent;
+	import com.thread.ai.IAgent;
+	import com.thread.bounds.IBoundsChecker;
 	import com.thread.bounds.RandomAngleBoundsChecker;
 	import com.thread.color.GradientColorSupplier;
-	import com.thread.draw.SimpleDrawer;
-	import com.thread.line.SizedLine;
-	import com.thread.transform.FourWayTransform;
-	import com.thread.vo.IRandomizable;
+	import com.thread.color.IColorSupplier;
+	import com.thread.draw.IDrawer;
+	import com.thread.draw.RibbonDrawer;
+	import com.thread.line.IDrawStyle;
+	import com.thread.line.SimpleLine;
+	import com.thread.transform.IDrawTransform;
+	import com.thread.transform.SimpleTransform;
+	import com.thread.vo.ILineStyleable;
+	import com.thread.vo.IMotionable;
 	import com.thread.vo.ThreadDataVO;
-	import org.as3commons.lang.ClassUtils;
+	import org.swiftsuspenders.Injector;
 
-	/**	 * @author plemarquand	 */	public class RandomThreadFactory 
+	/**	 * @author plemarquand	 */
+	public class RandomThreadFactory
 	{
-		private var _threadVO : Array = [ThreadDataVO];
-		private var _agents : Array = [FollowAgent];//[FollowAgent];//[RightAngleFollowAgent];//[UniqueLeaderFollowAgent];//[SimpleAgent, CurvyAgent, FollowAgent, GroupFollowAgent, RightAngleAgent];
-		private var _colours : Array = [GradientColorSupplier];//[GradientColorSupplier, IncrementalStartKulerColorSupplier, KulerColorSupplier, RandomKulerColorSupplier];//[SimpleColorSupplier, GradientColorSupplier, IncrementalStartKulerColorSupplier, KulerColorSupplier, RandomKulerColorSupplier];
-		private var _drawers : Array = [SimpleDrawer];//, CircleDrawer, PolyDrawer, ProximityPolyDrawer, SquareDrawer];
-		private var _transformers : Array = [SimpleTransform];//[FourWayTransform, MirrorRibbonTransform, MirrorTransform, RibbonTransform, SimpleTransform];//[FourWayIntermittentTransform, FourWayRibbonTransform, FourWayTransform, KaleidoscopeTransform, MirrorRibbonTransform, MirrorTransform, RibbonTransform, SimpleTransform];
-		private var _bounds : Array = [RandomAngleBoundsChecker];//[BounceBoundsChecker, ContinuationBoundsChecker, RandomAngleBoundsChecker];
-		private var _styles : Array = [SizedLine];//[AlphaLine, FaintLine, FillShapeStyle, SimpleLine, SizedAlphaLine, SizedLine];
-
-		private var _randomized : Boolean;
-		private var _parameterLists : Vector.<ParameterList>;
+		private var _agents : Array = [ FollowAgent ]; // [FollowAgent];//[RightAngleFollowAgent];//[UniqueLeaderFollowAgent];//[SimpleAgent, CurvyAgent, FollowAgent, GroupFollowAgent, RightAngleAgent];
+		private var _colours : Array = [ GradientColorSupplier ]; // [GradientColorSupplier, IncrementalStartKulerColorSupplier, KulerColorSupplier, RandomKulerColorSupplier];//[SimpleColorSupplier, GradientColorSupplier, IncrementalStartKulerColorSupplier, KulerColorSupplier, RandomKulerColorSupplier];
+		private var _drawers : Array = [ RibbonDrawer ]; // , CircleDrawer, PolyDrawer, ProximityPolyDrawer, SquareDrawer];
+		// private var _drawers : Array = [SimpleDrawer];//, CircleDrawer, PolyDrawer, ProximityPolyDrawer, SquareDrawer];
+		private var _transformers : Array = [ MirrorTransform ]; // [FourWayTransform, MirrorRibbonTransform, MirrorTransform, RibbonTransform, SimpleTransform];//[FourWayIntermittentTransform, FourWayRibbonTransform, FourWayTransform, KaleidoscopeTransform, MirrorRibbonTransform, MirrorTransform, RibbonTransform, SimpleTransform];
+		private var _bounds : Array = [ RandomAngleBoundsChecker ]; // [BounceBoundsChecker, ContinuationBoundsChecker, RandomAngleBoundsChecker];
+		// private var _styles : Array = [SimpleLine];//[AlphaLine, FaintLine, FillShapeStyle, SimpleLine, SizedAlphaLine, SizedLine];
+		private var _styles : Array = [ SimpleLine ]; // [AlphaLine, FaintLine, FillShapeStyle, SimpleLine, SizedAlphaLine, SizedLine];
 
 		public function randomize() : void
 		{
-			_parameterLists = new Vector.<ParameterList>( );
-			// this must match the order of the Thread constructor for now.
-			var items : Array = [_threadVO, _bounds, _colours, _transformers, _drawers, _styles, _agents];
-			for (var i : String in items) 
-			{
-				var rnd : Class = ArrayExtensions.randomElement( items[i] );
-				var list : ParameterList = new ParameterList( rnd );
-				_parameterLists.push( list );
-//				trace("Using: " + rnd);
-			}
-			_randomized = true;
 		}
 
 		public function getThread() : Thread
 		{
-			if(!_randomized)
-			{
-				randomize( );
-			}
+			var vo : ThreadDataVO = new ThreadDataVO();
+			var injector : Injector = new Injector();
+			injector.mapClass( Thread, Thread );
+			injector.mapClass( IAgent, ArrayExtensions.randomElement( _agents ) );
+			injector.mapClass( IColorSupplier, ArrayExtensions.randomElement( _colours ) );
+			injector.mapClass( IDrawer, ArrayExtensions.randomElement( _drawers ) );
+			injector.mapClass( IDrawTransform, ArrayExtensions.randomElement( _transformers ) );
+			injector.mapClass( IBoundsChecker, ArrayExtensions.randomElement( _bounds ) );
+			injector.mapClass( IDrawStyle, ArrayExtensions.randomElement( _styles ) );
+			injector.mapValue( IMotionable, vo );
+			injector.mapValue( ILineStyleable, vo );
+			injector.mapValue( ThreadDataVO, vo );
+
+			var thread : Thread = injector.getInstance( Thread );
 			
-			var threadArgInstances : Array = [];
-			var instantiationArgumentList : Array = [];
-			for (var i : Number = 0; i < _parameterLists.length ; i++) 
-			{
-				var list : ParameterList = _parameterLists[i];
-				list.initializationObjects = instantiationArgumentList;
-				
-				var obj : * = list.generateObject( );
-				if(obj is IRandomizable)
-				{
-					IRandomizable( obj ).randomize( );
-				}
-				instantiationArgumentList.push( obj );
-				threadArgInstances.push( obj );
-			}
-			
-			return ClassUtils.newInstance( Thread, threadArgInstances );
-		}	}}
-
-import com.breaktrycatch.collection.util.ArrayExtensions;
-import org.as3commons.lang.ClassUtils;
-import org.as3commons.reflect.Parameter;
-import org.as3commons.reflect.Type;
-
-internal class ParameterList
-{
-	private var _clazz : Class;
-	private var _initObjects : Array;
-
-	public function ParameterList(clazz : Class, initializationObjects : Array = null) 
-	{
-		_clazz = clazz;
-		_initObjects = (initializationObjects == null) ? ([]) : (initializationObjects);
-	}
-
-	public function set initializationObjects(arr : Array) : void
-	{
-		_initObjects = arr;
-	}
-
-	public function generateObject() : Object
-	{
-		var type : Type = Type.forClass( _clazz );
-		var constructorParams : Array = type.constructor.parameters;
-		var constructorArgs : Array = [];
-		for (var i : Number = 0; i < constructorParams.length ; i++) 
-		{
-			var param : Parameter = constructorParams[i];
-			if(!param.isOptional)
-			{
-				var initObj : * = findAppropriateType( param.type, _initObjects );
-				constructorArgs.push( initObj );
-			}
+			// so so so slow!
+//			ArrayExtensions.executeCallbackOnArray( ReflectionUtils.getAllObjectsOfType( thread, IRandomizable, true ), 'randomize' );
+			return thread;
 		}
-		
-		return ClassUtils.newInstance( _clazz, constructorArgs );
 	}
-
-	private function findAppropriateType(type : Type, list : Array) : *
-	{
-		return ArrayExtensions.first( list, function(item : *, ... args) : Boolean
-		{
-			return item is type.clazz;
-		} );	
-	}}
+}

@@ -13,7 +13,7 @@ package com.thread.draw
 		{
 			_polyRadius = polyRadius;
 			_polySides = polySides;
-						super( this );		}
+						super();		}
 
 		override public function draw(drawTarget : Sprite, lines : Array) : void
 		{
