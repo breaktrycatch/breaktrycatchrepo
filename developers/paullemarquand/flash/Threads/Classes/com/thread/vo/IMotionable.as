@@ -1,6 +1,5 @@
-package com.thread.vo 
+package com.thread.vo
 {
-
 	/**
 	 * @author Paul
 	 */
@@ -13,5 +12,9 @@ package com.thread.vo
 		function get initialSpeed() : Number;
 
 		function set initialSpeed(n : Number) : void;
+
+		function get followSpeedRange() : Number;
+
+		function set followSpeedRange(n : Number) : void;
 	}
 }

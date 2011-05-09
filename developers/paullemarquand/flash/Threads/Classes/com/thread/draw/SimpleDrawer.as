@@ -10,7 +10,7 @@ package com.thread.draw
 	{
 		public function SimpleDrawer()
 		{
-			super( this );
+			super();
 		}
 
 		override public function draw(drawTarget : Sprite, lines : Array) : void

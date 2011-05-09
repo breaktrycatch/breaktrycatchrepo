@@ -18,6 +18,7 @@ package com.thread.line
 		override public function preDraw(drawTarget : Sprite) : void
 		{
 			drawTarget.graphics.lineStyle( _target.lineSize, _colorSupplier.currentColor, _target.lineAlpha );
+			drawTarget.graphics.beginFill( _colorSupplier.currentColor, _target.lineAlpha );
 		}
 
 		override public function postDraw(drawTarget : Sprite) : void

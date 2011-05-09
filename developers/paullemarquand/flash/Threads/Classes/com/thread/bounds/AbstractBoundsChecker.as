@@ -13,9 +13,8 @@ package com.thread.bounds
 		protected var _target : IMotionable;
 		private var __savedPoint : Point;
 
-		public function AbstractBoundsChecker(target : IMotionable, enforcer : AbstractBoundsChecker)
+		public function AbstractBoundsChecker(target : IMotionable)
 		{
-			enforcer = null;
 			_target = target;
 			__savedPoint = new Point();
 		}

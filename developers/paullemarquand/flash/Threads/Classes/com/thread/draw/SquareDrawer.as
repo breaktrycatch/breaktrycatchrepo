@@ -7,7 +7,7 @@ package com.thread.draw
 	{
 		public function SquareDrawer() 
 		{
-			super( this );
+			super();
 		}
 
 		override public function draw(drawTarget : Sprite, lines : Array) : void

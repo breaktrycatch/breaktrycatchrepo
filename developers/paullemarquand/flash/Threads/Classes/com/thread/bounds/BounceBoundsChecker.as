@@ -12,7 +12,7 @@ package com.thread.bounds
 	{
 		public function BounceBoundsChecker(target : IMotionable)
 		{
-			super( target, this );
+			super( target );
 		}
 
 		override public function checkBounds(x : Number, y : Number) : Point

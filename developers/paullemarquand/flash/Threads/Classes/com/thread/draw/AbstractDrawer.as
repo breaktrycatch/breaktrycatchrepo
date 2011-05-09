@@ -9,8 +9,9 @@ package com.thread.draw
 	{
 		protected var _modifiers : Array;
 
-		public function AbstractDrawer(enforcer : AbstractDrawer) 
+		public function AbstractDrawer() 
 		{
+			randomize();
 		}
 
 		public function draw(drawTarget : Sprite, lines : Array) : void

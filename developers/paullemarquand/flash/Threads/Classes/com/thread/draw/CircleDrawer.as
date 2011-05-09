@@ -8,7 +8,7 @@ package com.thread.draw
 	{				
 		public function CircleDrawer() 
 		{
-			super(this);
+			super();
 		}
 		
 		override public function draw(drawTarget : Sprite, lines : Array) : void

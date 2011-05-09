@@ -13,7 +13,7 @@ package com.thread.transform
 
 		public function FourWayIntermittentDrawer()
 		{
-			super( this );
+			super();
 		}
 
 		override public function transform(d : IPositionable) : Array

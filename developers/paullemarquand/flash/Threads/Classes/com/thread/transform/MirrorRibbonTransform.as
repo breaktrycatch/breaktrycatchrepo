@@ -12,7 +12,7 @@ package com.thread.transform
 		{
 			_mirrorDrawer = new MirrorTransform();
 			_ribbonDrawer = new RibbonTransform( ribbonSections, ribbonSeparation );
-			super( this );
+			super();
 		}
 
 		override public function transform(d : IPositionable) : Array

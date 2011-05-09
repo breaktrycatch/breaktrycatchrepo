@@ -20,7 +20,7 @@ package com.thread.draw
 			_polySides = polySides;
 			_loopInc = ( TWOPI ) / _polySides;
 			
-			super( this );
+			super();
 		}
 
 		override public function draw(drawTarget : Sprite, lines : Array) : void
@@ -46,8 +46,8 @@ package com.thread.draw
 		override public function randomize() : void
 		{
 			var randomizer : Randomizer = new Randomizer( );
-			randomizer.addRule( Number, "polyRadius", 3, 45 );
-			randomizer.addRule( Number, "polySides", 3, 10 );
+			randomizer.addRule( Number, "polyRadius", 2,4  );
+			randomizer.addRule( Number, "polySides", 3, 5 );
 			randomizer.randomize( this );
 		}
 		

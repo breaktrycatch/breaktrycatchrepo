@@ -12,7 +12,7 @@ package com.thread.transform
 		public function KaleidoscopeRibbonTransform(kaleidoscopeSections : int = 5, ribbonSections : int = 20, ribbonSeparation : int = 5)
 		{
 			_kaleidoscope = new KaleidoscopeTransform( kaleidoscopeSections );
-			_ribbonDrawer = new RibbonTransform( ribbonSections, ribbonSeparation );			super( this );		}
+			_ribbonDrawer = new RibbonTransform( ribbonSections, ribbonSeparation );			super();		}
 
 		override public function transform(d : IPositionable) : Array
 		{			var lines : Array = new Array( );
