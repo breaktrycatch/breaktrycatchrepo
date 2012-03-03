@@ -48,6 +48,7 @@ package com.thread.factory
 
 		public function getSimpleThread() : Thread
 		{
+			var vo : ThreadDataVO = createThreadVO();
 			var injector : Injector = new Injector();
 			injector.mapClass( IDrawer, SimpleDrawer );
 			injector.mapClass( IDrawStyle, SimpleLine );
@@ -56,8 +57,8 @@ package com.thread.factory
 			injector.mapClass( IBoundsChecker, BounceBoundsChecker );
 			injector.mapValue( ThreadDataVO, vo );
 			var thread : Thread = injector.instantiate( Thread );
-			
-			var vo : ThreadDataVO = createThreadVO();
+			return thread;
+			/*
 			var colorSupplier : IColorSupplier = new KulerColorSupplier( [ 0xff0000, 0x00ff00, 0x0000ff ], 200 );
 			var transform : IDrawTransform = new RibbonTransform( 10, 5 );
 			var drawer : IDrawer = new SimpleDrawer();
@@ -78,7 +79,7 @@ package com.thread.factory
 
 			_threadCount++;
 
-			return new Thread( vo, boundsChecker, colorSupplier, transform, drawer, lineStyle, motionAI );
+			return new Thread( vo, boundsChecker, colorSupplier, transform, drawer, lineStyle, motionAI );*/
 		}
 
 		public function getAlphabetThread(letterData : BitmapData) : Thread
@@ -106,7 +107,7 @@ package com.thread.factory
 
 			_threadCount++;
 
-			return new Thread( vo, boundsChecker, colorSupplier, transform, drawer, lineStyle, motionAI );
+			return new Thread( vo, boundsChecker, colorSupplier, transform, drawer, lineStyle, motionAI,  );
 		}
 		// public function getAlphabetThread(letterData : BitmapData) : Thread
 		// {

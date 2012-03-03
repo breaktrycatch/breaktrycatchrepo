@@ -7,7 +7,7 @@ package com.thread.transform
 	/**
 	 * @author Paul
 	 */
-	public class FourWayTransform extends MirrorTransform implements IDrawTransform 
+	public class FourWayTransform extends MirrorXTransform implements IDrawTransform 
 	{
 		override public function transform(d : IPositionable) : Array
 		{

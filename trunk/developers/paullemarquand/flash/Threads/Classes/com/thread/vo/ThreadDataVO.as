@@ -32,7 +32,7 @@ package com.thread.vo
 			_lineAlpha = 1;
 			_initialSpeed = 1;
 			_followSpeedRange = 0;
-			
+
 			randomize();
 		}
 
@@ -145,16 +145,22 @@ package com.thread.vo
 			randomizer.addRule( Number, "angle", 267, 273 );
 			randomizer.addRule( Number, "x", 0, ThreadConstants.MANAGER_WIDTH );
 			randomizer.addRule( Number, "y", 0, ThreadConstants.MANAGER_HEIGHT );
-			
+
 			// initial speed should have no variance.
-			randomizer.addRule( Number, "initialSpeed", 3,3 );
-			randomizer.addRule( Number, "lineSize", 1, 2 );
-			randomizer.addRule( Number, "lineAlpha", 1,1 );
+			randomizer.addRule( Number, "initialSpeed", 3.6, 3.6 );
+			randomizer.addRule( Number, "lineSize", .1, 1 );
+			randomizer.addRule( Number, "lineAlpha", .1, .1 );
 			randomizer.addRule( Number, "followSpeedRange", .8, .8 );
+			randomizer.addRule( Number, 'x', 0, ThreadConstants.MANAGER_WIDTH - ThreadConstants.MARGIN_X * 2 );
+			randomizer.addRule( Number, 'y', 0, ThreadConstants.MANAGER_HEIGHT - ThreadConstants.MARGIN_Y * 2 );
 			randomizer.randomize( this );
 
 			x = ThreadConstants.MANAGER_WIDTH / 2 - Math.random() * 20 + Math.random() * 20;
-			y = ThreadConstants.MANAGER_HEIGHT - 5;
+			y = ThreadConstants.MANAGER_HEIGHT / 2 - Math.abs( ThreadConstants.MARGIN_Y );
+			angle = Math.random() * 360;
+			angle -= angle % 90;
+			// / 2;
+			
 			// 2;
 		}
 	}

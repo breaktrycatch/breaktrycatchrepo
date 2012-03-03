@@ -13,7 +13,7 @@ package com.thread.factory
 	import com.thread.line.IDrawStyle;
 	import com.thread.line.SizedAlphaLine;
 	import com.thread.transform.IDrawTransform;
-	import com.thread.transform.MirrorTransform;
+	import com.thread.transform.MirrorXTransform;
 	import com.thread.vo.ThreadDataVO;
 
 	/**	 * @author plemarquand	 */	public class SavedFactory 
@@ -32,7 +32,7 @@ package com.thread.factory
 			vo.initialSpeed = 1.1;
 			
 			var colorSupplier : IColorSupplier = new KulerColorSupplier( [0xff0000, 0x00ff00, 0x0000ff], 200 );
-			var transform : IDrawTransform = new MirrorTransform( );
+			var transform : IDrawTransform = new MirrorXTransform( );
 			var drawer : IDrawer = new SimpleDrawer( );
 			var motionAI : IAgent = (_threadCount < 1) ? (new RightAngleAgent( vo )) : (new FollowAgent( vo ));
 			motionAI.randomize( );

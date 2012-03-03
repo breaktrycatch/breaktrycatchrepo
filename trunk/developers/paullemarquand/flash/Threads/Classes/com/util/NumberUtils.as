@@ -1,5 +1,8 @@
 package com.util
 {
+
+	import flash.geom.Point;
+
 	/**
 	 * A set of Number helper methods
 	 */
@@ -7,7 +10,7 @@ package com.util
 	{
 		public static const PI_2 : Number = Math.PI * 2;
 		public static const PI_HALF : Number = Math.PI / 2;
-		
+
 		public static function sign(num : Number) : Number
 		{
 			return (num >= 0) ? (1) : (-1);
@@ -34,27 +37,6 @@ package com.util
 		public static function randomBetween(low : int, high : int) : int
 		{
 			return( Math.round( Math.random() * (high - low) ) + low );
-		}
-
-		/**
-		 * Formats a number to add the appropreiate cents value
-		 * @param num The number to add the cents value to
-		 * @return The a new string with the cents added
-		 */
-		public static function addCents(num : Number) : String
-		{
-			var a : Array = ( ( Math.round( num * 100 ) / 100 ) + "" ).split( "." );
-
-			if ( a[ 1 ] != undefined )
-			{
-				a[ 1 ] = ( a[ 1 ] + "00" ).substr( 0, 2 );
-			}
-			else
-			{
-				a[ 1 ] = "00";
-			}
-
-			return( a.join( "." ) );
 		}
 
 		/**
@@ -104,6 +86,10 @@ package com.util
 			return rad * ( 180 / Math.PI);
 		}
 
+		public function dotProduct(v1 : Point, v2 : Point) : Number
+		{
+			return (v1.x * v2.x + v1.y * v2.y);
+		}
 
 		/**
 		 * Unwraps an angle to a value within one rotation (2PI or 360) either +ve or -ve

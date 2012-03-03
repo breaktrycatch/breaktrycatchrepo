@@ -12,7 +12,7 @@ package com.thread.transform
 		override public function transform(d : IPositionable) : Array
 		{
 			var lines : Array = super.transform( d );
-			lines.push( new Line( -d.prevX + ThreadConstants.MANAGER_WIDTH, d.prevY, -d.x + ThreadConstants.MANAGER_WIDTH, d.y ) );
+			lines.push( new Line( -d.prevX + ThreadConstants.MANAGER_WIDTH, -d.prevY + ThreadConstants.MANAGER_HEIGHT, -d.x + ThreadConstants.MANAGER_WIDTH, -d.y + ThreadConstants.MANAGER_HEIGHT ) );
 			return lines;
 		}
 	}

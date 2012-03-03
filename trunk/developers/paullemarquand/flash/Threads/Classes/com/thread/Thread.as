@@ -1,5 +1,6 @@
-package com.thread 
+package com.thread
 {
+
 	import com.breaktrycatch.collection.util.ArrayExtensions;
 	import com.thread.ai.IAgent;
 	import com.thread.bounds.IBoundsChecker;
@@ -11,10 +12,10 @@ package com.thread
 	import com.thread.vo.IVisualComponent;
 	import com.thread.vo.ThreadDataVO;
 	import com.util.NumberUtils;
-
+	import com.util.Profiler;
 	import org.as3commons.reflect.Type;
 	import org.as3commons.reflect.Variable;
-
+	import org.osflash.signals.Signal;
 	import flash.display.Sprite;
 	import flash.geom.Point;
 
@@ -23,27 +24,30 @@ package com.thread
 	 */
 	public class Thread extends Sprite implements IVisualComponent, IDisposable
 	{
-		public var colorSupplier 	: IColorSupplier;
-		public var boundsChecker 	: IBoundsChecker;
-		public var lineStyle 		: IDrawStyle;
-		public var drawTransform	: IDrawTransform;
-		public var drawer 			: IDrawer;
-		public var motionAI 		: IAgent;
-		public var data	 			: ThreadDataVO;
-
-		private var _worldThreads 	: Array;
-		private var _worldIndex 	: int;
-
-		public function Thread(_data : ThreadDataVO, _bounds : IBoundsChecker, _color : IColorSupplier, _transform : IDrawTransform, _drawer : IDrawer, _line : IDrawStyle, _agent : IAgent)
+		public var onDead : Signal = new Signal( Thread );
+		public var colorSupplier : IColorSupplier;
+		public var boundsChecker : IBoundsChecker;
+		public var lineStyle : IDrawStyle;
+		public var drawTransform : IDrawTransform;
+		public var drawer : IDrawer;
+		public var motionAI : IAgent;
+		public var data : ThreadDataVO;
+		private var _worldThreads : Array;
+		private var _worldIndex : int;
+		private var _isDead : Boolean;
+		public var profiler : Profiler;
+		
+		public function Thread(_data : ThreadDataVO, _bounds : IBoundsChecker, _color : IColorSupplier, _transform : IDrawTransform, _drawer : IDrawer, _line : IDrawStyle, _agent : IAgent, _profiler : Profiler)
 		{
 			data = _data;
-			
+
 			boundsChecker = _bounds;
 			colorSupplier = _color;
 			drawTransform = _transform;
 			drawer = _drawer;
 			lineStyle = _line;
 			motionAI = _agent;
+			profiler = _profiler;
 		}
 
 		public function setWorldData(threads : Array, i : Number) : void
@@ -54,15 +58,31 @@ package com.thread
 
 		public function update() : void
 		{
-			colorSupplier.update( );
-			lineStyle.setModifiers( _worldThreads, _worldIndex );
-			motionAI.setModifiers( _worldThreads, _worldIndex );
-			drawer.setModifiers( _worldThreads, _worldIndex );
-			motionAI.update( );
+			profiler.start("color");
+			colorSupplier.update();
+			profiler.stop("color");
 			
+			profiler.start("lineStyle");
+			lineStyle.setModifiers( _worldThreads, _worldIndex );
+			profiler.start("lineStyle");
+			
+			profiler.start("motionAIMods");
+			motionAI.setModifiers( _worldThreads, _worldIndex );
+			profiler.stop("motionAIMods");
+			
+			profiler.start("drawer");
+			drawer.setModifiers( _worldThreads, _worldIndex );
+			profiler.start("drawer");
+			
+			profiler.start("motionAI");
+			motionAI.update();
+			profiler.stop("motionAI");
+			
+			profiler.start("applyPositions");
 			var dx : Number = Math.cos( NumberUtils.degreeToRad( data.angle ) ) * data.speed;
 			var dy : Number = Math.sin( NumberUtils.degreeToRad( data.angle ) ) * data.speed;
 			var pt : Point = boundsChecker.checkBounds( data.x + dx, data.y + dy );
+			profiler.stop("applyPositions");
 			
 			data.x = pt.x;
 			data.y = pt.y;
@@ -70,39 +90,52 @@ package com.thread
 
 		public function draw() : void
 		{
-			graphics.clear( );
-			
+			graphics.clear();
+
 			lineStyle.preDraw( this );
 			drawer.draw( this, drawTransform.transform( data ) );
 			lineStyle.postDraw( this );
-			
+
 			graphics.endFill();
 		}
-		
+
 		public function dispose() : void
 		{
-			var disposableElementNames : Array = getDisposableElementNames( );
+			onDead.removeAll();
+
+			var disposableElementNames : Array = getDisposableElementNames();
 			var parentRef : Thread = this;
-			var elementsToDispose : Array = disposableElementNames.map( function(name : String, ...args):*
+			var elementsToDispose : Array = disposableElementNames.map( function(name : String, ...args) : *
 			{
 				return parentRef[name];
 			} );
-			ArrayExtensions.executeCallbackOnArray(elementsToDispose, 'dispose');
+			ArrayExtensions.executeCallbackOnArray( elementsToDispose, 'dispose' );
 		}
-		
+
 		private function getDisposableElementNames() : Array
-		{			
+		{
 			var disposableNames : Array = [];
 			var typeInfo : Type = Type.forInstance( this );
 			var parentRef : Thread = this;
 			typeInfo.variables.forEach( function(element : Variable, ...args) : void
 			{
-				if(parentRef[element.name] is IDisposable)
+				if (parentRef[element.name] is IDisposable)
 				{
-					disposableNames.push(element.name);
+					disposableNames.push( element.name );
 				}
 			} );
 			return disposableNames;
+		}
+		
+		public function get isDead() : Boolean
+		{
+			return _isDead;
+		}
+
+		public function kill() : void
+		{
+			_isDead = true;
+			onDead.dispatch(this);
 		}
 	}
 }

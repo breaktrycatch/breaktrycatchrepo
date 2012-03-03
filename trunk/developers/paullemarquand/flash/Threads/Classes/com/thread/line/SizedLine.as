@@ -23,7 +23,7 @@ package com.thread.line
 		
 		override public function preDraw(drawTarget : Sprite) : void
 		{
-			drawTarget.graphics.lineStyle( _target.lineSize * (_index / _worldAgents.length), _colorSupplier.currentColor, _target.lineAlpha );
+			drawTarget.graphics.lineStyle( _target.lineSize * (1 - (_index / _worldAgents.length)), _colorSupplier.currentColor, _target.lineAlpha );
 		}
 
 		override public function postDraw(drawTarget : Sprite) : void

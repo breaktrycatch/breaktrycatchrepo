@@ -12,7 +12,7 @@ package com.thread.ai
 
 		public function FollowAgent(target : IMotionable)
 		{
-			super( target, this );
+			super( target );
 		}
 
 		override public function randomize() : void

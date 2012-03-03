@@ -40,7 +40,7 @@ package com.thread.draw
 		override public function randomize() : void
 		{
 			var randomizer : Randomizer = new Randomizer();
-			randomizer.addRule( Number, "ribbonWidth", 3, 3 );
+			randomizer.addRule( Number, "ribbonWidth", 1, 1 );
 			randomizer.randomize( this );
 		}
 

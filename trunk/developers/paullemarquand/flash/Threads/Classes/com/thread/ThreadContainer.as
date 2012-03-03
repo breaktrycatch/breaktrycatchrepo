@@ -64,13 +64,23 @@ package com.thread
 			FileUtil.saveUniquePNG( _canvas, ++ _numSavedImages + ".png" );
 		}
 
+		public function removeThread() : void
+		{
+			ArrayExtensions.executeCallbackOnArray( _threadManagers, 'removeThread' );
+		}
+
+		public function addThread() : void
+		{
+			ArrayExtensions.executeCallbackOnArray( _threadManagers, 'addThread' );
+		}
+
 		private function createThreadManagers() : void
 		{
 			for (var y : uint = 0; y < ThreadConstants.GRID_HEIGHT ; y++)
 			{
 				for (var x : int = 0; x < ThreadConstants.GRID_WIDTH; x++)
 				{
-					for(var i : int = 0; i < ThreadConstants.MANAGERS_PER_GRID; i++)
+					for (var i : int = 0; i < ThreadConstants.MANAGERS_PER_GRID; i++)
 					{
 						var threadManager : AbstractThreadManager = new ThreadManager( _canvas );
 						threadManager.x = ThreadConstants.MARGIN_X + (x * ThreadConstants.MANAGER_WIDTH) + (ThreadConstants.MARGIN_X * x * 2);
@@ -83,7 +93,10 @@ package com.thread
 
 		private function onTimer(e : TimerEvent) : void
 		{
-			update();
+			for (var i : int = 0; i < 5; i++)
+			{
+				update();
+			}
 		}
 
 		private function update() : void

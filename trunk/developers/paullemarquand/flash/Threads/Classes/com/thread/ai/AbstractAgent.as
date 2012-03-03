@@ -19,10 +19,10 @@ package com.thread.ai
 		private var _ctr : Number;
 		private var _followTarget : IMotionable;
 		private var _isLeader : Boolean;
+		private var _leader : Thread;
 
-		public function AbstractAgent(target : IMotionable, enforcer : AbstractAgent)
+		public function AbstractAgent(target : IMotionable)
 		{
-			enforcer = null;
 			_target = target;
 			_ctr = 0;
 		}
@@ -36,7 +36,7 @@ package com.thread.ai
 			_target.angle += NumberUtils.radToDegree( angle ) / (1 + ( 1 - dist / ThreadConstants.MANAGER_WIDTH / 2)) * ((_index / _worldAgents.length) * Math.PI);
 			_ctr += 1;
 
-			if (_isLeader )
+			if (_isLeader)
 			{
 				run();
 			}
@@ -54,10 +54,14 @@ package com.thread.ai
 
 		public function setModifiers(...args) : void
 		{
-			var spd : Number = 0;
+			// the higher the value the tigher the follow
+			var spd : Number = ThreadConstants.FOLLOW_TIGHTNESS;
 			_worldAgents = args[0];
 			_index = args[1];
-			_target.speed = _target.initialSpeed * ((1 - (_index / _worldAgents.length)))// * (1 - spd) + spd);
+
+			var perc : Number = _index / _worldAgents.length;
+			_target.speed = _target.initialSpeed * (1 - perc) + _target.initialSpeed * (perc * spd);
+			_leader = _worldAgents[0];
 			_isLeader = (_index == 0);
 
 			updateFollowTarget();

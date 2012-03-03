@@ -12,7 +12,7 @@ package com.thread.ai
 		
 		public function SimpleAgent(target : IMotionable)
 		{
-			super( target, this );
+			super( target );
 		}
 
 		override public function update() : void
