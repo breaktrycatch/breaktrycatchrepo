@@ -1,6 +1,7 @@
 package com.thread.ai
 {
 
+	import com.util.NumberUtils;
 	import com.thread.ai.AbstractAgent;
 	import com.thread.ai.IAgent;
 	import com.thread.vo.IMotionable;
@@ -11,11 +12,15 @@ package com.thread.ai
 	{
 		private var _ctr : int = 0;
 		private var _switchInterval : int;
-
+		private const _angleIncrement : Number = 90;
+		
+		private var _intervals : Array = [100, 150, 200, 250, 200, 150, 100];
+		private var _intervalCounter : int = 0;
+		
 		public function RightAngleAgent(target : IMotionable)
 		{
 			updateSwitchInterval();
-			super( target, this );
+			super( target );
 		}
 
 		override public function run() : void
@@ -25,14 +30,16 @@ package com.thread.ai
 			if (_ctr % _switchInterval == 0)
 			{
 				updateSwitchInterval();
-				_target.angle += ((Math.random() < .5) ? (90) : (-90));
+				_target.angle += ((Math.random() < .5) ? (_angleIncrement) : (-_angleIncrement));
 			}
 			super.run();
 		}
 
 		private function updateSwitchInterval() : void
 		{
-			_switchInterval = 20 + Math.round( Math.random() * 100 );
+			_intervalCounter = (_intervalCounter + 1) % _intervals.length;
+//			_switchInterval = _intervals[_intervalCounter];
+			_switchInterval = NumberUtils.randomBetween(10, 100);
 		}
 
 		override public function randomize() : void

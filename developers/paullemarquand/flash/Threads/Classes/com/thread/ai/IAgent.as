@@ -1,7 +1,9 @@
 package com.thread.ai 
 {
+
 	import com.thread.vo.IMotionable;
 	import com.thread.vo.IUpdateable;
+	import org.osflash.signals.Signal;
 
 	/**
 	 * @author Paul

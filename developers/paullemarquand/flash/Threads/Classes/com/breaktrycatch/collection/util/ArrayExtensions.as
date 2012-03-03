@@ -37,6 +37,7 @@ package com.breaktrycatch.collection.util
 					callback( seed, item );
 				}
 			} );
+			
 			return seed;
 		}
 		/**
@@ -269,6 +270,25 @@ package com.breaktrycatch.collection.util
 				ctr += direction;
 			}
 			return arr;
+		}
+		
+		/**
+		 * Removes an element from an array. Returns true if the element was removed and
+		 * false if it could not be found. This method will remove all identical elements from an array.
+		 * @param arr An array of elements to search through
+		 * @param item The item to remove from the array.
+		 * @return If the element was found and removed from the array at least one time.
+		 */
+		public static function removeElementFromArray(arr : Array, item : *) : Boolean
+		{
+			var index : int;
+			var found : Boolean = false;
+			while ((index = arr.indexOf(item)) != -1)
+			{
+				found = true;
+				arr.splice(index, 1);
+			}
+			return found;
 		}
 		/**
 		 * Creates a copy of the original array and reverses it in place.

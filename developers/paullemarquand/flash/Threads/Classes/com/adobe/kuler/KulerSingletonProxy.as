@@ -1,22 +1,22 @@
 package com.adobe.kuler
 {
 
-	import com.adobe.kuler.events.ColorRecievedEvent;
 	import com.adobe.kuler.events.GetResultEvent;
 	import com.adobe.kuler.swatches.swatch.Swatch;
 	import com.breaktrycatch.collection.util.ArrayExtensions;
-	import flash.events.EventDispatcher;
+	import com.util.binding.BindableObject;
 	import flash.utils.Dictionary;
 
 	/**
 	 * @author Paul
 	 */
-	public class KulerSingletonProxy extends EventDispatcher
+	public class KulerSingletonProxy extends BindableObject
 	{
 		private static var instance : KulerSingletonProxy;
 		private var _kulerService : KLibService;
 		private var _callCache : Dictionary;
 		private var _resultsCache : Dictionary;
+		private var isFetching : Boolean;
 
 		public function KulerSingletonProxy(pvt : SingletonEnforcer)
 		{
@@ -36,67 +36,56 @@ package com.adobe.kuler
 		 */
 		public static function getInstance() : KulerSingletonProxy
 		{
-			if ( instance == null )
-			{
-				instance = new KulerSingletonProxy( new SingletonEnforcer() );
-			}
+			instance ||= new KulerSingletonProxy( new SingletonEnforcer() );
 			return instance;
 		}
 
 		public function getRandomColours() : void
 		{
-			callFunction( _kulerService.getRandom, 0, 5 );
-		}
-
-		private function callFunction(fn : Function, ...args) : void
-		{
-			// todo: checking the cache doesn't check the arguments passed in.
-			var results : Array = checkResultsCache( fn );
-			trace( "Do we have results? ", results, "in call cache", checkCallCache( fn ) );
-			if (results)
-			{
-				dispatchResults( results );
-				return;
-			}
-			else if (checkCallCache( fn ))
+			if (isFetching)
 			{
 				return;
 			}
 
-			_callCache[fn] = true;
+			isFetching = true;
+			trace( "KulerSingletonProxy.getRandomColours(", [], ")" );
 			var handler : Function = function(e : GetResultEvent) : void
 			{
-				_resultsCache[fn] = processResults( e.results.swatches );
+				trace( "KulerSingletonProxy.handler(", [ e.results.title ], ")" );
 				_kulerService.removeEventListener( GetResultEvent.GET_RESULTS, arguments.callee );
-				dispatchResults( _resultsCache[fn] );
+				dispatchResults( processResults( e.results.swatches ) );
 			};
 			_kulerService.addEventListener( GetResultEvent.GET_RESULTS, handler );
-			_kulerService.getRandom( 0, 20 );
+			_kulerService.getPopular( 0, 20 );
+		}
+
+		public function get result() : Array
+		{
+			return get( 'result' );
+		}
+
+		public function set result(value : Array) : void
+		{
+			set( 'result', value );
 		}
 
 		private function processResults(results : Array) : Array
 		{
-			var arr : Array = ArrayExtensions.aggregate( results, [], function(seed : Array, item : Swatch) : Array
+			var arr : Array = [];
+			
+			for (var i : int = 0; i < results.length; i++)
 			{
-				return seed.concat( item.hexColorArray );
-			} );
+				var item : Swatch = results[i];
+				arr.push( item.hexColorArray );
+			}
+			
 			return arr;
 		}
 
-		private function dispatchResults(results : Array) : void
+		private function dispatchResults(rawResult : Array) : void
 		{
-			trace( "DISPATCHING RESULTS!: " + results );
-			dispatchEvent( new ColorRecievedEvent( ColorRecievedEvent.COLORS_RECIEVED, results ) );
-		}
-
-		private function checkCallCache(fn : Function) : Boolean
-		{
-			return _callCache[fn];
-		}
-
-		private function checkResultsCache(fn : Function) : *
-		{
-			return _resultsCache[fn];
+			result = rawResult;
+			trace( "DISPATCHING RESULTS!: " + result );
 		}
 	}
 }
